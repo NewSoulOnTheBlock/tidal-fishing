@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>TIDELINE — 3D Fishing Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<div id="app">
+  <div id="canvas-wrap"></div>
+  <div id="vignette"></div>
+
+  <!-- ======================= HUD ======================= -->
+  <div id="hud" class="hidden">
+    <div class="hud-corner hud-topleft">
+      <div class="hud-card">
+        <div id="hud-money" class="money-text">$0</div>
+        <div class="level-row">
+          <span id="hud-level" class="level-badge">Lv 1</span>
+          <div class="xp-bar"><div id="hud-xpfill" class="xp-fill"></div></div>
+        </div>
+        <div id="hud-xptext" class="xp-text">0 / 70 XP</div>
+      </div>
+    </div>
+
+    <div class="hud-corner hud-topright">
+      <div class="hud-card hud-clockcard">
+        <div class="clock-row">
+          <span id="hud-clock" class="clock-text">08:30</span>
+          <span id="hud-seg" class="seg-chip seg-day">Day</span>
+          <span id="hud-weather" class="weather-chip">Clear</span>
+        </div>
+        <div id="hud-loc" class="loc-text">Calm Lake</div>
+      </div>
+      <div class="hud-buttons">
+        <button id="btn-map" class="hud-btn" title="Map (M)">Map</button>
+        <button id="btn-shop" class="hud-btn" title="Shop (B)">Shop</button>
+        <button id="btn-journal" class="hud-btn" title="Journal (J)">Journal</button>
+        <button id="btn-pause" class="hud-btn" title="Pause (Esc)">Pause</button>
+      </div>
+    </div>
+
+    <div class="hud-corner hud-bottomleft">
+      <div id="hud-rod" class="gear-chip"><span class="gear-label">Rod</span><span class="gear-name">Bamboo Rod</span></div>
+      <div id="hud-bait" class="gear-chip"><span class="gear-label">Bait</span><span class="gear-name">Garden Worms</span></div>
+    </div>
+
+    <div class="hud-corner hud-bottomright">
+      <button id="hud-bag" class="bag-chip">Catch Bag: empty</button>
+    </div>
+
+    <div id="hud-zone" class="zone-hint hidden"></div>
+    <div id="hud-prompt" class="prompt"></div>
+
+    <!-- power meter -->
+    <div id="power-wrap" class="power-wrap hidden">
+      <div class="power-track">
+        <div class="power-sweet"></div>
+        <div id="power-fill" class="power-fill"></div>
+      </div>
+      <div class="power-label">POWER</div>
+    </div>
+
+    <!-- reel fight overlay -->
+    <div id="reel-wrap" class="reel-wrap hidden">
+      <div class="fight-head">
+        <span id="fight-name" class="fight-name">Something is hooked...</span>
+        <span id="fight-stars" class="fight-stars"></span>
+      </div>
+      <div id="surge-banner" class="surge-banner hidden">SURGE — EASE OFF!</div>
+      <div class="bar-row">
+        <span class="bar-tag">TENSION</span>
+        <div class="bar tension-bar"><div id="tension-fill" class="bar-fill tension-fill"></div></div>
+      </div>
+      <div class="bar-row">
+        <span class="bar-tag">CATCH</span>
+        <div class="bar progress-bar"><div id="progress-fill" class="bar-fill progress-fill"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bite-indicator" class="bite-indicator hidden">!</div>
+  <div id="toasts"></div>
+
+  <!-- ======================= SCREENS ======================= -->
+  <div id="screen-menu" class="screen hidden">
+    <div class="menu-box">
+      <h1 class="game-title">TIDELINE</h1>
+      <p class="game-sub">a 3D fishing journey</p>
+      <div class="menu-buttons">
+        <button id="menu-play" class="btn btn-primary btn-big">Play</button>
+        <button id="menu-howto" class="btn">How to Play</button>
+        <button id="menu-settings" class="btn">Settings</button>
+        <button id="menu-reset" class="btn btn-danger-ghost">Reset Save</button>
+      </div>
+      <p id="menu-save-info" class="menu-save-info"></p>
+      <p class="menu-credits">Built with Three.js · water, sky &amp; fish all procedural</p>
+    </div>
+  </div>
+
+  <div id="screen-howto" class="screen hidden">
+    <div class="panel panel-mid">
+      <h2 class="panel-title">How to Play</h2>
+      <ul class="howto-list">
+        <li><b>Aim</b> — move the mouse to swing your cast direction.</li>
+        <li><b>Cast</b> — hold <kbd>Left Click</kbd> or <kbd>Space</kbd> to charge the power meter, release to cast. Long casts reach deeper water where rarer fish live.</li>
+        <li><b>Wait</b> — watch the bobber. Small nibbles are teases; when it plunges and a <span class="excl">!</span> appears, you have a split second.</li>
+        <li><b>Hook</b> — click (or <kbd>Space</kbd>) instantly during the <span class="excl">!</span> window to set the hook.</li>
+        <li><b>Reel</b> — hold click to reel in. Reeling builds <b>tension</b>; release to let it recover. When the fish <b style="color:var(--danger)">surges</b>, stop reeling or the line snaps!</li>
+        <li><b>Profit</b> — sell fish at the Shop (<kbd>B</kbd>), upgrade your rod, reel, line and bait, and unlock new waters on the Map (<kbd>M</kbd>).</li>
+        <li><b>Collect</b> — every species you land is logged in the Journal (<kbd>J</kbd>). Time of day and location change what bites.</li>
+        <li><b>Retrieve</b> — hold click while waiting (or press <kbd>R</kbd>) to reel the bobber back with no bite.</li>
+      </ul>
+      <button id="howto-back" class="btn btn-primary">Back</button>
+    </div>
+  </div>
+
+  <div id="screen-settings" class="screen hidden">
+    <div class="panel panel-narrow">
+      <h2 class="panel-title">Settings</h2>
+      <div class="setting-row">
+        <label for="set-volume">Volume</label>
+        <input id="set-volume" type="range" min="0" max="100" value="80" />
+      </div>
+      <div class="setting-row">
+        <label for="set-mute">Mute</label>
+        <input id="set-mute" type="checkbox" />
+      </div>
+      <div class="setting-row">
+        <label for="set-quality">Quality</label>
+        <select id="set-quality">
+          <option value="high">High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="setting-row setting-danger">
+        <label>Erase all progress</label>
+        <button id="set-reset" class="btn btn-danger-ghost">Reset Save</button>
+      </div>
+      <button id="settings-back" class="btn btn-primary">Back</button>
+    </div>
+  </div>
+
+  <div id="screen-pause" class="screen hidden">
+    <div class="panel panel-narrow">
+      <h2 class="panel-title">Paused</h2>
+      <div class="menu-buttons">
+        <button id="pause-resume" class="btn btn-primary btn-big">Resume</button>
+        <button id="pause-settings" class="btn">Settings</button>
+        <button id="pause-howto" class="btn">How to Play</button>
+        <button id="pause-quit" class="btn btn-danger-ghost">Save &amp; Quit to Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-shop" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-head">
+        <h2 class="panel-title">Bait &amp; Tackle</h2>
+        <span id="shop-money" class="money-text">$0</span>
+        <button id="shop-close" class="btn btn-close">Close</button>
+      </div>
+      <nav id="shop-tabs" class="tab-row"></nav>
+      <div id="shop-content" class="shop-content"></div>
+    </div>
+  </div>
+
+  <div id="screen-journal" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-head">
+        <h2 class="panel-title">Fish Journal</h2>
+        <span id="journal-stats" class="journal-stats"></span>
+        <button id="journal-close" class="btn btn-close">Close</button>
+      </div>
+      <div id="journal-grid" class="journal-scroll"></div>
+    </div>
+  </div>
+
+  <div id="screen-map" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-head">
+        <h2 class="panel-title">Fishing Spots</h2>
+        <span class="journal-stats">Travel between unlocked waters</span>
+        <button id="map-close" class="btn btn-close">Close</button>
+      </div>
+      <div id="map-grid" class="map-grid"></div>
+    </div>
+  </div>
+
+  <div id="catch-root"></div>
+
+  <div id="boot-loader">
+    <div class="boot-spin"></div>
+    <div class="boot-text">Loading TIDELINE…</div>
+    <div class="boot-sub">fetching Three.js from CDN</div>
+  </div>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
