@@ -89,7 +89,6 @@ export function createDefaultState() {
     // Progression systems
     progressionJournal: null,  // Initialized by initJournal()
     dailyLogin: null,          // Initialized by initDailyLogin()
-    challenges: null,          // Initialized by initChallenges()
     achievements: null,        // Initialized by initAchievements()
     weather: null,             // Initialized by initWeather()
     onchain: {

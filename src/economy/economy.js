@@ -8,9 +8,7 @@ import { LOCATIONS } from "../data/locationData.js";
 import { FISH_BY_ID } from "../data/fishData.js";
 import { saveGame } from "../state/saveLoad.js";
 import { recordCatch as recordJournalCatch } from "../progression/journal.js";
-import { updateChallengeProgress } from "../progression/challenges.js";
 import { checkAchievements } from "../progression/achievements.js";
-import { updateTournamentScore } from "../progression/tournament.js";
 import { recordCatch as recordCatchDB } from "../web3/database.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFarming.js";
@@ -123,7 +121,7 @@ export function addXp(amount) {
 export async function registerCatch(fish) {
   // Daily hot spot pays +10%. Apply BEFORE validation/credit so the bonus
   // propagates everywhere downstream (jackpot credit, inventory, journal, DB
-  // record, tournament). The server raises its value ceiling for the hot
+  // record). The server raises its value ceiling for the hot
   // location by the same 10% so the boosted figure isn't clamped away.
   if (isHotSpot(S.world.current) && Number.isFinite(fish.value) && fish.value > 0) {
     fish.value = Math.round(fish.value * 1.1);
@@ -237,18 +235,6 @@ export async function registerCatch(fish) {
     }).catch(err => console.error('[economy] Failed to record catch to DB:', err));
   }
   
-  // Update daily challenges
-  if (S.challenges) {
-    const completed = updateChallengeProgress(S.challenges, {
-      type: 'catch',
-      species: fish.speciesId,
-      location: S.world.current,
-      rarity: fish.rarity,
-      value: fish.value,
-    });
-    if (completed) events.emit("challenge:complete");
-  }
-
   // Check achievements
   if (S.achievements) {
     const stats = getGameStats();
@@ -256,16 +242,6 @@ export async function registerCatch(fish) {
     if (newAchievements.length > 0) {
       events.emit("achievements:unlocked", newAchievements);
     }
-  }
-
-  // Update tournament score if active
-  if (S.tournament?.currentTournament?.started && !S.tournament.currentTournament.ended) {
-    updateTournamentScore(S.tournament.currentTournament, {
-      speciesId: fish.speciesId,
-      sizeCm: fish.sizeCm,
-      value: fish.value,
-      rarity: fish.rarity,
-    });
   }
 
   events.emit("inventory");

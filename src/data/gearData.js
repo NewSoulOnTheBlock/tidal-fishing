@@ -12,7 +12,7 @@ export const GEAR = {
     { id: "rod_0", name: "Bamboo Rod", tier: 1, price: 0, level: 1, castMult: 1.0, control: 1.0, blurb: "Grandpa's hand-me-down. It works. Mostly." },
     { id: "rod_1", name: "Fiberglass Rod", tier: 2, price: 17647, level: 2, castMult: 1.25, control: 1.15, blurb: "Springy and forgiving — casts a third farther." },
     { id: "rod_2", name: "Carbon Pro Rod", tier: 3, price: 35294, level: 5, castMult: 1.55, control: 1.35, blurb: "Featherweight carbon. Deep water is suddenly in range." },
-    { id: "rod_3", name: "Titan Master Rod", tier: 4, price: 52941, level: 9, castMult: 1.9, control: 1.6, blurb: "Tournament hardware. Surges feel like ripples." },
+    { id: "rod_3", name: "Titan Master Rod", tier: 4, price: 52941, level: 9, castMult: 1.9, control: 1.6, blurb: "Pro-grade hardware. Surges feel like ripples." },
     { id: "rod_4", name: "Apex Thunder Rod", tier: 5, price: 70588, level: 12, castMult: 2.15, control: 1.85, blurb: "Lightning-fast response. Deep casts feel effortless." },
     { id: "rod_5", name: "Storm Chaser Rod", tier: 6, price: 88235, level: 15, castMult: 2.45, control: 2.1, blurb: "Built for rough weather. Tames the wildest fish." },
     { id: "rod_6", name: "Typhoon Elite Rod", tier: 7, price: 105882, level: 18, castMult: 2.75, control: 2.4, blurb: "Competition-grade construction. Casts to the horizon." },

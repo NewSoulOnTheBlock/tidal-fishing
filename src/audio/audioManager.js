@@ -323,36 +323,11 @@ class AudioManager {
         this.tone({ type: "sine", freq: 1760, t0: 0.2, dur: 0.15, peak: 0.1 });
         break;
       }
-      case "challenge": {
-        // Challenge complete ding
-        this.tone({ type: "triangle", freq: 988, dur: 0.1, peak: 0.16 });
-        this.tone({ type: "triangle", freq: 1318, t0: 0.1, dur: 0.15, peak: 0.16 });
-        break;
-      }
       case "dailyLogin": {
         // Daily login streak sound - warm and welcoming
         const notes = [523, 659, 784, 1046];
         notes.forEach((f, i) => this.tone({ type: "sine", freq: f, t0: i * 0.1, dur: 0.2, peak: 0.13 }));
         this.tone({ type: "triangle", freq: 1318, t0: 0.35, dur: 0.3, peak: 0.08 });
-        break;
-      }
-      case "countdown": {
-        // Tournament countdown tick
-        const intensity = opts.intensity || 0.5;
-        this.tone({ type: "square", freq: 440 + (intensity * 880), dur: 0.08, peak: 0.14 * (1 + intensity) });
-        break;
-      }
-      case "tournamentStart": {
-        // Tournament begins - exciting fanfare
-        const notes = [392, 523, 659, 880, 1046];
-        notes.forEach((f, i) => this.tone({ type: "sawtooth", freq: f, t0: i * 0.07, dur: 0.15, peak: 0.16 }));
-        this.noise({ t0: 0.1, dur: 0.5, peak: 0.08, filterType: "highpass", freq: 6000, attack: 0.2 });
-        break;
-      }
-      case "tournamentEnd": {
-        // Tournament ends - resolution
-        const notes = [1046, 880, 784, 659, 523];
-        notes.forEach((f, i) => this.tone({ type: "triangle", freq: f, t0: i * 0.12, dur: 0.2, peak: 0.14 }));
         break;
       }
       case "jackpot": {

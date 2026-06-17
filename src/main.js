@@ -28,7 +28,6 @@ import { CatchCard } from "./ui/catchCard.js";
 import { WalletPanel } from "./ui/walletPanel.js";
 import { JournalUI as ProgressionJournalUI } from "./ui/journalUI.js";
 // import { DailyLoginUI } from "./ui/dailyLoginUI.js"; // DISABLED - daily rewards removed
-import { ChallengesUI } from "./ui/challengesUI.js";
 import { AchievementsUI } from "./ui/achievementsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
@@ -36,16 +35,13 @@ import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
 import { ChatUI } from "./ui/chatUI.js";
 import { SocialUI } from "./ui/socialUI.js";
-import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
 // import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js"; // DISABLED - daily rewards removed
-import { initChallenges, rollDailyChallenges, updateChallengeProgress } from "./progression/challenges.js";
 import { initAchievements } from "./progression/achievements.js";
 import { initWeather } from "./progression/weather.js";
-import { initTournament } from "./progression/tournament.js";
 
 // ---------------------------------------------------------------------------
 // boot
@@ -56,13 +52,8 @@ loadGame();
 // Initialize progression systems
 S.progressionJournal = initJournal(S);
 // S.dailyLogin = initDailyLogin(S); // DISABLED - daily rewards removed
-S.challenges = initChallenges(S);
 S.achievements = initAchievements(S);
 S.weather = initWeather(S);
-S.tournament = initTournament(S);
-
-// Roll daily challenges for today
-rollDailyChallenges(S.challenges);
 
 // Daily login check DISABLED - no more daily rewards
 // const dailyCheck = checkDailyLogin(S.dailyLogin);
@@ -112,11 +103,9 @@ const mapUI = new MapUI(
 // New progression UIs
 const progressionJournalUI = new ProgressionJournalUI();
 const achievementsUI = new AchievementsUI();
-const challengesUI = new ChallengesUI();
 const weatherUI = new WeatherUI(scene);
 const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
-const tournamentUI = new TournamentUI();
 const onboardingUI = new OnboardingUI();
 
 // First-time wallet sign-in: force the angler-name onboarding flow.
@@ -143,11 +132,9 @@ if (!isInstalledPWA()) {
 const socialUI = new SocialUI();
 socialUI.mount();
 
-// Initialize weather and challenges widgets
+// Initialize weather + achievements widgets
 weatherUI.init();
-challengesUI.init();
 achievementsUI.init();
-tournamentUI.init();
 
 const screens = new Screens({
   onPlay: () => machine.set(Phase.IDLE),
@@ -377,15 +364,6 @@ events.on("bite:hooked", ({ fish, isPerfect }) => {
   // Track perfect hooks
   if (isPerfect) {
     S.stats.perfectHooks = (S.stats.perfectHooks || 0) + 1;
-    
-    // Update challenges with perfect hook event
-    if (S.challenges) {
-      const completed = updateChallengeProgress(S.challenges, {
-        type: 'hook',
-        perfectHook: true,
-      });
-      if (completed) events.emit("challenge:complete");
-    }
   }
   
   machine.set(Phase.REELING, { fish });
@@ -548,10 +526,6 @@ window.addEventListener("keydown", (e) => {
         if (leaderboardUI.panel) leaderboardUI.hide();
         else leaderboardUI.show();
       }
-      break;
-    case "KeyT":
-      // Tournament info - widget is always visible when relevant
-      // This key could show a detailed tournament history modal in future
       break;
     case "Escape":
       handleEscape();
