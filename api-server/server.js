@@ -112,6 +112,22 @@ async function initDatabase() {
   } catch (err) {
     console.error('❌ Failed to add total_withdrawn column:', err.message);
   }
+  // Engagement features: chat message kind (user/system/rare/welcome/catch) +
+  // poster level for in-chat flair. Run separately so each is independent.
+  try {
+    await pool.query("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS kind VARCHAR(16) DEFAULT 'user'");
+    await pool.query('ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS level INT DEFAULT 0');
+  } catch (err) {
+    console.error('❌ Failed to add chat flair columns:', err.message);
+  }
+  // Daily-streak tracking (consecutive UTC days the wallet checked in).
+  try {
+    await pool.query('ALTER TABLE players ADD COLUMN IF NOT EXISTS streak_count INT DEFAULT 0');
+    await pool.query('ALTER TABLE players ADD COLUMN IF NOT EXISTS last_active_date DATE');
+    await pool.query('ALTER TABLE players ADD COLUMN IF NOT EXISTS streak_reward_date DATE');
+  } catch (err) {
+    console.error('❌ Failed to add streak columns:', err.message);
+  }
 }
 initDatabase();
 
@@ -148,6 +164,74 @@ const SERVER_CAPS = {
   earnHour: 8_000,
   earnDay: 40_000,
 };
+
+// ============================================================================
+// SHARED-WORLD / ENGAGEMENT HELPERS
+// Online-presence count, daily hot spot, and the system "live feed" that posts
+// notable catches into the global chat (Fishermans Hole).
+// ============================================================================
+
+const SYSTEM_WALLET = 'SYSTEM';
+const HOT_SPOTS = ['lake', 'river', 'pier', 'ocean'];
+const HOT_SPOT_LABEL = { lake: 'Lake', river: 'River', pier: 'Pier', ocean: 'Ocean' };
+// Daily $TIDE check-in bonus (credited to the withdrawable ledger). Kept small
+// and once-per-UTC-day so it can't be farmed: base + step×min(streak,7).
+const STREAK_BONUS_BASE = 25;
+const STREAK_BONUS_STEP = 15;
+const STREAK_BONUS_MAX = 150;
+
+function utcDayNumber(ms = Date.now()) { return Math.floor(ms / 86400000); }
+// Deterministic rotating hot spot — must match the client's world.js formula.
+function dailyHotSpot() { return HOT_SPOTS[utcDayNumber() % HOT_SPOTS.length]; }
+
+function shortWallet(w) {
+  return (typeof w === 'string' && w.length > 10) ? `${w.slice(0, 4)}…${w.slice(-4)}` : (w || 'angler');
+}
+// Prettify a species id ("largemouth_bass") into a display name ("Largemouth Bass").
+function prettySpecies(id) {
+  return String(id || 'fish').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 40);
+}
+
+// In-memory presence: per-tab id -> last-seen ms. Counts tabs active in the last
+// 60s. Resets on restart (fine — it's flavor), single Render instance.
+const presence = new Map();
+const PRESENCE_TTL_MS = 60_000;
+const PRESENCE_MAX = 5000;
+function touchPresence(id) {
+  if (typeof id !== 'string' || id.length < 6 || id.length > 64) return;
+  if (!presence.has(id) && presence.size >= PRESENCE_MAX) return;
+  presence.set(id, Date.now());
+}
+function onlineCount() {
+  const cutoff = Date.now() - PRESENCE_TTL_MS;
+  for (const [id, t] of presence) if (t < cutoff) presence.delete(id);
+  return presence.size;
+}
+
+// Post a system "live feed" line into the global chat. Fire-and-forget so it
+// never blocks a gameplay response; periodically prunes the table.
+let _sysChatCount = 0;
+async function insertSystemChat(message, kind = 'system') {
+  const msg = String(message)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 280);
+  if (!msg) return;
+  try {
+    await pool.query(
+      `INSERT INTO chat_messages (wallet_address, username, message, kind, level)
+       VALUES ($1, $2, $3, $4, 0)`,
+      [SYSTEM_WALLET, 'Fishermans Hole', msg, kind]
+    );
+    if ((++_sysChatCount % 10) === 0) {
+      pool.query(
+        `DELETE FROM chat_messages
+         WHERE id < (SELECT MIN(id) FROM (SELECT id FROM chat_messages ORDER BY id DESC LIMIT 500) t)`
+      ).catch(() => {});
+    }
+  } catch (e) { /* best-effort flavor — never throw */ }
+}
 
 // Timing-safe admin key check (avoids leaking the secret via response timing).
 function adminKeyValid(provided) {
@@ -908,7 +992,7 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
 
   try {
     const player = await pool.query(
-      'SELECT id FROM players WHERE wallet_address = $1',
+      'SELECT id, username, total_catches FROM players WHERE wallet_address = $1',
       [walletAddress]
     );
 
@@ -916,6 +1000,8 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
       return res.status(404).json({ error: 'Player not found' });
     }
     const playerId = player.rows[0].id;
+    const playerName = player.rows[0].username || shortWallet(walletAddress);
+    const priorCatches = Number(player.rows[0].total_catches) || 0;
 
     const speciesId = String(catchData.speciesId || '').slice(0, 50);
     const cap = FISH_VALUES.species[speciesId];
@@ -928,8 +1014,11 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
       return res.status(400).json({ error: 'Invalid location', code: 'BAD_LOCATION' });
     }
 
+    // Daily hot spot pays +10% — raise the ceiling there so the client's bonus
+    // value isn't clamped away.
+    const hotMult = (location === dailyHotSpot()) ? 1.1 : 1;
     // Server-authoritative value: clamp the client figure to the species ceiling.
-    const ceiling = Math.ceil((cap.max ?? FLAT_VALUE_CEIL) * 1.02) + 2;
+    const ceiling = Math.ceil((cap.max ?? FLAT_VALUE_CEIL) * 1.02 * hotMult) + 2;
     let value = intOr(catchData.value, 0, 0, ceiling);
 
     // Server-side anti-farming (bounds a client-bypassing bot).
@@ -984,6 +1073,22 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
       `UPDATE players SET total_earned = total_earned + $2, total_catches = total_catches + 1 WHERE id = $1`,
       [playerId, value]
     );
+
+    // Live social feed (fire-and-forget — never blocks the catch response).
+    // First catch → welcome; legendary → gold broadcast; epic / perfect-hook
+    // rare → ticker line. Bounded set so the chat never floods.
+    const rl2 = rarity.toLowerCase();
+    const sizeR = Math.round(sizeCm);
+    const fishName = prettySpecies(speciesId);
+    if (priorCatches === 0) {
+      insertSystemChat(`👋 Welcome ${playerName} to the waters — first catch: a ${sizeR}cm ${fishName}!`, 'welcome');
+    } else if (rl2 === 'legendary') {
+      insertSystemChat(`⭐ LEGENDARY! ${playerName} landed a ${sizeR}cm ${fishName}!`, 'rare');
+    } else if (rl2 === 'epic') {
+      insertSystemChat(`🐟 ${playerName} landed a ${sizeR}cm ${fishName} (Epic)!`, 'catch');
+    } else if (rl2 === 'rare' && perfect) {
+      insertSystemChat(`🎣 ${playerName} nailed a perfect ${sizeR}cm ${fishName}!`, 'catch');
+    }
 
     res.json({ success: true, creditedValue: value });
   } catch (error) {
@@ -1075,14 +1180,14 @@ app.get('/api/chat', async (req, res) => {
     let result;
     if (Number.isFinite(since) && since > 0) {
       result = await pool.query(
-        `SELECT id, wallet_address, username, message, created_at
+        `SELECT id, wallet_address, username, message, kind, level, created_at
          FROM chat_messages WHERE id > $1 ORDER BY id ASC LIMIT $2`,
         [since, limit]
       );
     } else {
       // Latest N, then flip to chronological order for the client.
       const r = await pool.query(
-        `SELECT id, wallet_address, username, message, created_at
+        `SELECT id, wallet_address, username, message, kind, level, created_at
          FROM chat_messages ORDER BY id DESC LIMIT $1`,
         [limit]
       );
@@ -1133,11 +1238,18 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
       }
     }
 
+    // Fetch the poster's level for in-chat flair (cheap, cached column).
+    let posterLevel = 0;
+    try {
+      const lr = await pool.query('SELECT level FROM players WHERE wallet_address = $1', [walletAddress]);
+      posterLevel = Number(lr.rows[0]?.level) || 0;
+    } catch (e) { /* flair is best-effort */ }
+
     const inserted = await pool.query(
-      `INSERT INTO chat_messages (wallet_address, username, message)
-       VALUES ($1, $2, $3)
-       RETURNING id, wallet_address, username, message, created_at`,
-      [walletAddress, cleanName, message]
+      `INSERT INTO chat_messages (wallet_address, username, message, kind, level)
+       VALUES ($1, $2, $3, 'user', $4)
+       RETURNING id, wallet_address, username, message, kind, level, created_at`,
+      [walletAddress, cleanName, message, posterLevel]
     );
 
     // Keep the table bounded — drop everything but the newest 500 messages.
@@ -1150,6 +1262,122 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
   } catch (error) {
     console.error('[chat] Post error:', error);
     res.status(500).json({ error: 'Failed to post message' });
+  }
+});
+
+// ============================================================================
+// SHARED-WORLD ENDPOINTS (engagement features)
+// ============================================================================
+
+// 4d. Presence heartbeat — a tab pings every ~30s with a per-tab id. Returns the
+// live online count + today's hot spot. In-memory, no DB, no session required.
+app.post('/api/presence', (req, res) => {
+  const { id, walletAddress } = req.body || {};
+  touchPresence(id || walletAddress);
+  res.json({ online: onlineCount(), hotSpot: dailyHotSpot() });
+});
+
+// 4e. World snapshot — online count, daily hot spot, and the catch of the day
+// (biggest catch in the last 24h). Read-only, public.
+app.get('/api/world', async (req, res) => {
+  let catchOfDay = null;
+  try {
+    const r = await pool.query(
+      `SELECT c.species_id, c.size_cm, c.rarity, c.value, p.username, p.wallet_address
+       FROM catches c JOIN players p ON c.player_id = p.id
+       WHERE c.caught_at > NOW() - INTERVAL '24 hours'
+       ORDER BY c.size_cm DESC, c.value DESC
+       LIMIT 1`
+    );
+    if (r.rows[0]) {
+      const c = r.rows[0];
+      catchOfDay = {
+        species: prettySpecies(c.species_id),
+        sizeCm: Math.round(Number(c.size_cm)),
+        rarity: c.rarity,
+        who: c.username || shortWallet(c.wallet_address),
+      };
+    }
+  } catch (e) {
+    console.error('[world] Error:', e.message);
+  }
+  res.json({ online: onlineCount(), hotSpot: dailyHotSpot(), hotSpotLabel: HOT_SPOT_LABEL[dailyHotSpot()], catchOfDay });
+});
+
+// 4f. Daily check-in — advance the consecutive-day streak and, once per UTC day,
+// credit a small $TIDE bonus to the withdrawable ledger. Session-guarded.
+app.post('/api/player/checkin', writeLimiter, requireSession, async (req, res) => {
+  const { walletAddress } = req.body || {};
+  if (!walletAddress || walletAddress.length < 32) {
+    return res.status(400).json({ error: 'Invalid wallet address' });
+  }
+  try {
+    const pr = await pool.query(
+      'SELECT id, streak_count, last_active_date FROM players WHERE wallet_address = $1',
+      [walletAddress]
+    );
+    if (pr.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    const row = pr.rows[0];
+    const todayNum = utcDayNumber();
+    const lastNum = row.last_active_date ? utcDayNumber(new Date(row.last_active_date).getTime()) : null;
+    let streak = Number(row.streak_count) || 0;
+    let bonus = 0;
+
+    if (lastNum === todayNum) {
+      // Already checked in today — no bonus, streak unchanged.
+    } else {
+      streak = (lastNum !== null && todayNum - lastNum === 1) ? streak + 1 : 1;
+      bonus = Math.min(STREAK_BONUS_MAX, STREAK_BONUS_BASE + STREAK_BONUS_STEP * Math.min(streak, 7));
+      await pool.query(
+        `UPDATE players
+         SET streak_count = $2, last_active_date = CURRENT_DATE,
+             streak_reward_date = CURRENT_DATE, total_earned = total_earned + $3
+         WHERE id = $1`,
+        [row.id, streak, bonus]
+      );
+    }
+    res.json({ streak, bonus, hotSpot: dailyHotSpot(), hotSpotLabel: HOT_SPOT_LABEL[dailyHotSpot()], online: onlineCount() });
+  } catch (error) {
+    console.error('[checkin] Error:', error);
+    res.status(500).json({ error: 'Check-in failed' });
+  }
+});
+
+// 4g. Player rank + best catch — backs the /rank and /best chat slash-commands.
+app.get('/api/player/rank/:walletAddress', async (req, res) => {
+  const wallet = req.params.walletAddress;
+  try {
+    const me = await pool.query(
+      'SELECT id, username, total_earned, total_catches, streak_count FROM players WHERE wallet_address = $1',
+      [wallet]
+    );
+    if (me.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+    const earned = Number(me.rows[0].total_earned) || 0;
+    const rankQ = await pool.query(
+      'SELECT COUNT(*)::int + 1 AS rank FROM players WHERE total_earned > $1',
+      [earned]
+    );
+    const bestQ = await pool.query(
+      'SELECT species_id, size_cm FROM catches WHERE player_id = $1 ORDER BY size_cm DESC LIMIT 1',
+      [me.rows[0].id]
+    );
+    res.json({
+      rank: rankQ.rows[0].rank,
+      username: me.rows[0].username || null,
+      totalEarned: earned,
+      totalCatches: Number(me.rows[0].total_catches) || 0,
+      streak: Number(me.rows[0].streak_count) || 0,
+      best: bestQ.rows[0]
+        ? { species: prettySpecies(bestQ.rows[0].species_id), sizeCm: Math.round(Number(bestQ.rows[0].size_cm)) }
+        : null,
+    });
+  } catch (error) {
+    console.error('[rank] Error:', error);
+    res.status(500).json({ error: 'Failed to fetch rank' });
   }
 });
 
