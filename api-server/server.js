@@ -20,6 +20,7 @@ import dotenv from 'dotenv';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { evaluateCatch } from './catchRules.js';
 
 dotenv.config();
 
@@ -156,19 +157,11 @@ try {
 } catch (e) {
   console.error('[server] fishValues.json missing — falling back to flat value ceiling:', e.message);
 }
-const FLAT_VALUE_CEIL = 500_000; // fallback ceiling if a species is absent from the table
 const VALID_LOCATIONS = new Set(['lake', 'river', 'pier', 'ocean']);
 
-// Server-side anti-farming caps. Set ABOVE the client limits (5/min, 150/hr,
-// 800/day; 5k/hr, 30k/day) so honest players gated by the client never trip
-// these, but a client-bypassing bot is still bounded.
-const SERVER_CAPS = {
-  perMin: 12,
-  perHour: 250,
-  perDay: 1200,
-  earnHour: 8_000,
-  earnDay: 40_000,
-};
+// Catch validation rules (reachability gate, value/size/weight clamps, rarity
+// + earnings caps) live in catchRules.js so they can be unit-tested in
+// isolation.
 
 // ============================================================================
 // SHARED-WORLD / ENGAGEMENT HELPERS
@@ -1013,48 +1006,44 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
 
     const speciesId = String(catchData.speciesId || '').slice(0, 50);
     const cap = FISH_VALUES.species[speciesId];
-    if (!cap) {
-      return res.status(400).json({ error: 'Unknown species', code: 'BAD_SPECIES' });
-    }
-
     const location = String(catchData.location || '');
-    if (!VALID_LOCATIONS.has(location)) {
-      return res.status(400).json({ error: 'Invalid location', code: 'BAD_LOCATION' });
-    }
 
-    // Daily hot spot pays +10% — raise the ceiling there so the client's bonus
-    // value isn't clamped away.
-    const hotMult = (location === dailyHotSpot()) ? 1.1 : 1;
-    // Server-authoritative value: clamp the client figure to the species ceiling.
-    const ceiling = Math.ceil((cap.max ?? FLAT_VALUE_CEIL) * 1.02 * hotMult) + 2;
-    let value = intOr(catchData.value, 0, 0, ceiling);
-
-    // Server-side anti-farming (bounds a client-bypassing bot).
+    // Per-player catch counts over rolling windows, plus per-rarity / jackpot-
+    // species tallies for the plausibility backstop. Drives all the caps below.
     const rl = await pool.query(
       `SELECT
          COUNT(*) FILTER (WHERE caught_at > NOW() - INTERVAL '1 minute') AS m,
          COUNT(*) FILTER (WHERE caught_at > NOW() - INTERVAL '1 hour')   AS h,
          COUNT(*)                                                        AS d,
          COALESCE(SUM(value) FILTER (WHERE caught_at > NOW() - INTERVAL '1 hour'), 0) AS eh,
-         COALESCE(SUM(value), 0)                                                       AS ed
+         COALESCE(SUM(value), 0)                                                       AS ed,
+         COUNT(*) FILTER (WHERE rarity = 'legendary' AND caught_at > NOW() - INTERVAL '1 hour') AS lh,
+         COUNT(*) FILTER (WHERE rarity = 'legendary')                                          AS ld,
+         COUNT(*) FILTER (WHERE species_id = $2)                                               AS js
        FROM catches
        WHERE player_id = $1 AND caught_at > NOW() - INTERVAL '1 day'`,
-      [playerId]
+      [playerId, speciesId]
     );
-    const m = Number(rl.rows[0].m);
-    const h = Number(rl.rows[0].h);
-    const d = Number(rl.rows[0].d);
-    const eh = Number(rl.rows[0].eh);
-    const ed = Number(rl.rows[0].ed);
-    if (m >= SERVER_CAPS.perMin || h >= SERVER_CAPS.perHour || d >= SERVER_CAPS.perDay) {
-      return res.status(429).json({ error: 'Catch rate limit reached', code: 'RATE_LIMIT' });
-    }
-    // Cap credited value to the remaining hourly/daily earnings allowance.
-    value = Math.max(0, Math.min(value, SERVER_CAPS.earnHour - eh, SERVER_CAPS.earnDay - ed));
+    const counts = rl.rows[0];
 
-    const sizeCm = Math.min(99999, Math.max(0, Number(catchData.sizeCm) || 0));
-    const weightKg = Math.min(99999, Math.max(0, Number(catchData.weightKg) || 0));
-    const rarity = String(catchData.rarity || cap.rarity || 'common').slice(0, 20);
+    // Authoritative decision: reachability gate, value/size/weight clamps,
+    // forced rarity, rate + earnings + rarity caps. Pure logic in catchRules.js.
+    const decision = evaluateCatch({
+      cap,
+      location,
+      validLocation: VALID_LOCATIONS.has(location),
+      isHotSpot: location === dailyHotSpot(),
+      catchData,
+      counts,
+    });
+    if (!decision.ok) {
+      if (decision.code === 'BAD_SPECIES_LOCATION' || decision.code === 'RARITY_LIMIT') {
+        // Log clear cheat signals so abusers can be identified from server logs.
+        console.warn(`[catch] REJECT ${decision.code} species=${speciesId} loc=${location} wallet=${walletAddress} counts=${JSON.stringify(counts)}`);
+      }
+      return res.status(decision.status).json({ error: decision.error, code: decision.code });
+    }
+    const { value, sizeCm, weightKg, rarity } = decision;
     const perfect = !!catchData.perfectHook;
 
     // Insert catch with the server-validated value
@@ -1467,6 +1456,16 @@ app.post('/api/catch/validate', writeLimiter, async (req, res) => {
   
   if (!walletAddress || !speciesId) {
     return res.status(400).json({ error: 'Missing required fields', allowed: false });
+  }
+
+  // Reject globally-unreachable species up front (defense-in-depth; the
+  // authoritative gate is /api/player/catch). A species that appears in no
+  // spawn table can never be caught legitimately — only a tampered client
+  // would claim one (e.g. the high-value "fantasy" legendaries).
+  const spec = FISH_VALUES.species[String(speciesId).slice(0, 50)];
+  if (!spec || !spec.spawn || Object.keys(spec.spawn).length === 0) {
+    console.warn(`[catch-validate] REJECT unreachable species=${speciesId} wallet=${walletAddress}`);
+    return res.json({ allowed: false, error: 'That fish cannot be caught here' });
   }
   
   try {
