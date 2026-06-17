@@ -159,6 +159,77 @@ function adminKeyValid(provided) {
   return crypto.timingSafeEqual(a, b);
 }
 
+// ============================================================================
+// SIGN-IN WITH SOLANA (SIWS) — session tokens prove wallet ownership so the
+// write endpoints can't be impersonated by spoofing `walletAddress` in a body.
+// ============================================================================
+
+// Secret used to HMAC session tokens. Prefer a dedicated SESSION_SECRET env var;
+// fall back to a stable value derived from existing secrets so tokens survive
+// server restarts even if the operator hasn't set one yet.
+const SESSION_SECRET = process.env.SESSION_SECRET ||
+  crypto.createHash('sha256')
+    .update(`tidal-session|${process.env.ADMIN_SECRET || ''}|${TIDE_MINT_STR || ''}`)
+    .digest('hex');
+// Default to enforcing; set SESSION_ENFORCE=false only as an emergency escape hatch.
+const SESSION_ENFORCE = String(process.env.SESSION_ENFORCE ?? 'true').toLowerCase() !== 'false';
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+const SIWS_MAX_AGE_MS = 5 * 60 * 1000;      // signed login message must be <5min old
+
+function base64url(buf) {
+  return Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+// Issue a compact `<payload>.<hmac>` token binding a wallet to an expiry.
+function issueSessionToken(wallet) {
+  const exp = Date.now() + SESSION_TTL_MS;
+  const payload = base64url(JSON.stringify({ w: wallet, exp }));
+  const mac = base64url(crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest());
+  return { token: `${payload}.${mac}`, expiresAt: exp };
+}
+
+// Verify a token's HMAC + expiry; returns the wallet address or null.
+function verifySessionToken(token) {
+  if (typeof token !== 'string' || !token.includes('.')) return null;
+  const [payload, mac] = token.split('.');
+  if (!payload || !mac) return null;
+  const expectedMac = base64url(crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest());
+  const a = Buffer.from(mac), b = Buffer.from(expectedMac);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  let data;
+  try { data = JSON.parse(Buffer.from(payload.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')); }
+  catch { return null; }
+  if (!data || typeof data.w !== 'string' || typeof data.exp !== 'number') return null;
+  if (Date.now() > data.exp) return null;
+  return data.w;
+}
+
+// Middleware: require a valid Bearer session whose wallet matches the body's
+// walletAddress. When SESSION_ENFORCE is off, tokenless requests pass through
+// (legacy compatibility) but a present token is still validated + matched.
+function requireSession(req, res, next) {
+  const auth = req.headers['authorization'] || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : null;
+  const bodyWallet = req.body?.walletAddress;
+
+  if (!token) {
+    if (SESSION_ENFORCE) {
+      return res.status(401).json({ error: 'Sign in with your wallet to continue', code: 'SESSION_REQUIRED' });
+    }
+    return next(); // legacy grace period
+  }
+
+  const wallet = verifySessionToken(token);
+  if (!wallet) {
+    return res.status(401).json({ error: 'Session expired — sign in again', code: 'SESSION_INVALID' });
+  }
+  if (bodyWallet && bodyWallet !== wallet) {
+    return res.status(403).json({ error: 'Session does not match wallet', code: 'SESSION_MISMATCH' });
+  }
+  req.authWallet = wallet;
+  next();
+}
+
 // Solana program IDs
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
 const TOKEN_2022_PROGRAM_ID = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
@@ -561,7 +632,7 @@ app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
 // ============================================================================
 
 // Update player profile (username, profile picture, bio)
-app.patch('/api/player/profile', writeLimiter, async (req, res) => {
+app.patch('/api/player/profile', writeLimiter, requireSession, async (req, res) => {
   try {
     const { walletAddress, username, profilePicture, bio } = req.body;
     
@@ -719,6 +790,55 @@ app.post('/api/player/auth', async (req, res) => {
   }
 });
 
+// SIWS: verify a wallet signature and issue a session token used to authorize
+// the write endpoints. Banned wallets are already rejected by checkBans.
+app.post('/api/auth/session', writeLimiter, async (req, res) => {
+  const { walletAddress, message, signature } = req.body;
+
+  if (typeof walletAddress !== 'string' || walletAddress.length < 32) {
+    return res.status(400).json({ error: 'walletAddress required' });
+  }
+  if (typeof message !== 'string' || typeof signature !== 'string') {
+    return res.status(400).json({ error: 'message and signature required' });
+  }
+
+  let pk;
+  try { pk = new PublicKey(walletAddress); }
+  catch { return res.status(400).json({ error: 'Invalid wallet address' }); }
+
+  let sigBytes;
+  try { sigBytes = Buffer.from(signature, 'base64'); }
+  catch { return res.status(401).json({ error: 'Malformed signature' }); }
+  if (sigBytes.length !== 64) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+  const verified = nacl.sign.detached.verify(
+    new Uint8Array(Buffer.from(message, 'utf8')),
+    new Uint8Array(sigBytes),
+    pk.toBytes()
+  );
+  if (!verified) {
+    return res.status(401).json({ error: 'Signature verification failed' });
+  }
+
+  // The signed message must bind to THIS wallet and be fresh (replay guard).
+  const fields = {};
+  for (const line of message.split('\n')) {
+    const idx = line.indexOf(':');
+    if (idx > -1) fields[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+  }
+  if (fields.wallet !== walletAddress) {
+    return res.status(401).json({ error: 'Signed message wallet mismatch' });
+  }
+  const issued = Number(fields.issued);
+  if (!Number.isFinite(issued) || Math.abs(Date.now() - issued) > SIWS_MAX_AGE_MS) {
+    return res.status(401).json({ error: 'Login message expired — try again' });
+  }
+
+  const { token, expiresAt } = issueSessionToken(walletAddress);
+  res.json({ token, expiresAt });
+});
+
 // Coerce to a bounded non-negative integer; rejects NaN/Infinity/negatives.
 function intOr(v, def = 0, min = 0, max = 2_000_000_000) {
   const n = Math.floor(Number(v));
@@ -730,7 +850,7 @@ function intOr(v, def = 0, min = 0, max = 2_000_000_000) {
 // NOTE: total_earned and total_catches are server-authoritative (incremented
 // only by /api/player/catch after value validation) and are deliberately NOT
 // written here — otherwise a tampered client could inflate them and withdraw.
-app.post('/api/player/save', writeLimiter, async (req, res) => {
+app.post('/api/player/save', writeLimiter, requireSession, async (req, res) => {
   const { walletAddress, state } = req.body;
 
   if (!walletAddress || !state) {
@@ -779,7 +899,7 @@ app.post('/api/player/save', writeLimiter, async (req, res) => {
 // The client-reported value is clamped to the species ceiling, server-side
 // anti-farming caps are enforced, and total_earned/total_catches (the figures
 // the withdrawal ledger trusts) are incremented here and ONLY here.
-app.post('/api/player/catch', writeLimiter, async (req, res) => {
+app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => {
   const { walletAddress, catch: catchData } = req.body;
 
   if (!walletAddress || !catchData) {
@@ -979,7 +1099,7 @@ app.get('/api/chat', async (req, res) => {
 // 4c. Global troll box — post a chat message.
 // Banned wallets are already blocked by checkBans (walletAddress in body).
 // Requires a chosen angler name, enforces a length cap + per-wallet cooldown.
-app.post('/api/chat', writeLimiter, async (req, res) => {
+app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
   const { walletAddress, username } = req.body;
   let { message } = req.body;
 

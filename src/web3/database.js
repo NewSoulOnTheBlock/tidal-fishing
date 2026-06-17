@@ -50,6 +50,7 @@ export async function savePlayerState(playerState = {}) {
   try {
     const res = await apiFetch('/api/player/save', {
       method: 'POST',
+      auth: true,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         walletAddress,
@@ -104,6 +105,7 @@ export async function recordCatch(catchInfo = {}) {
   try {
     const res = await apiFetch('/api/player/catch', {
       method: 'POST',
+      auth: true,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         walletAddress,
@@ -200,6 +202,7 @@ export async function updateProfile(walletAddress, updates) {
   try {
     const res = await apiFetch('/api/player/profile', {
       method: 'PATCH',
+      auth: true,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         walletAddress, 

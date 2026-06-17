@@ -205,6 +205,7 @@ export class ChatUI {
     try {
       const res = await apiFetch("/api/chat", {
         method: "POST",
+        auth: true,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress: pk, username: name, message: text }),
       });

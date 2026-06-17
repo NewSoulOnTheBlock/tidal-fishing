@@ -3,6 +3,7 @@
 
 import { authenticatePlayer, savePlayerState, recordCatch } from "./database.js";
 import { currentPublicKey } from "./wallet.js";
+import { establishSession, clearSession } from "./session.js";
 import { S, events } from "../state/gameState.js";
 import { saveGame } from "../state/saveLoad.js";
 
@@ -34,6 +35,10 @@ export async function onWalletConnect() {
 
   isAuthenticated = true;
   console.log("[db] ✅ Player authenticated:", player);
+
+  // Sign-In With Solana: prompt once for a session token so the write
+  // endpoints can verify wallet ownership. Done before any save/sync below.
+  await establishSession();
 
   // Emit toast notification (hud's toast listener expects { msg, kind }).
   events.emit("toast", {
@@ -72,6 +77,7 @@ export async function onWalletConnect() {
 export function onWalletDisconnect() {
   stopAutoSave();
   isAuthenticated = false;
+  clearSession();
   console.log("[db] Wallet disconnected, auto-save stopped");
 }
 

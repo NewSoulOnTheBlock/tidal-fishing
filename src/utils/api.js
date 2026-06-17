@@ -21,17 +21,47 @@ function resolveApiBase() {
 
 export const API_BASE = resolveApiBase();
 
+// SIWS session hooks, wired in by src/web3/session.js. Kept as setter-injected
+// callbacks so this module has no import cycle with the session/wallet layer.
+let _getToken = null;
+let _reauth = null;
+
+/** Register the session token provider + re-auth callback (called once). */
+export function setAuthHooks({ getToken, reauth } = {}) {
+  if (getToken) _getToken = getToken;
+  if (reauth) _reauth = reauth;
+}
+
 /**
  * fetch() with an AbortController timeout so a hung server can never wedge the
  * game's network calls forever. Accepts a path (joined to API_BASE) or a full
- * URL. Extra option `timeoutMs` (default 12s). Behaves like fetch otherwise.
+ * URL. Options:
+ *   - timeoutMs (default 12s)
+ *   - auth: true  → for write calls; transparently re-establishes a SIWS
+ *                   session and retries once if the server reports it expired.
+ * A session bearer token (when present) is always attached. Behaves like fetch
+ * otherwise.
  */
-export async function apiFetch(path, { timeoutMs = 12000, ...options } = {}) {
+export async function apiFetch(path, { timeoutMs = 12000, auth = false, _retried = false, ...options } = {}) {
   const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path}`;
+  const headers = { ...(options.headers || {}) };
+  const token = _getToken?.();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const res = await fetch(url, { ...options, headers, signal: controller.signal });
+
+    if (auth && res.status === 401 && !_retried && _reauth) {
+      let code;
+      try { code = (await res.clone().json())?.code; } catch { /* ignore */ }
+      if (code === 'SESSION_REQUIRED' || code === 'SESSION_INVALID') {
+        const ok = await _reauth();
+        if (ok) return apiFetch(path, { timeoutMs, auth, _retried: true, ...options });
+      }
+    }
+    return res;
   } finally {
     clearTimeout(timer);
   }
