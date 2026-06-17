@@ -34,6 +34,7 @@ import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
+import { TutorialUI } from "./ui/tutorialUI.js";
 import { ChatUI } from "./ui/chatUI.js";
 import { SocialUI } from "./ui/socialUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
@@ -115,9 +116,12 @@ const weatherUI = new WeatherUI(scene);
 const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
 const onboardingUI = new OnboardingUI();
+const tutorialUI = new TutorialUI();
 
 // First-time wallet sign-in: force the angler-name onboarding flow.
 events.on("onboarding:needed", () => onboardingUI.show());
+// Right after a new angler picks a name, walk them through how to fish.
+events.on("onboarding:complete", () => tutorialUI.show());
 
 // Global Fishermans Hole (global chat) — only on the browser-tab web version,
 // hidden in the installed/standalone PWA.

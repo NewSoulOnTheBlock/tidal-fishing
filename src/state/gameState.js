@@ -63,6 +63,7 @@ export function createDefaultState() {
       username: "",
       bio: "",
       avatar: "default",
+      tutorialSeen: false,
     },
     gear: {
       owned: { rods: [0], reels: [0], lines: [0], baits: [0] },

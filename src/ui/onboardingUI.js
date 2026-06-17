@@ -117,6 +117,8 @@ export class OnboardingUI {
 
     this.close();
     events.emit("toast", { msg: `🎉 Welcome aboard, ${name}! Tight lines!`, kind: "gold" });
+    // First-time anglers get the how-to-fish walkthrough right after naming.
+    events.emit("onboarding:complete");
   }
 
   close() {
