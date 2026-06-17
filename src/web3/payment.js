@@ -133,9 +133,11 @@ function createBurnIx(account, mint, owner, amount, tokenProgram) {
   //     0. [writable] Token account to burn from
   //     1. [writable] Mint
   //     2. [signer]   Owner of the token account
-  const data = Buffer.alloc(9);
-  data.writeUInt8(8, 0);
-  data.writeBigUInt64LE(amount, 1);
+  const data = new Uint8Array(9);
+  data[0] = 8; // Burn instruction
+  // Write amount as little-endian u64
+  const view = new DataView(data.buffer);
+  view.setBigUint64(1, amount, true); // true = little-endian
   return new TransactionInstruction({
     programId: tokenProgram,
     keys: [
@@ -152,6 +154,6 @@ function buildMemoIx(text) {
   return new TransactionInstruction({
     programId: MEMO_PROGRAM_ID,
     keys: [],
-    data: Buffer.from(text, "utf8"),
+    data: new TextEncoder().encode(text),
   });
 }
