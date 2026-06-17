@@ -386,8 +386,8 @@ events.on("fight:escape", ({ reason }) => {
   machine.set(Phase.IDLE);
 });
 
-events.on("fight:landed", ({ fish }) => {
-  const result = economy.registerCatch(fish);
+events.on("fight:landed", async ({ fish }) => {
+  const result = await economy.registerCatch(fish);
   rig.addShake(0.25);
   machine.set(Phase.CATCH);
   catchCard.show(fish, result, () => machine.set(Phase.IDLE));

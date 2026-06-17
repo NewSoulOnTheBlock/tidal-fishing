@@ -14,6 +14,7 @@ import { updateTournamentScore } from "../progression/tournament.js";
 import { recordCatch as recordCatchDB } from "../web3/database.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFarming.js";
+import { validateCatch, showBanMessage } from "../web3/catchValidation.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -115,8 +116,32 @@ export function addXp(amount) {
 /** Registers a landed fish: inventory, journal, records, XP. Jackpot species
  *  (fish.jackpot === true) bypass the catch bag entirely and credit their
  *  full value to the player on the spot.
+ *  
+ *  NOW REQUIRES SERVER VALIDATION - prevents offline fishing.
  */
-export function registerCatch(fish) {
+export async function registerCatch(fish) {
+  // SERVER VALIDATION CHECK (prevents offline fishing)
+  const validation = await validateCatch(fish.speciesId, fish.value);
+  if (!validation.allowed) {
+    console.warn("[economy] Catch blocked by server:", validation.error);
+    
+    if (validation.banned) {
+      showBanMessage(validation.error);
+    } else {
+      events.emit("toast", { msg: validation.error || "Catch validation failed", kind: "warn" });
+    }
+    
+    return {
+      xpGained: 0,
+      levels: [],
+      moneyGained: 0,
+      isNew: false,
+      isRecord: false,
+      blocked: true,
+      serverBlocked: true,
+    };
+  }
+  
   // ANTI-FARMING CHECK
   const catchCheck = canCatch();
   if (!catchCheck.allowed) {

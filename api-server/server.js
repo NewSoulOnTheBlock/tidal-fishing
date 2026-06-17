@@ -59,6 +59,72 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// IP extraction helper
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0].trim() ||
+         req.headers['x-real-ip'] ||
+         req.connection.remoteAddress ||
+         req.socket.remoteAddress ||
+         'unknown';
+}
+
+// Ban check middleware
+async function checkBans(req, res, next) {
+  const ip = getClientIP(req);
+  const walletAddress = req.body.walletAddress || req.query.walletAddress;
+  
+  try {
+    // Check IP ban
+    const ipBan = await pool.query(
+      'SELECT reason FROM banned_ips WHERE ip_address = $1',
+      [ip]
+    );
+    if (ipBan.rows.length > 0) {
+      return res.status(403).json({ 
+        error: 'Access denied',
+        reason: ipBan.rows[0].reason || 'Your IP has been banned',
+        banned: true
+      });
+    }
+    
+    // Check wallet ban if provided
+    if (walletAddress) {
+      const walletBan = await pool.query(
+        'SELECT reason FROM banned_wallets WHERE wallet_address = $1',
+        [walletAddress]
+      );
+      if (walletBan.rows.length > 0) {
+        return res.status(403).json({ 
+          error: 'Account suspended',
+          reason: walletBan.rows[0].reason || 'This wallet has been banned',
+          banned: true
+        });
+      }
+    }
+    
+    next();
+  } catch (error) {
+    console.error('[ban-check] Error:', error);
+    // Don't block on ban-check errors
+    next();
+  }
+}
+
+// Track IP activity
+async function trackActivity(ip, wallet, action, metadata = {}) {
+  try {
+    await pool.query(
+      'INSERT INTO ip_activity (ip_address, wallet_address, action, metadata) VALUES ($1, $2, $3, $4)',
+      [ip, wallet, action, JSON.stringify(metadata)]
+    );
+  } catch (error) {
+    console.error('[track-activity] Error:', error);
+  }
+}
+
+// Apply ban check to all API routes
+app.use('/api', checkBans);
+
 // Load treasury keypair
 let treasuryKeypair = null;
 try {
@@ -598,4 +664,155 @@ app.listen(PORT, () => {
   console.log(`[server] Treasury: ${treasuryKeypair ? '✅ Loaded' : '❌ Not configured'}`);
   console.log(`[server] $TIDE Mint: ${TIDE_MINT_STR}`);
   console.log(`[server] Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'}`);
+});
+
+// ============================================================================
+// BAN SYSTEM & CATCH VALIDATION
+// ============================================================================
+
+// Validate catch (prevents offline fishing)
+app.post('/api/catch/validate', async (req, res) => {
+  const { walletAddress, speciesId, value } = req.body;
+  const ip = getClientIP(req);
+  
+  if (!walletAddress || !speciesId) {
+    return res.status(400).json({ error: 'Missing required fields', allowed: false });
+  }
+  
+  try {
+    // Track this catch attempt
+    await trackActivity(ip, walletAddress, 'catch_validate', { speciesId, value });
+    
+    // Check rate limits (catches per minute from this IP)
+    const recentCatches = await pool.query(
+      `SELECT COUNT(*) as count FROM ip_activity 
+       WHERE ip_address = $1 
+       AND action = 'catch_validate' 
+       AND timestamp > NOW() - INTERVAL '1 minute'`,
+      [ip]
+    );
+    
+    if (parseInt(recentCatches.rows[0].count) > 10) {
+      console.log(`[catch-validate] Rate limit exceeded for IP: ${ip}`);
+      return res.json({ 
+        allowed: false, 
+        error: 'Too many catches. Please slow down.' 
+      });
+    }
+    
+    // All checks passed
+    res.json({ allowed: true });
+  } catch (error) {
+    console.error('[catch-validate] Error:', error);
+    // Fail closed - don't allow catch on error
+    res.status(500).json({ error: 'Validation failed', allowed: false });
+  }
+});
+
+// Admin: Ban wallet
+app.post('/api/admin/ban/wallet', async (req, res) => {
+  const { walletAddress, reason, adminKey } = req.body;
+  
+  if (adminKey !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  if (!walletAddress) {
+    return res.status(400).json({ error: 'Wallet address required' });
+  }
+  
+  try {
+    await pool.query(
+      'INSERT INTO banned_wallets (wallet_address, reason) VALUES ($1, $2) ON CONFLICT (wallet_address) DO UPDATE SET reason = $2',
+      [walletAddress, reason || 'Violation of terms']
+    );
+    console.log(`[admin] Banned wallet: ${walletAddress}`);
+    res.json({ success: true, message: `Wallet ${walletAddress} has been banned` });
+  } catch (error) {
+    console.error('[admin] Ban wallet error:', error);
+    res.status(500).json({ error: 'Failed to ban wallet' });
+  }
+});
+
+// Admin: Ban IP
+app.post('/api/admin/ban/ip', async (req, res) => {
+  const { ipAddress, reason, adminKey } = req.body;
+  
+  if (adminKey !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  if (!ipAddress) {
+    return res.status(400).json({ error: 'IP address required' });
+  }
+  
+  try {
+    await pool.query(
+      'INSERT INTO banned_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = $2',
+      [ipAddress, reason || 'Violation of terms']
+    );
+    console.log(`[admin] Banned IP: ${ipAddress}`);
+    res.json({ success: true, message: `IP ${ipAddress} has been banned` });
+  } catch (error) {
+    console.error('[admin] Ban IP error:', error);
+    res.status(500).json({ error: 'Failed to ban IP' });
+  }
+});
+
+// Admin: Unban wallet
+app.post('/api/admin/unban/wallet', async (req, res) => {
+  const { walletAddress, adminKey } = req.body;
+  
+  if (adminKey !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    await pool.query('DELETE FROM banned_wallets WHERE wallet_address = $1', [walletAddress]);
+    console.log(`[admin] Unbanned wallet: ${walletAddress}`);
+    res.json({ success: true, message: `Wallet ${walletAddress} has been unbanned` });
+  } catch (error) {
+    console.error('[admin] Unban wallet error:', error);
+    res.status(500).json({ error: 'Failed to unban wallet' });
+  }
+});
+
+// Admin: Unban IP
+app.post('/api/admin/unban/ip', async (req, res) => {
+  const { ipAddress, adminKey } = req.body;
+  
+  if (adminKey !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    await pool.query('DELETE FROM banned_ips WHERE ip_address = $1', [ipAddress]);
+    console.log(`[admin] Unbanned IP: ${ipAddress}`);
+    res.json({ success: true, message: `IP ${ipAddress} has been unbanned` });
+  } catch (error) {
+    console.error('[admin] Unban IP error:', error);
+    res.status(500).json({ error: 'Failed to unban IP' });
+  }
+});
+
+// Admin: List bans
+app.get('/api/admin/bans', async (req, res) => {
+  const { adminKey } = req.query;
+  
+  if (adminKey !== process.env.ADMIN_SECRET) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  try {
+    const wallets = await pool.query('SELECT * FROM banned_wallets ORDER BY banned_at DESC LIMIT 100');
+    const ips = await pool.query('SELECT * FROM banned_ips ORDER BY banned_at DESC LIMIT 100');
+    
+    res.json({
+      bannedWallets: wallets.rows,
+      bannedIPs: ips.rows
+    });
+  } catch (error) {
+    console.error('[admin] List bans error:', error);
+    res.status(500).json({ error: 'Failed to list bans' });
+  }
 });

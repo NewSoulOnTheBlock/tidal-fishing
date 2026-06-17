@@ -137,3 +137,37 @@ LEFT JOIN catches c ON p.id = c.player_id
 GROUP BY p.id
 ORDER BY p.total_earned DESC
 LIMIT 100;
+
+-- Ban system tables
+CREATE TABLE IF NOT EXISTS banned_wallets (
+  id SERIAL PRIMARY KEY,
+  wallet_address VARCHAR(44) UNIQUE NOT NULL,
+  reason TEXT,
+  banned_at TIMESTAMP DEFAULT NOW(),
+  banned_by VARCHAR(100) DEFAULT 'system',
+  CONSTRAINT banned_wallet_check CHECK (length(wallet_address) >= 32)
+);
+
+CREATE TABLE IF NOT EXISTS banned_ips (
+  id SERIAL PRIMARY KEY,
+  ip_address VARCHAR(45) UNIQUE NOT NULL,
+  reason TEXT,
+  banned_at TIMESTAMP DEFAULT NOW(),
+  banned_by VARCHAR(100) DEFAULT 'system'
+);
+
+CREATE INDEX IF NOT EXISTS idx_banned_wallets ON banned_wallets(wallet_address);
+CREATE INDEX IF NOT EXISTS idx_banned_ips ON banned_ips(ip_address);
+
+-- IP tracking for rate limiting and fraud detection
+CREATE TABLE IF NOT EXISTS ip_activity (
+  id SERIAL PRIMARY KEY,
+  ip_address VARCHAR(45) NOT NULL,
+  wallet_address VARCHAR(44),
+  action VARCHAR(50) NOT NULL,
+  timestamp TIMESTAMP DEFAULT NOW(),
+  metadata JSONB
+);
+
+CREATE INDEX IF NOT EXISTS idx_ip_activity_lookup ON ip_activity(ip_address, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_ip_activity_wallet ON ip_activity(wallet_address, timestamp DESC);
