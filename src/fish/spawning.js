@@ -45,9 +45,10 @@ export function rollFish(ctx) {
   const sizeNorm = (sizeCm - minS) / (maxS - minS);
 
   const weightKg = Math.max(0.01, sp.weightMidKg * Math.pow(sizeCm / mid, 2.9));
+  const earnMult = CONFIG.economy.earnMultiplier ?? 1;
   const value = sp.fixedValue
-    ? sp.baseValue
-    : Math.round(sp.baseValue * (0.45 + 0.55 * Math.pow(sizeCm / mid, 2.2)));
+    ? Math.max(1, Math.round(sp.baseValue * earnMult))
+    : Math.max(1, Math.round(sp.baseValue * (0.45 + 0.55 * Math.pow(sizeCm / mid, 2.2)) * earnMult));
   const rarity = RARITIES[sp.rarity];
   const xp = Math.round(rarity.xp * (0.75 + 0.5 * (sizeCm / mid)));
 
