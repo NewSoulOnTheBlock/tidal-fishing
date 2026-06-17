@@ -30,7 +30,6 @@ export class CatchCard {
    * @param {Function} onDone
    */
   show(fish, flags, onDone) {
-    console.log("[CatchCard] show() called", fish, flags);
     this.active = true;
     this.onDone = onDone;
     
@@ -85,16 +84,13 @@ export class CatchCard {
         if (e.target === overlay) this.dismiss();
       });
 
-      console.log("[CatchCard] Appending overlay to root...");
       this.root.appendChild(overlay);
       this.overlay = overlay;
-      console.log("[CatchCard] Overlay appended successfully");
 
       audio.play(flags.isJackpot || fish.rarity === "legendary" ? "legendary" : "catch");
       if (flags.isJackpot || flags.isNew || flags.isRecord || RARITIES[fish.rarity].order >= 3) {
         this.confetti(overlay.querySelector(".catch-card"), flags.isJackpot ? 96 : 26);
       }
-      console.log("[CatchCard] Card shown successfully!");
     } catch (error) {
       console.error("[CatchCard] Error showing card:", error);
       this.active = false;
@@ -118,7 +114,6 @@ export class CatchCard {
 
   async shareScreenshot(cardEl, fishName) {
     try {
-      console.log("[CatchCard] Starting screenshot capture...");
       // Hide confetti and share button temporarily
       const confettiBits = cardEl.querySelectorAll('.confetti-bit');
       const shareBtn = cardEl.querySelector('.btn-share');
@@ -135,8 +130,6 @@ export class CatchCard {
         new Promise((_, reject) => setTimeout(() => reject(new Error('Screenshot timeout')), 5000))
       ]);
 
-      console.log("[CatchCard] Screenshot captured successfully");
-      
       // Restore elements
       confettiBits.forEach(b => b.style.display = '');
       if (shareBtn) shareBtn.style.display = '';

@@ -59,3 +59,22 @@ export function shortAddress(addr, head = 4, tail = 4) {
   if (s.length <= head + tail + 1) return s;
   return `${s.slice(0, head)}…${s.slice(-tail)}`;
 }
+
+// Base58 encoder (Bitcoin/Solana alphabet). Used to stringify the raw signature
+// bytes that some wallet adapters return from signAndSend. Lives here so the
+// $TIDE and SOL payment paths share one implementation instead of duplicating it.
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+export function base58Encode(bytes) {
+  let num = 0n;
+  for (const byte of bytes) num = num * 256n + BigInt(byte);
+  let result = num === 0n ? BASE58_ALPHABET[0] : "";
+  while (num > 0n) {
+    result = BASE58_ALPHABET[Number(num % 58n)] + result;
+    num = num / 58n;
+  }
+  for (const byte of bytes) {
+    if (byte !== 0) break;
+    result = BASE58_ALPHABET[0] + result;
+  }
+  return result;
+}

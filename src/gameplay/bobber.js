@@ -21,6 +21,7 @@ export class Bobber {
     this.mode = "hidden"; // hidden | flying | floating | retrieving
     this.vel = new THREE.Vector3();
     this.playerSpot = new THREE.Vector3();
+    this._scratchDir = new THREE.Vector3();
     this.floatT = 0;
     this.flightT = 0;
     this.dip = 0;
@@ -128,7 +129,7 @@ export class Bobber {
         break;
       }
       case "retrieving": {
-        const dir = new THREE.Vector3().subVectors(this.playerSpot, this.pos);
+        const dir = this._scratchDir.subVectors(this.playerSpot, this.pos);
         dir.y = 0;
         const dist = dir.length();
         if (dist < 2.4) {

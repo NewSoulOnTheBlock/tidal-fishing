@@ -2,8 +2,7 @@
 // All catches must be approved by the server before being registered
 
 import { currentPublicKey } from "./wallet.js";
-
-const API_URL = import.meta.env.VITE_API_URL || "https://tidal-fishing.onrender.com";
+import { apiFetch } from "../utils/api.js";
 
 let lastValidationCheck = 0;
 let validationCache = { allowed: true, timestamp: 0 };
@@ -27,7 +26,7 @@ export async function validateCatch(speciesId, value) {
   const walletAddress = publicKey.toString();
   
   try {
-    const response = await fetch(`${API_URL}/api/catch/validate`, {
+    const response = await apiFetch("/api/catch/validate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 

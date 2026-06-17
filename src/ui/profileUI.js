@@ -142,7 +142,7 @@ export class ProfileUI {
             
             <div class="profile-info-section">
               <div class="profile-username-row">
-                <h3 class="profile-username">${player.username || shortAddress(player.wallet_address)}</h3>
+                <h3 class="profile-username">${player.username ? this.escapeHtml(player.username) : shortAddress(player.wallet_address)}</h3>
                 <button class="btn btn-icon btn-edit-username" title="Edit username">✏️</button>
               </div>
               
@@ -152,7 +152,7 @@ export class ProfileUI {
               </div>
               
               <div class="profile-bio">
-                <div class="bio-text">${player.bio || '<em>No bio set. Click to add one!</em>'}</div>
+                <div class="bio-text">${player.bio ? this.escapeHtml(player.bio) : '<em>No bio set. Click to add one!</em>'}</div>
                 <button class="btn btn-icon btn-edit-bio" title="Edit bio">✏️</button>
               </div>
             </div>

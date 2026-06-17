@@ -5,11 +5,7 @@ import { S } from "../state/gameState.js";
 import { formatMoney } from "../utils/utils.js";
 import { shortAddress } from "../web3/solana.js";
 import { FISH_BY_ID } from "../data/fishData.js";
-
-// Point to API server on Render (or localhost for dev)
-const API_BASE = window.location.hostname === "localhost" 
-  ? "http://localhost:3000" 
-  : "https://tidal-fishing.onrender.com";
+import { apiFetch } from "../utils/api.js";
 
 export class LeaderboardUI {
   constructor() {
@@ -98,7 +94,7 @@ export class LeaderboardUI {
 
     try {
       if (tab === "earnings") {
-        const response = await fetch(`${API_BASE}/api/leaderboard?limit=100`);
+        const response = await apiFetch("/api/leaderboard?limit=100");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         // Server returns { leaderboard: [...] } already ordered by earnings.
@@ -109,7 +105,7 @@ export class LeaderboardUI {
         }));
         content.innerHTML = this.renderEarnings(entries);
       } else if (tab === "recent") {
-        const response = await fetch(`${API_BASE}/api/leaderboard?type=recent&limit=50`);
+        const response = await apiFetch("/api/leaderboard?type=recent&limit=50");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         content.innerHTML = this.renderRecent(data.catches);
@@ -227,7 +223,7 @@ export class LeaderboardUI {
     content.innerHTML = '<div class="loading">Loading...</div>';
 
     try {
-      const response = await fetch(`${API_BASE}/api/leaderboard?type=species&species=${speciesId}&limit=20`);
+      const response = await apiFetch(`/api/leaderboard?type=species&species=${speciesId}&limit=20`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const species = FISH_BY_ID[speciesId];
@@ -306,7 +302,7 @@ export async function submitToLeaderboard(catchData, wallet) {
   if (!wallet) return;
 
   try {
-    await fetch(`${API_BASE}/api/leaderboard`, {
+    await apiFetch("/api/leaderboard", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

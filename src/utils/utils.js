@@ -83,6 +83,9 @@ export function deepMerge(base, src) {
     const s = src[key];
     if (b && s && typeof b === "object" && typeof s === "object" && !Array.isArray(b) && !Array.isArray(s)) {
       out[key] = deepMerge(b, s);
+    } else if (typeof s === "number" && !Number.isFinite(s)) {
+      // Reject NaN/Infinity from corrupted or hostile saves — keep the base value.
+      if (b !== undefined) out[key] = b;
     } else {
       out[key] = s;
     }

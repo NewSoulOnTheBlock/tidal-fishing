@@ -1,7 +1,7 @@
 // Database API client for Tidal Fishing
 // Handles player authentication, state persistence, and leaderboards
 
-const API_URL = import.meta.env.VITE_API_SERVER_URL || 'https://tidal-fishing.onrender.com';
+import { apiFetch } from '../utils/api.js';
 
 /**
  * Authenticate player with wallet address
@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_SERVER_URL || 'https://tidal-fishing.on
  */
 export async function authenticatePlayer(walletAddress) {
   try {
-    const res = await fetch(`${API_URL}/api/player/auth`, {
+    const res = await apiFetch('/api/player/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ walletAddress }),
@@ -48,7 +48,7 @@ export async function savePlayerState(playerState = {}) {
   } = playerState;
 
   try {
-    const res = await fetch(`${API_URL}/api/player/save`, {
+    const res = await apiFetch('/api/player/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -102,7 +102,7 @@ export async function recordCatch(catchInfo = {}) {
   } = catchInfo;
 
   try {
-    const res = await fetch(`${API_URL}/api/player/catch`, {
+    const res = await apiFetch('/api/player/catch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -137,7 +137,7 @@ export async function recordCatch(catchInfo = {}) {
  */
 export async function getLeaderboard() {
   try {
-    const res = await fetch(`${API_URL}/api/leaderboard`);
+    const res = await apiFetch('/api/leaderboard');
     
     if (!res.ok) {
       const error = await res.json();
@@ -157,7 +157,7 @@ export async function getLeaderboard() {
  */
 export async function getPlayerStats(walletAddress) {
   try {
-    const res = await fetch(`${API_URL}/api/player/stats/${walletAddress}`);
+    const res = await apiFetch(`/api/player/stats/${walletAddress}`);
     
     if (!res.ok) {
       const error = await res.json();
@@ -177,7 +177,7 @@ export async function getPlayerStats(walletAddress) {
  */
 export async function getPlayerJournal(walletAddress) {
   try {
-    const res = await fetch(`${API_URL}/api/player/journal/${walletAddress}`);
+    const res = await apiFetch(`/api/player/journal/${walletAddress}`);
     
     if (!res.ok) {
       const error = await res.json();
@@ -198,7 +198,7 @@ export async function getPlayerJournal(walletAddress) {
  */
 export async function updateProfile(walletAddress, updates) {
   try {
-    const res = await fetch(`${API_URL}/api/player/profile`, {
+    const res = await apiFetch('/api/player/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -225,7 +225,7 @@ export async function updateProfile(walletAddress, updates) {
  */
 export async function getPlayerProfile(walletAddress) {
   try {
-    const res = await fetch(`${API_URL}/api/player/profile/${walletAddress}`);
+    const res = await apiFetch(`/api/player/profile/${walletAddress}`);
     
     if (!res.ok) {
       const error = await res.json();

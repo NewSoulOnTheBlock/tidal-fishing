@@ -14,30 +14,9 @@ import {
   ComputeBudgetProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { connection, TIDE_MINT, TIDE_TREASURY } from "./solana.js";
+import { connection, TIDE_MINT, TIDE_TREASURY, base58Encode } from "./solana.js";
 import { signAndSendTransaction, currentPublicKey, signTransaction } from "./wallet.js";
 import { fetchSplBalance } from "./token.js";
-
-// Base58 encoding for signatures
-const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-function base58Encode(bytes) {
-  const alphabet = BASE58_ALPHABET;
-  let num = 0n;
-  for (const byte of bytes) {
-    num = num * 256n + BigInt(byte);
-  }
-  if (num === 0n) return alphabet[0];
-  let result = '';
-  while (num > 0n) {
-    result = alphabet[Number(num % 58n)] + result;
-    num = num / 58n;
-  }
-  for (const byte of bytes) {
-    if (byte !== 0) break;
-    result = alphabet[0] + result;
-  }
-  return result;
-}
 
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const TOKEN_2022_PROGRAM_ID = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");

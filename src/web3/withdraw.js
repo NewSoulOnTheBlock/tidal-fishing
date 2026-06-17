@@ -6,6 +6,7 @@
 
 import { TIDE_MINT } from "./solana.js";
 import { currentPublicKey, signMessage } from "./wallet.js";
+import { apiFetch } from "../utils/api.js";
 
 /** True when the client has enough config to even attempt a withdrawal. */
 export function isWithdrawConfigured() {
@@ -32,8 +33,6 @@ export async function withdrawTide(amount) {
   if (!recipient) throw new Error("Wallet not connected");
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
 
-  // Use Render API server (deployed separately from Vercel)
-  const API_URL = import.meta.env.VITE_API_URL || "https://tidal-fishing.onrender.com";
   const recipientStr = recipient.toBase58();
 
   // Build the authorization message the wallet will display + sign.
@@ -54,10 +53,13 @@ export async function withdrawTide(amount) {
     throw new Error(e?.message?.includes("reject") ? "Withdrawal signature declined" : "Could not sign withdrawal authorization");
   }
 
-  const res = await fetch(`${API_URL}/api/withdraw`, {
+  // 60s timeout: the server signs AND confirms the on-chain transfer before
+  // responding, so allow generous time but never hang the UI forever.
+  const res = await apiFetch("/api/withdraw", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ recipient: recipientStr, amount, message, signature }),
+    timeoutMs: 60000,
   });
   let body;
   try {

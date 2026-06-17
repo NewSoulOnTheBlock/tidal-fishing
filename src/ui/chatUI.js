@@ -5,10 +5,7 @@
 import { S, events } from "../state/gameState.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { shortAddress } from "../web3/solana.js";
-
-const API_BASE = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://tidal-fishing.onrender.com";
+import { apiFetch } from "../utils/api.js";
 
 const POLL_MS = 4000;
 const MAX_RENDER = 80;
@@ -55,7 +52,37 @@ export class ChatUI {
 
     this.maybeRefreshFooter();
     this.fetchInitial();
+    this.startPolling();
+
+    // Pause polling while the tab is hidden to avoid needless network churn,
+    // and tear everything down cleanly if the page is going away.
+    this._onVisibility = () => {
+      if (document.hidden) this.stopPolling();
+      else this.startPolling();
+    };
+    document.addEventListener("visibilitychange", this._onVisibility);
+    this._onPageHide = () => this.unmount();
+    window.addEventListener("pagehide", this._onPageHide);
+  }
+
+  startPolling() {
+    if (this.pollTimer) return;
     this.pollTimer = setInterval(() => this.poll(), POLL_MS);
+  }
+
+  stopPolling() {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
+  }
+
+  unmount() {
+    this.stopPolling();
+    if (this._onVisibility) document.removeEventListener("visibilitychange", this._onVisibility);
+    if (this._onPageHide) window.removeEventListener("pagehide", this._onPageHide);
+    this.root?.remove();
+    this.root = null;
   }
 
   toggle() {
@@ -67,7 +94,7 @@ export class ChatUI {
 
   async fetchInitial() {
     try {
-      const res = await fetch(`${API_BASE}/api/chat?limit=60`);
+      const res = await apiFetch("/api/chat?limit=60");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       const msgs = data.messages || [];
@@ -87,7 +114,7 @@ export class ChatUI {
     this.maybeRefreshFooter();
     if (!this.lastId) return this.fetchInitial();
     try {
-      const res = await fetch(`${API_BASE}/api/chat?since=${this.lastId}&limit=100`);
+      const res = await apiFetch(`/api/chat?since=${this.lastId}&limit=100`);
       if (!res.ok) return;
       const data = await res.json();
       const msgs = data.messages || [];
@@ -173,7 +200,7 @@ export class ChatUI {
     this.sending = true;
     input.disabled = true;
     try {
-      const res = await fetch(`${API_BASE}/api/chat`, {
+      const res = await apiFetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ walletAddress: pk, username: name, message: text }),
