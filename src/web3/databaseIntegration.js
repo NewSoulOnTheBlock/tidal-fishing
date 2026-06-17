@@ -3,7 +3,7 @@
 
 import { authenticatePlayer, savePlayerState, recordCatch } from "./database.js";
 import { currentPublicKey } from "./wallet.js";
-import { establishSession, clearSession } from "./session.js";
+import { establishSession, clearSession, getSessionToken } from "./session.js";
 import { S, events } from "../state/gameState.js";
 import { saveGame } from "../state/saveLoad.js";
 
@@ -11,6 +11,28 @@ let autoSaveInterval = null;
 let isAuthenticated = false;
 let isSyncing = false;
 let lastSyncTime = 0;
+let sessionPromptWallet = null;
+
+/**
+ * Kick off the one-time Sign-In With Solana signature for this wallet. Shows a
+ * single explanatory toast (once per wallet) so the signature prompt isn't a
+ * surprise. Fire-and-forget — never blocks the connect flow or gameplay.
+ */
+function ensureSession(walletAddress) {
+  if (getSessionToken()) return;
+  if (sessionPromptWallet !== walletAddress) {
+    sessionPromptWallet = walletAddress;
+    events.emit("toast", {
+      msg: "✍️ Approve the signature to enable chat & cloud save",
+      kind: "info",
+    });
+  }
+  establishSession().then((ok) => {
+    if (ok) {
+      events.emit("toast", { msg: "✅ Signed in — chat & cloud save active", kind: "success" });
+    }
+  }).catch(() => { /* user dismissed; will retry on next explicit action */ });
+}
 
 /**
  * Authenticate player on wallet connect and start auto-save
@@ -25,6 +47,12 @@ export async function onWalletConnect() {
   const walletAddress = publicKey.toString();
   console.log("[db] Authenticating player:", walletAddress);
 
+  // Sign-In With Solana: prompt for the session signature RIGHT NOW, while the
+  // user is in the "just connected" context. Fired independently of (and before)
+  // the DB authenticate call below, which can cold-start or fail — a slow/empty
+  // database must never suppress or delay the sign-in prompt.
+  ensureSession(walletAddress);
+
   // Authenticate player (creates if new). The endpoint returns { player }.
   const authResult = await authenticatePlayer(walletAddress);
   const player = authResult?.player || authResult;
@@ -35,10 +63,6 @@ export async function onWalletConnect() {
 
   isAuthenticated = true;
   console.log("[db] ✅ Player authenticated:", player);
-
-  // Sign-In With Solana: prompt once for a session token so the write
-  // endpoints can verify wallet ownership. Done before any save/sync below.
-  await establishSession();
 
   // Emit toast notification (hud's toast listener expects { msg, kind }).
   events.emit("toast", {
@@ -77,6 +101,7 @@ export async function onWalletConnect() {
 export function onWalletDisconnect() {
   stopAutoSave();
   isAuthenticated = false;
+  sessionPromptWallet = null;
   clearSession();
   console.log("[db] Wallet disconnected, auto-save stopped");
 }

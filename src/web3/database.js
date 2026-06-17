@@ -51,6 +51,7 @@ export async function savePlayerState(playerState = {}) {
     const res = await apiFetch('/api/player/save', {
       method: 'POST',
       auth: true,
+      interactive: false,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         walletAddress,
@@ -106,6 +107,7 @@ export async function recordCatch(catchInfo = {}) {
     const res = await apiFetch('/api/player/catch', {
       method: 'POST',
       auth: true,
+      interactive: false,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         walletAddress,

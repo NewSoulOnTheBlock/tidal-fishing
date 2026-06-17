@@ -174,7 +174,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET ||
 // Default to enforcing; set SESSION_ENFORCE=false only as an emergency escape hatch.
 const SESSION_ENFORCE = String(process.env.SESSION_ENFORCE ?? 'true').toLowerCase() !== 'false';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-const SIWS_MAX_AGE_MS = 5 * 60 * 1000;      // signed login message must be <5min old
+const SIWS_MAX_AGE_MS = 15 * 60 * 1000;     // signed login message freshness window (generous to absorb client clock skew)
 
 function base64url(buf) {
   return Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

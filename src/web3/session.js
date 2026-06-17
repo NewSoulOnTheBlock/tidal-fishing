@@ -18,7 +18,7 @@ let _exp = 0;
 let _wallet = null;
 let _inflight = null;
 let _lastAttempt = 0;
-const ATTEMPT_COOLDOWN_MS = 20_000;
+const ATTEMPT_COOLDOWN_MS = 8_000;
 
 function toBase64(bytes) {
   let bin = "";

@@ -37,12 +37,18 @@ export function setAuthHooks({ getToken, reauth } = {}) {
  * game's network calls forever. Accepts a path (joined to API_BASE) or a full
  * URL. Options:
  *   - timeoutMs (default 12s)
- *   - auth: true  → for write calls; transparently re-establishes a SIWS
- *                   session and retries once if the server reports it expired.
+ *   - auth: true   → attach the SIWS bearer token (when present).
+ *   - interactive  → when a write 401s with an expired/missing session AND this
+ *                    is true (default), transparently re-establish a session
+ *                    (which may prompt the wallet to sign) and retry once.
+ *                    Background writes (autosave, catch logging) pass
+ *                    interactive:false so they NEVER trigger a surprise
+ *                    signature popup mid-gameplay — they just use an existing
+ *                    token or fail quietly until the next explicit user action.
  * A session bearer token (when present) is always attached. Behaves like fetch
  * otherwise.
  */
-export async function apiFetch(path, { timeoutMs = 12000, auth = false, _retried = false, ...options } = {}) {
+export async function apiFetch(path, { timeoutMs = 12000, auth = false, interactive = true, _retried = false, ...options } = {}) {
   const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path}`;
   const headers = { ...(options.headers || {}) };
   const token = _getToken?.();
@@ -53,12 +59,12 @@ export async function apiFetch(path, { timeoutMs = 12000, auth = false, _retried
   try {
     const res = await fetch(url, { ...options, headers, signal: controller.signal });
 
-    if (auth && res.status === 401 && !_retried && _reauth) {
+    if (auth && interactive && res.status === 401 && !_retried && _reauth) {
       let code;
       try { code = (await res.clone().json())?.code; } catch { /* ignore */ }
       if (code === 'SESSION_REQUIRED' || code === 'SESSION_INVALID') {
         const ok = await _reauth();
-        if (ok) return apiFetch(path, { timeoutMs, auth, _retried: true, ...options });
+        if (ok) return apiFetch(path, { timeoutMs, auth, interactive, _retried: true, ...options });
       }
     }
     return res;
