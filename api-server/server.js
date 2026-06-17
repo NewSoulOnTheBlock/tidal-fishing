@@ -11,6 +11,9 @@ import {
   clusterApiUrl,
 } from '@solana/web3.js';
 import bs58 from 'bs58';
+import nacl from 'tweetnacl';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import pg from 'pg';
 import dotenv from 'dotenv';
 
@@ -20,6 +23,10 @@ const { Pool } = pg;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Render runs the app behind a single reverse proxy; trust it so req.ip and
+// X-Forwarded-For reflect the real client (needed for rate limiting + IP bans).
+app.set('trust proxy', 1);
 
 // Database connection
 const pool = new Pool({
@@ -77,12 +84,29 @@ async function initDatabase() {
       created_at TIMESTAMP DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_chat_created ON chat_messages(id DESC);
+    CREATE TABLE IF NOT EXISTS withdrawals (
+      id SERIAL PRIMARY KEY,
+      wallet_address VARCHAR(44) NOT NULL,
+      amount BIGINT NOT NULL,
+      nonce VARCHAR(80) UNIQUE NOT NULL,
+      tx_signature VARCHAR(120),
+      status VARCHAR(20) DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_withdrawals_wallet ON withdrawals(wallet_address, created_at DESC);
   `;
   try {
     await pool.query(ddl);
     console.log('✅ Ban-system tables ready');
   } catch (err) {
     console.error('❌ Failed to initialize ban-system tables:', err);
+  }
+  // Withdrawable-balance ledger column. Run separately so a failure here
+  // (e.g. players table not yet migrated) doesn't block the tables above.
+  try {
+    await pool.query('ALTER TABLE players ADD COLUMN IF NOT EXISTS total_withdrawn BIGINT DEFAULT 0');
+  } catch (err) {
+    console.error('❌ Failed to add total_withdrawn column:', err.message);
   }
 }
 initDatabase();
@@ -103,10 +127,33 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xW
 // Middleware
 app.use(cors({
   origin: CORS_ORIGIN,
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
   credentials: true,
 }));
-app.use(express.json());
+// Security headers. CSP disabled (this is a JSON API) and CORP relaxed so the
+// off-origin Windows Widgets board can still read /api/widget.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+app.use(express.json({ limit: '64kb' }));
+
+// --- Rate limiters (per-IP; trust proxy is enabled above) ---
+const withdrawLimiter = rateLimit({
+  windowMs: 60_000, max: 5,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many withdrawal attempts. Wait a minute and try again.' },
+});
+const adminLimiter = rateLimit({
+  windowMs: 60_000, max: 10,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many admin requests.' },
+});
+const writeLimiter = rateLimit({
+  windowMs: 60_000, max: 90,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many requests. Slow down.' },
+});
 
 // IP extraction helper
 function getClientIP(req) {
@@ -291,18 +338,21 @@ app.get('/api/treasury/balance', async (req, res) => {
   }
 });
 
-// Withdraw endpoint
-app.post('/api/withdraw', async (req, res) => {
+// Withdraw endpoint.
+// Hardened: the caller must prove ownership of `recipient` with a wallet
+// signature over a time-bound, single-use message, the amount is gated against
+// the server-recorded withdrawable balance (total_earned - total_withdrawn),
+// and the nonce is consumed atomically to prevent replay / double-spend.
+app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
   try {
-    // Validation
     if (!treasuryKeypair || !TIDE_MINT_STR) {
       return res.status(503).json({
         error: 'Withdrawals not configured: treasury key or mint missing',
       });
     }
 
-    const { recipient, amount } = req.body;
-    
+    const { recipient, amount, message, signature } = req.body;
+
     if (typeof recipient !== 'string' || !recipient) {
       return res.status(400).json({ error: 'recipient (string) required' });
     }
@@ -312,6 +362,9 @@ app.post('/api/withdraw', async (req, res) => {
     if (amount > MAX_UI_AMOUNT) {
       return res.status(400).json({ error: `amount exceeds per-call cap of ${MAX_UI_AMOUNT}` });
     }
+    if (typeof message !== 'string' || typeof signature !== 'string') {
+      return res.status(401).json({ error: 'Signed authorization required' });
+    }
 
     let recipientPk;
     try {
@@ -320,67 +373,142 @@ app.post('/api/withdraw', async (req, res) => {
       return res.status(400).json({ error: 'Invalid recipient address' });
     }
 
-    const mintPk = new PublicKey(TIDE_MINT_STR);
-    const rawAmount = BigInt(Math.round(amount * 10 ** TIDE_DECIMALS));
+    // Reject banned wallets — checkBans only inspects req.body.walletAddress,
+    // but withdrawals key off `recipient`, so check it explicitly here.
+    const bannedRow = await pool.query('SELECT reason FROM banned_wallets WHERE wallet_address = $1', [recipient]);
+    if (bannedRow.rows.length > 0) {
+      return res.status(403).json({ error: 'Account suspended', reason: bannedRow.rows[0].reason || 'This wallet has been banned' });
+    }
 
-    // Detect token program from the mint
-    const tokenProgram = await detectTokenProgram(mintPk);
-    
-    const source = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey, tokenProgram);
-    const dest = await getAssociatedTokenAddress(mintPk, recipientPk, tokenProgram);
-
-    // Build transaction
-    const ixs = [];
-    ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 150_000 }));
-
-    // Check treasury balance
-    let sourceBalance = 0n;
+    // --- Verify the wallet signature over the authorization message ---
+    let sigBytes;
     try {
-      const acc = await connection.getTokenAccountBalance(source.address);
-      sourceBalance = BigInt(acc.value.amount);
-    } catch (error) {
-      return res.status(500).json({ error: 'Treasury has no $TIDE token account' });
+      sigBytes = Buffer.from(signature, 'base64');
+    } catch {
+      return res.status(401).json({ error: 'Malformed signature' });
     }
-
-    if (sourceBalance < rawAmount) {
-      return res.status(503).json({
-        error: `Treasury balance too low (have ${Number(sourceBalance) / 10 ** TIDE_DECIMALS}, need ${amount})`,
-      });
+    if (sigBytes.length !== 64) {
+      return res.status(401).json({ error: 'Invalid signature' });
     }
-
-    // Create recipient ATA if needed
-    const destInfo = await connection.getAccountInfo(dest.address);
-    if (!destInfo) {
-      ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, dest.address, recipientPk, mintPk, tokenProgram));
-    }
-
-    // Add transfer instruction
-    ixs.push(createTransferIx(source.address, dest.address, treasuryKeypair.publicKey, rawAmount, tokenProgram));
-
-    // Create and sign transaction
-    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
-    const tx = new Transaction({
-      feePayer: treasuryKeypair.publicKey,
-      blockhash,
-      lastValidBlockHeight,
-    });
-    tx.add(...ixs);
-    tx.sign(treasuryKeypair);
-
-    // Send and confirm
-    const signature = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 3 });
-    await connection.confirmTransaction(
-      { signature, blockhash, lastValidBlockHeight },
-      'confirmed'
+    const verified = nacl.sign.detached.verify(
+      new Uint8Array(Buffer.from(message, 'utf8')),
+      new Uint8Array(sigBytes),
+      recipientPk.toBytes()
     );
+    if (!verified) {
+      return res.status(401).json({ error: 'Signature verification failed' });
+    }
 
-    console.log('[withdraw] Success:', signature, 'recipient:', recipient, 'amount:', amount);
+    // --- The signed message must bind to THIS request (wallet, amount, freshness) ---
+    const fields = {};
+    for (const line of message.split('\n')) {
+      const idx = line.indexOf(':');
+      if (idx > 0) fields[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+    }
+    if (fields.wallet !== recipient) {
+      return res.status(401).json({ error: 'Signed wallet does not match recipient' });
+    }
+    const signedAmount = parseFloat(String(fields.amount));
+    if (!Number.isFinite(signedAmount) || Math.abs(signedAmount - amount) > 1e-6) {
+      return res.status(401).json({ error: 'Signed amount does not match request' });
+    }
+    const issued = Number(fields.issued);
+    if (!Number.isFinite(issued) || Math.abs(Date.now() - issued) > 120000) {
+      return res.status(401).json({ error: 'Authorization expired — please try again' });
+    }
+    const nonce = String(fields.nonce || '').slice(0, 80);
+    if (!nonce) {
+      return res.status(401).json({ error: 'Missing authorization nonce' });
+    }
+
+    const intAmount = Math.round(amount);
+
+    // --- Idempotency: claim the nonce before touching the chain. UNIQUE
+    //     constraint makes a replayed request fail here. ---
+    try {
+      await pool.query(
+        `INSERT INTO withdrawals (wallet_address, amount, nonce, status) VALUES ($1, $2, $3, 'pending')`,
+        [recipient, intAmount, nonce]
+      );
+    } catch (e) {
+      if (e.code === '23505') {
+        return res.status(409).json({ error: 'This withdrawal was already submitted' });
+      }
+      throw e;
+    }
+
+    // --- Atomically reserve the withdrawable balance (prevents concurrent
+    //     double-spend). Only succeeds if earned-minus-withdrawn covers it. ---
+    const reserve = await pool.query(
+      `UPDATE players
+         SET total_withdrawn = total_withdrawn + $2
+       WHERE wallet_address = $1
+         AND (total_earned - total_withdrawn) >= $2
+       RETURNING total_withdrawn, total_earned`,
+      [recipient, intAmount]
+    );
+    if (reserve.rows.length === 0) {
+      await pool.query(`UPDATE withdrawals SET status = 'rejected' WHERE nonce = $1`, [nonce]);
+      const p = await pool.query('SELECT total_earned, total_withdrawn FROM players WHERE wallet_address = $1', [recipient]);
+      const avail = p.rows.length ? Math.max(0, Number(p.rows[0].total_earned) - Number(p.rows[0].total_withdrawn)) : 0;
+      return res.status(400).json({ error: `Insufficient earned balance. You can withdraw up to ${avail} $TIDE.`, withdrawable: avail });
+    }
+
+    // --- Build, sign and send the on-chain transfer ---
+    let txSig;
+    try {
+      const mintPk = new PublicKey(TIDE_MINT_STR);
+      const rawAmount = BigInt(Math.round(amount * 10 ** TIDE_DECIMALS));
+      const tokenProgram = await detectTokenProgram(mintPk);
+      const source = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey, tokenProgram);
+      const dest = await getAssociatedTokenAddress(mintPk, recipientPk, tokenProgram);
+
+      const ixs = [];
+      ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 150_000 }));
+
+      let sourceBalance = 0n;
+      try {
+        const acc = await connection.getTokenAccountBalance(source.address);
+        sourceBalance = BigInt(acc.value.amount);
+      } catch {
+        throw new Error('Treasury has no $TIDE token account');
+      }
+      if (sourceBalance < rawAmount) {
+        throw new Error(`Treasury balance too low (have ${Number(sourceBalance) / 10 ** TIDE_DECIMALS}, need ${amount})`);
+      }
+
+      const destInfo = await connection.getAccountInfo(dest.address);
+      if (!destInfo) {
+        ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, dest.address, recipientPk, mintPk, tokenProgram));
+      }
+      ixs.push(createTransferIx(source.address, dest.address, treasuryKeypair.publicKey, rawAmount, tokenProgram));
+
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+      const tx = new Transaction({ feePayer: treasuryKeypair.publicKey, blockhash, lastValidBlockHeight });
+      tx.add(...ixs);
+      tx.sign(treasuryKeypair);
+
+      txSig = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 3 });
+      await connection.confirmTransaction({ signature: txSig, blockhash, lastValidBlockHeight }, 'confirmed');
+    } catch (txErr) {
+      // Refund the reserved ledger amount and mark the attempt failed.
+      await pool.query(
+        `UPDATE players SET total_withdrawn = GREATEST(0, total_withdrawn - $2) WHERE wallet_address = $1`,
+        [recipient, intAmount]
+      );
+      await pool.query(`UPDATE withdrawals SET status = 'failed' WHERE nonce = $1`, [nonce]);
+      console.error('[withdraw] Transaction failed:', txErr);
+      return res.status(502).json({ error: txErr.message || 'Transaction failed' });
+    }
+
+    await pool.query(`UPDATE withdrawals SET status = 'sent', tx_signature = $2 WHERE nonce = $1`, [nonce, txSig]);
+    console.log('[withdraw] Success:', txSig, 'recipient:', recipient, 'amount:', amount);
 
     res.json({
-      signature,
+      signature: txSig,
       recipient,
       amount,
-      explorerUrl: `https://solscan.io/tx/${signature}`,
+      explorerUrl: `https://solscan.io/tx/${txSig}`,
     });
   } catch (error) {
     console.error('[withdraw] Error:', error);

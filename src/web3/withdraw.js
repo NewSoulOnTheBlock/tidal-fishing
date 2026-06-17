@@ -5,15 +5,26 @@
 // This wallet holds $TIDE reserves that users can withdraw to their connected wallets.
 
 import { TIDE_MINT } from "./solana.js";
-import { currentPublicKey } from "./wallet.js";
+import { currentPublicKey, signMessage } from "./wallet.js";
 
 /** True when the client has enough config to even attempt a withdrawal. */
 export function isWithdrawConfigured() {
   return Boolean(TIDE_MINT && currentPublicKey());
 }
 
+/** Base64-encode a small byte array (signatures are 64 bytes). */
+function toBase64(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
 /**
  * Withdraw `amount` $TIDE from the Tidal treasury to the connected wallet.
+ *
+ * The server requires a wallet signature proving ownership of the recipient
+ * address. We build a short, human-readable, single-use authorization message,
+ * ask the wallet to sign it, and send the signature alongside the request.
  * Returns the tx signature on success.
  */
 export async function withdrawTide(amount) {
@@ -23,11 +34,30 @@ export async function withdrawTide(amount) {
 
   // Use Render API server (deployed separately from Vercel)
   const API_URL = import.meta.env.VITE_API_URL || "https://tidal-fishing.onrender.com";
+  const recipientStr = recipient.toBase58();
+
+  // Build the authorization message the wallet will display + sign.
+  const nonce = (crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const issued = Date.now();
+  const message =
+    `Tidal Fishing withdrawal\n` +
+    `wallet: ${recipientStr}\n` +
+    `amount: ${amount}\n` +
+    `nonce: ${nonce}\n` +
+    `issued: ${issued}`;
+
+  let signature;
+  try {
+    const sigBytes = await signMessage(new TextEncoder().encode(message));
+    signature = toBase64(sigBytes);
+  } catch (e) {
+    throw new Error(e?.message?.includes("reject") ? "Withdrawal signature declined" : "Could not sign withdrawal authorization");
+  }
 
   const res = await fetch(`${API_URL}/api/withdraw`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recipient: recipient.toBase58(), amount }),
+    body: JSON.stringify({ recipient: recipientStr, amount, message, signature }),
   });
   let body;
   try {
