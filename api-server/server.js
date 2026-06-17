@@ -59,27 +59,26 @@ try {
 const connection = new Connection(RPC_URL, 'confirmed');
 
 // Helper functions
-async function getAssociatedTokenAddress(mint, owner) {
-  // Try both Token programs (classic SPL Token and Token-2022)
-  const [classicAta] = PublicKey.findProgramAddressSync(
-    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
-    ASSOCIATED_TOKEN_PROGRAM_ID
-  );
-  const [token2022Ata] = PublicKey.findProgramAddressSync(
-    [owner.toBuffer(), TOKEN_2022_PROGRAM_ID.toBuffer(), mint.toBuffer()],
-    ASSOCIATED_TOKEN_PROGRAM_ID
-  );
-  
-  // Check which one exists
-  const [classicInfo, t2022Info] = await Promise.all([
-    connection.getAccountInfo(classicAta),
-    connection.getAccountInfo(token2022Ata),
-  ]);
-  
-  if (t2022Info) {
-    return { address: token2022Ata, programId: TOKEN_2022_PROGRAM_ID };
+async function detectTokenProgram(mint) {
+  // Check the mint account to determine if it's Token-2022 or classic
+  const mintInfo = await connection.getAccountInfo(mint);
+  if (!mintInfo) {
+    throw new Error('Mint account not found');
   }
-  return { address: classicAta, programId: TOKEN_PROGRAM_ID };
+  // Token-2022 mints are owned by the Token-2022 program
+  if (mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
+    return TOKEN_2022_PROGRAM_ID;
+  }
+  return TOKEN_PROGRAM_ID;
+}
+
+async function getAssociatedTokenAddress(mint, owner, tokenProgram) {
+  // Derive ATA using the correct token program
+  const [ata] = PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), tokenProgram.toBuffer(), mint.toBuffer()],
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  );
+  return { address: ata, programId: tokenProgram };
 }
 
 function createAssociatedTokenAccountIx(payer, ata, owner, mint, tokenProgram) {
@@ -133,7 +132,8 @@ app.get('/api/treasury/balance', async (req, res) => {
     }
 
     const mintPk = new PublicKey(TIDE_MINT_STR);
-    const { address: ata } = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey);
+    const tokenProgram = await detectTokenProgram(mintPk);
+    const { address: ata } = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey, tokenProgram);
     
     const balance = await connection.getTokenAccountBalance(ata);
     
@@ -185,8 +185,11 @@ app.post('/api/withdraw', async (req, res) => {
     const mintPk = new PublicKey(TIDE_MINT_STR);
     const rawAmount = BigInt(Math.round(amount * 10 ** TIDE_DECIMALS));
 
-    const source = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey);
-    const dest = await getAssociatedTokenAddress(mintPk, recipientPk);
+    // Detect token program from the mint
+    const tokenProgram = await detectTokenProgram(mintPk);
+    
+    const source = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey, tokenProgram);
+    const dest = await getAssociatedTokenAddress(mintPk, recipientPk, tokenProgram);
 
     // Build transaction
     const ixs = [];
@@ -210,11 +213,11 @@ app.post('/api/withdraw', async (req, res) => {
     // Create recipient ATA if needed
     const destInfo = await connection.getAccountInfo(dest.address);
     if (!destInfo) {
-      ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, dest.address, recipientPk, mintPk, dest.programId));
+      ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, dest.address, recipientPk, mintPk, tokenProgram));
     }
 
     // Add transfer instruction
-    ixs.push(createTransferIx(source.address, dest.address, treasuryKeypair.publicKey, rawAmount, source.programId));
+    ixs.push(createTransferIx(source.address, dest.address, treasuryKeypair.publicKey, rawAmount, tokenProgram));
 
     // Create and sign transaction
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
