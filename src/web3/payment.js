@@ -1,13 +1,12 @@
-// On-chain $TIDE payment helpers — BURN MODEL.
+// On-chain $TIDE payment helpers — TREASURY TRANSFER MODEL.
 //
-// Phase 2 wiring: when the player has a wallet connected AND VITE_TIDE_MINT is
-// set, every gear / location purchase BURNS the $TIDE amount from the player's
-// own ATA. No treasury account is needed — purchases are deflationary, removing
-// supply on every spend.
+// When the player has a wallet connected AND VITE_TIDE_MINT is set, every gear
+// / location purchase TRANSFERS the $TIDE amount from the player's ATA to the
+// treasury wallet. This creates a circular economy: players earn $TIDE, spend
+// it to unlock gear/maps, and the treasury recycles it for future payouts.
 //
-// Until the token is deployed (Phase 3), TIDE_MINT will be null and the UI
-// branches that depend on `isOnChainPayEnabled()` stay hidden — so this module
-// is a no-op in production today.
+// Until the token is deployed, TIDE_MINT will be null and the UI branches that
+// depend on `isOnChainPayEnabled()` stay hidden — so this module is a no-op.
 
 import {
   PublicKey,
@@ -15,7 +14,7 @@ import {
   ComputeBudgetProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { connection, TIDE_MINT } from "./solana.js";
+import { connection, TIDE_MINT, TIDE_TREASURY } from "./solana.js";
 import { signAndSendTransaction, currentPublicKey, signTransaction } from "./wallet.js";
 import { fetchSplBalance } from "./token.js";
 
@@ -54,29 +53,31 @@ export function isOnChainPayEnabled() {
 export function paymentConfig() {
   return {
     mint: TIDE_MINT?.toBase58() ?? null,
-    model: "burn",
+    model: "transfer_to_treasury",
+    treasury: TIDE_TREASURY?.toBase58() ?? null,
     decimals: TIDE_DECIMALS,
     enabled: isOnChainPayEnabled(),
   };
 }
 
 /**
- * Burn `uiAmount` of on-chain $TIDE from the connected wallet's ATA. Returns
- * the tx signature on success.
+ * Transfer `uiAmount` of on-chain $TIDE from the connected wallet to the
+ * treasury wallet. Returns the tx signature on success.
  *
  * `uiAmount` is the human-facing $TIDE figure (e.g. 9000). It's converted to
- * raw token units using `VITE_TIDE_DECIMALS` (default 9).
+ * raw token units using `VITE_TIDE_DECIMALS` (default 6).
  *
- * The burn permanently reduces the $TIDE supply — purchases are deflationary.
+ * The transfer creates a circular economy: players earn $TIDE from fishing,
+ * spend it to unlock gear/maps, and the treasury recycles it for future payouts.
  * A memo instruction is attached so block explorers display the purchase
  * reason (`tidal:gear:rods:2`, `tidal:loc:river`, etc.).
- *
- * Note: this targets the original SPL Token program (Tokenkeg…). For a
- * Token-2022 mint, swap the program id + ATA derivation.
  */
 export async function payTide(uiAmount, { memo } = {}) {
   if (!isOnChainPayEnabled()) {
     throw new Error("On-chain $TIDE payment is not configured");
+  }
+  if (!TIDE_TREASURY) {
+    throw new Error("Treasury wallet not configured");
   }
   const payer = currentPublicKey();
   if (!payer) throw new Error("Wallet not connected");
@@ -88,10 +89,11 @@ export async function payTide(uiAmount, { memo } = {}) {
   }
 
   const { address: playerAta, programId: tokenProgram } = await getAssociatedTokenAddress(TIDE_MINT, payer);
+  const { address: treasuryAta } = await getAssociatedTokenAddress(TIDE_MINT, TIDE_TREASURY);
 
   const ixs = [];
-  ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }));
-  ixs.push(createBurnIx(playerAta, TIDE_MINT, payer, rawAmount, tokenProgram));
+  ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 100_000 }));
+  ixs.push(createTransferIx(playerAta, treasuryAta, payer, rawAmount, tokenProgram));
   if (memo) {
     ixs.push(buildMemoIx(memo));
   }
@@ -150,22 +152,22 @@ async function getAssociatedTokenAddress(mint, owner) {
   return { address: classicAta, programId: TOKEN_PROGRAM_ID };
 }
 
-function createBurnIx(account, mint, owner, amount, tokenProgram) {
-  // SPL Token instruction 8 = Burn { amount: u64 }
+function createTransferIx(fromAccount, toAccount, owner, amount, tokenProgram) {
+  // SPL Token instruction 3 = Transfer { amount: u64 }
   //   Accounts:
-  //     0. [writable] Token account to burn from
-  //     1. [writable] Mint
-  //     2. [signer]   Owner of the token account
+  //     0. [writable] Source token account
+  //     1. [writable] Destination token account
+  //     2. [signer]   Owner of the source account
   const data = new Uint8Array(9);
-  data[0] = 8; // Burn instruction
+  data[0] = 3; // Transfer instruction
   // Write amount as little-endian u64
   const view = new DataView(data.buffer);
   view.setBigUint64(1, amount, true); // true = little-endian
   return new TransactionInstruction({
     programId: tokenProgram,
     keys: [
-      { pubkey: account, isSigner: false, isWritable: true },
-      { pubkey: mint, isSigner: false, isWritable: true },
+      { pubkey: fromAccount, isSigner: false, isWritable: true },
+      { pubkey: toAccount, isSigner: false, isWritable: true },
       { pubkey: owner, isSigner: true, isWritable: false },
     ],
     data,
