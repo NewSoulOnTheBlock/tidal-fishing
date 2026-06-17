@@ -2,7 +2,8 @@
 // the feel of the game can be adjusted without touching system code.
 
 export const CONFIG = {
-  saveKey: "tideline_save_v1",
+  saveKey: "tidal_save_v1",
+  legacySaveKey: "tideline_save_v1",
 
   water: { level: 0, size: 4000 },
 
@@ -57,10 +58,10 @@ export const CONFIG = {
   },
 
   economy: {
-    xpBase: 70,
+    xpBase: 700,
     xpPow: 1.4, // xp to next level = round(xpBase * level^xpPow)
     newSpeciesXpMult: 2,
-    startMoney: 25,
+    startMoney: 0,
   },
 
   weather: {
