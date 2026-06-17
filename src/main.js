@@ -33,6 +33,7 @@ import { AchievementsUI } from "./ui/achievementsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
+import { OnboardingUI } from "./ui/onboardingUI.js";
 import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { recordCatchToDB } from "./web3/databaseIntegration.js";
@@ -115,6 +116,10 @@ const weatherUI = new WeatherUI(scene);
 const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
 const tournamentUI = new TournamentUI();
+const onboardingUI = new OnboardingUI();
+
+// First-time wallet sign-in: force the angler-name onboarding flow.
+events.on("onboarding:needed", () => onboardingUI.show());
 
 // Initialize weather and challenges widgets
 weatherUI.init();

@@ -24,8 +24,9 @@ export async function onWalletConnect() {
   const walletAddress = publicKey.toString();
   console.log("[db] Authenticating player:", walletAddress);
 
-  // Authenticate player (creates if new)
-  const player = await authenticatePlayer(walletAddress);
+  // Authenticate player (creates if new). The endpoint returns { player }.
+  const authResult = await authenticatePlayer(walletAddress);
+  const player = authResult?.player || authResult;
   if (!player) {
     console.error("[db] Authentication failed - database may be unavailable");
     return;
@@ -33,25 +34,31 @@ export async function onWalletConnect() {
 
   isAuthenticated = true;
   console.log("[db] ✅ Player authenticated:", player);
-  
-  // Emit toast notification
-  events.emit("toast", { 
-    message: "🗄️ Database connected! Progress will auto-save.", 
-    type: "success" 
+
+  // Emit toast notification (hud's toast listener expects { msg, kind }).
+  events.emit("toast", {
+    msg: "🗄️ Connected! Progress will auto-save.",
+    kind: "success",
   });
+
+  // First-time sign-in: no name chosen yet on the server or locally — force
+  // the onboarding flow so every wallet picks an angler name.
+  if (!player.username && !S.profile.username) {
+    events.emit("onboarding:needed", { walletAddress });
+  }
 
   // If this is first time connecting AND player has local progress,
   // push it to database immediately
-  if (player.level === 1 && player.xp === 0 && S.profile.level > 1) {
+  if ((player.level ?? 1) === 1 && (player.xp ?? 0) === 0 && S.profile.level > 1) {
     console.log("[db] Migrating localStorage progress to database");
     events.emit("toast", {
-      message: "📤 Syncing local progress to cloud...",
-      type: "info"
+      msg: "📤 Syncing local progress to cloud...",
+      kind: "info",
     });
     await syncPlayerState();
     events.emit("toast", {
-      message: "✅ Progress synced! You're all set!",
-      type: "success"
+      msg: "✅ Progress synced! You're all set!",
+      kind: "success",
     });
   }
 

@@ -636,10 +636,48 @@ app.post('/api/player/catch', async (req, res) => {
   }
 });
 
-// 4. Get leaderboard
+// 4. Get leaderboard (top earners, recent catches feed, or per-species bests)
 app.get('/api/leaderboard', async (req, res) => {
+  const { type, species } = req.query;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 100, 100);
+
   try {
-    const result = await pool.query('SELECT * FROM leaderboard LIMIT 100');
+    // Recent catches feed — global, newest first.
+    if (type === 'recent') {
+      const result = await pool.query(
+        `SELECT c.species_id, c.location, c.rarity, c.size_cm, c.weight_kg,
+                c.value, c.perfect_hook, c.caught_at,
+                p.wallet_address, p.username
+         FROM catches c
+         JOIN players p ON c.player_id = p.id
+         ORDER BY c.caught_at DESC
+         LIMIT $1`,
+        [limit]
+      );
+      return res.json({ catches: result.rows });
+    }
+
+    // Biggest catches for a single species.
+    if (type === 'species') {
+      if (!species) {
+        return res.status(400).json({ error: 'species query param is required' });
+      }
+      const result = await pool.query(
+        `SELECT c.species_id, c.location, c.rarity, c.size_cm, c.weight_kg,
+                c.value, c.perfect_hook, c.caught_at,
+                p.wallet_address, p.username
+         FROM catches c
+         JOIN players p ON c.player_id = p.id
+         WHERE c.species_id = $1
+         ORDER BY c.size_cm DESC, c.value DESC
+         LIMIT $2`,
+        [species, limit]
+      );
+      return res.json({ catches: result.rows });
+    }
+
+    // Default: top earners.
+    const result = await pool.query('SELECT * FROM leaderboard LIMIT $1', [limit]);
     res.json({ leaderboard: result.rows });
   } catch (error) {
     console.error('[leaderboard] Error:', error);

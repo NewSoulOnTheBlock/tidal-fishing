@@ -52,15 +52,18 @@ export class LeaderboardUI {
     
     this.panel.addEventListener('click', (e) => {
       if (e.target === this.panel) this.hide();
-      
-      if (e.target.classList.contains('tab-btn')) {
+
+      const tabBtn = e.target.closest('.tab-btn');
+      if (tabBtn) {
         this.panel.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        this.loadTab(e.target.dataset.tab);
+        tabBtn.classList.add('active');
+        this.loadTab(tabBtn.dataset.tab);
+        return;
       }
-      
-      if (e.target.classList.contains('species-btn')) {
-        this.loadSpeciesLeaderboard(e.target.dataset.species);
+
+      const speciesBtn = e.target.closest('.species-btn');
+      if (speciesBtn) {
+        this.loadSpeciesLeaderboard(speciesBtn.dataset.species);
       }
     });
   }
@@ -83,11 +86,12 @@ export class LeaderboardUI {
         }));
         content.innerHTML = this.renderEarnings(entries);
       } else if (tab === "recent") {
-        // Recent catches not implemented yet - show coming soon
-        content.innerHTML = '<div class="empty">Recent catches coming soon!</div>';
+        const response = await fetch(`${API_BASE}/api/leaderboard?type=recent&limit=50`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        content.innerHTML = this.renderRecent(data.catches);
       } else if (tab === "species") {
-        // Species leaderboards not implemented yet
-        content.innerHTML = '<div class="empty">Species leaderboards coming soon!</div>';
+        content.innerHTML = this.renderSpeciesSelector();
       }
     } catch (error) {
       console.error('[leaderboard] Failed to load:', error);
@@ -127,23 +131,25 @@ export class LeaderboardUI {
 
   renderRecent(catches) {
     if (!catches || catches.length === 0) {
-      return '<div class="empty">No recent catches</div>';
+      return '<div class="empty">No catches recorded yet. Cast a line to be the first!</div>';
     }
 
     return `
       <div class="recent-feed">
         ${catches.map(c => {
-          const species = FISH_BY_ID[c.species];
+          const species = FISH_BY_ID[c.species_id];
+          const who = c.username ? this.esc(c.username) : shortAddress(c.wallet_address);
+          const when = this.timeAgo(new Date(c.caught_at).getTime());
           return `
             <div class="feed-item">
-              <div class="feed-icon">${species?.look?.image ? `<img src="${species.look.image}" width="40" />` : '🐟'}</div>
+              <div class="feed-icon">🐟</div>
               <div class="feed-content">
                 <div class="feed-text">
-                  <span class="feed-wallet">${shortAddress(c.wallet)}</span> caught a 
-                  <span class="feed-species">${species?.name || c.species}</span>
+                  <span class="feed-wallet">${who}</span> caught a
+                  <span class="feed-species">${this.esc(species?.name || c.species_id)}</span>
                 </div>
                 <div class="feed-meta">
-                  ${c.sizeCm.toFixed(1)}cm • ${formatMoney(c.value)} • ${this.timeAgo(c.timestamp)}
+                  ${Number(c.size_cm).toFixed(1)}cm • ${formatMoney(Number(c.value))} • ${when}
                 </div>
               </div>
             </div>
@@ -173,13 +179,14 @@ export class LeaderboardUI {
 
     try {
       const response = await fetch(`${API_BASE}/api/leaderboard?type=species&species=${speciesId}&limit=20`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const species = FISH_BY_ID[speciesId];
-      
+
       content.innerHTML = `
         <div class="species-leaderboard">
           <button class="btn-back">← Back to Species</button>
-          <h3>${species.name} - Biggest Catches</h3>
+          <h3>${this.esc(species?.name || speciesId)} - Biggest Catches</h3>
           ${this.renderSpeciesCatches(data.catches)}
         </div>
       `;
@@ -194,23 +201,34 @@ export class LeaderboardUI {
 
   renderSpeciesCatches(catches) {
     if (!catches || catches.length === 0) {
-      return '<div class="empty">No catches recorded yet</div>';
+      return '<div class="empty">No catches recorded for this species yet</div>';
     }
 
     return `
       <div class="leaderboard-list">
-        ${catches.map((c, i) => `
-          <div class="leaderboard-entry">
-            <div class="entry-rank">${i + 1}</div>
-            <div class="entry-info">
-              <div class="entry-wallet">${shortAddress(c.wallet)}</div>
-              <div class="entry-value">${c.sizeCm.toFixed(1)}cm • ${c.weightKg.toFixed(2)}kg • ${formatMoney(c.value)}</div>
+        ${catches.map((c, i) => {
+          const who = c.username ? this.esc(c.username) : shortAddress(c.wallet_address);
+          return `
+            <div class="leaderboard-entry">
+              <div class="entry-rank">${i + 1}</div>
+              <div class="entry-info">
+                <div class="entry-wallet">${who}</div>
+                <div class="entry-value">${Number(c.size_cm).toFixed(1)}cm • ${Number(c.weight_kg).toFixed(2)}kg • ${formatMoney(Number(c.value))}</div>
+              </div>
+              ${i < 3 ? `<div class="trophy">${['🥇', '🥈', '🥉'][i]}</div>` : ''}
             </div>
-            ${i < 3 ? `<div class="trophy">${['🥇', '🥈', '🥉'][i]}</div>` : ''}
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
+  }
+
+  esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   timeAgo(timestamp) {
