@@ -35,6 +35,7 @@ import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
 import { ChatUI } from "./ui/chatUI.js";
+import { SocialUI } from "./ui/socialUI.js";
 import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { shortAddress } from "./web3/solana.js";
@@ -136,6 +137,11 @@ if (!isInstalledPWA()) {
   const chatUI = new ChatUI();
   chatUI.mount();
 }
+
+// Shared-world badge (online count + daily hot spot) and Catch of the Day
+// banner. Mounted always — it's a passive, lightweight overlay.
+const socialUI = new SocialUI();
+socialUI.mount();
 
 // Initialize weather and challenges widgets
 weatherUI.init();

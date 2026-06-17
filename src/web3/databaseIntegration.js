@@ -6,12 +6,15 @@ import { currentPublicKey } from "./wallet.js";
 import { establishSession, clearSession, getSessionToken } from "./session.js";
 import { S, events } from "../state/gameState.js";
 import { saveGame } from "../state/saveLoad.js";
+import { apiFetch } from "../utils/api.js";
+import { addMoney } from "../economy/economy.js";
 
 let autoSaveInterval = null;
 let isAuthenticated = false;
 let isSyncing = false;
 let lastSyncTime = 0;
 let sessionPromptWallet = null;
+let lastCheckinWallet = null;
 
 /**
  * Kick off the one-time Sign-In With Solana signature for this wallet. Shows a
@@ -19,7 +22,7 @@ let sessionPromptWallet = null;
  * surprise. Fire-and-forget — never blocks the connect flow or gameplay.
  */
 function ensureSession(walletAddress) {
-  if (getSessionToken()) return;
+  if (getSessionToken()) return Promise.resolve(true);
   if (sessionPromptWallet !== walletAddress) {
     sessionPromptWallet = walletAddress;
     events.emit("toast", {
@@ -27,11 +30,43 @@ function ensureSession(walletAddress) {
       kind: "info",
     });
   }
-  establishSession().then((ok) => {
+  return establishSession().then((ok) => {
     if (ok) {
       events.emit("toast", { msg: "✅ Signed in — chat & cloud save active", kind: "success" });
     }
-  }).catch(() => { /* user dismissed; will retry on next explicit action */ });
+    return !!ok;
+  }).catch(() => false /* user dismissed; will retry on next explicit action */);
+}
+
+/**
+ * Daily check-in: advances the consecutive-day streak and, once per UTC day,
+ * credits a small $TIDE bonus (server-authoritative). Runs once per connect and
+ * only after a session token exists. Non-interactive so it never pops a wallet
+ * prompt on its own.
+ */
+async function checkInDaily(walletAddress) {
+  if (lastCheckinWallet === walletAddress) return;
+  lastCheckinWallet = walletAddress;
+  try {
+    const res = await apiFetch("/api/player/checkin", {
+      method: "POST",
+      auth: true,
+      interactive: false,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walletAddress }),
+    });
+    if (!res.ok) return;
+    const data = await res.json().catch(() => ({}));
+    if (data.bonus > 0) {
+      // Reflect the server-credited bonus in the local display balance.
+      addMoney(data.bonus);
+      const streak = data.streak || 1;
+      events.emit("toast", {
+        msg: `🔥 ${streak}-day streak! +${data.bonus} $TIDE daily bonus`,
+        kind: "success",
+      });
+    }
+  } catch { /* best-effort flavor */ }
 }
 
 /**
@@ -51,7 +86,9 @@ export async function onWalletConnect() {
   // user is in the "just connected" context. Fired independently of (and before)
   // the DB authenticate call below, which can cold-start or fail — a slow/empty
   // database must never suppress or delay the sign-in prompt.
-  ensureSession(walletAddress);
+  const sessionReady = ensureSession(walletAddress);
+  // Once a session exists, run the daily streak check-in (non-interactive).
+  sessionReady.then((ok) => { if (ok) checkInDaily(walletAddress); });
 
   // Authenticate player (creates if new). The endpoint returns { player }.
   const authResult = await authenticatePlayer(walletAddress);
@@ -102,6 +139,7 @@ export function onWalletDisconnect() {
   stopAutoSave();
   isAuthenticated = false;
   sessionPromptWallet = null;
+  lastCheckinWallet = null;
   clearSession();
   console.log("[db] Wallet disconnected, auto-save stopped");
 }

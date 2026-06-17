@@ -15,6 +15,7 @@ import { recordCatch as recordCatchDB } from "../web3/database.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFarming.js";
 import { validateCatch, showBanMessage } from "../web3/catchValidation.js";
+import { isHotSpot } from "../web3/world.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -120,6 +121,15 @@ export function addXp(amount) {
  *  NOW REQUIRES SERVER VALIDATION - prevents offline fishing.
  */
 export async function registerCatch(fish) {
+  // Daily hot spot pays +10%. Apply BEFORE validation/credit so the bonus
+  // propagates everywhere downstream (jackpot credit, inventory, journal, DB
+  // record, tournament). The server raises its value ceiling for the hot
+  // location by the same 10% so the boosted figure isn't clamped away.
+  if (isHotSpot(S.world.current) && Number.isFinite(fish.value) && fish.value > 0) {
+    fish.value = Math.round(fish.value * 1.1);
+    fish.hotSpotBonus = true;
+  }
+
   // SERVER VALIDATION CHECK (prevents offline fishing)
   const validation = await validateCatch(fish.speciesId, fish.value);
   if (!validation.allowed) {

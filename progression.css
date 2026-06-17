@@ -2263,3 +2263,126 @@ body.weather-cloudy {
   .trollbox { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 50vh; }
   .trollbox-messages { max-height: 34vh; }
 }
+
+/* ── In-chat flair: top-3 medals + level badge ───────────────────────────── */
+.trollbox-medal { margin-right: 4px; }
+.trollbox-lvl {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #06222e;
+  background: linear-gradient(135deg, #9be7ff, #4fb6e6);
+  vertical-align: middle;
+}
+
+/* ── System "live feed" lines (welcome / rare / catch broadcasts) ─────────── */
+.trollbox-sys {
+  border-left: 2px solid var(--stroke);
+  padding-left: 8px;
+  font-style: italic;
+  color: #b9cde0;
+}
+.trollbox-sys .trollbox-text { color: inherit; }
+.trollbox-sys.sys-rare {
+  border-left-color: var(--gold);
+  color: #ffe9a8;
+  font-style: normal;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 200, 80, 0.35);
+}
+.trollbox-sys.sys-welcome { border-left-color: #67e8a0; color: #c7f5da; }
+.trollbox-sys.sys-catch { border-left-color: var(--accent); color: #cfe9f7; }
+.trollbox-sys.sys-local {
+  border-left-color: #8a93a4;
+  color: #aeb9c8;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0 6px 6px 0;
+}
+
+/* ── Footer: emote reactions row + compose row ───────────────────────────── */
+.trollbox-footer { flex-direction: column; align-items: stretch; gap: 7px; }
+.trollbox-emotes { display: flex; gap: 5px; flex-wrap: wrap; }
+.trollbox-emote {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.08s ease, background 0.15s ease;
+}
+.trollbox-emote:hover { background: rgba(95, 212, 255, 0.16); transform: translateY(-1px); }
+.trollbox-emote:active { transform: scale(0.92); }
+.trollbox-compose { display: flex; gap: 6px; }
+
+/* ── Online + hot-spot badge (passive overlay) ───────────────────────────── */
+.world-badge {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #eaf7ff;
+}
+.world-badge.hidden { display: none; }
+.world-badge .wb-online,
+.world-badge .wb-hot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(8, 22, 33, 0.72);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+.world-badge .wb-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #56e08a;
+  box-shadow: 0 0 8px #56e08a;
+  animation: wb-pulse 2s ease-in-out infinite;
+}
+@keyframes wb-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.world-badge .wb-hot { color: #ffe2a6; border-color: rgba(255, 200, 80, 0.4); }
+.world-badge .wb-hot.wb-here {
+  color: #fff3cf;
+  border-color: var(--gold);
+  box-shadow: 0 0 12px rgba(255, 200, 80, 0.3);
+}
+.world-badge .wb-hot-sub { opacity: 0.8; font-weight: 600; font-size: 0.66rem; }
+@media (max-width: 560px) {
+  .world-badge { font-size: 0.66rem; gap: 5px; top: 6px; }
+  .world-badge .wb-hot-sub { display: none; }
+}
+
+/* ── Catch of the Day banner on the title screen ─────────────────────────── */
+.menu-cod {
+  margin: 6px auto 2px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 200, 80, 0.14), rgba(95, 212, 255, 0.1));
+  border: 1px solid rgba(255, 200, 80, 0.35);
+  color: #ffe9bd;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.menu-cod.hidden { display: none; }
+.menu-cod .cod-label { color: #ffd98a; opacity: 0.85; font-weight: 700; }
+.menu-cod b { color: #fff; }
+
