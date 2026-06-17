@@ -1,10 +1,12 @@
 // Tournament UI - Competitive timed fishing events
 
-import { S } from "../state/gameState.js";
-import { getTournamentSchedule, canJoinTournament, startTournament, updateTournamentScore, endTournament, formatTournamentScore, TOURNAMENT_TYPES } from "../progression/tournament.js";
+import { S, events } from "../state/gameState.js";
+import { getTournamentSchedule, startTournament, updateTournamentScore, endTournament, formatTournamentScore, TOURNAMENT_TYPES } from "../progression/tournament.js";
 import { formatMoney } from "../utils/utils.js";
 import { audio } from "../audio/audioManager.js";
 import { saveGame } from "../state/saveLoad.js";
+import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
+import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 
 export class TournamentUI {
   constructor() {
@@ -13,6 +15,7 @@ export class TournamentUI {
     this.active = false;
     this.dismissed = false;
     this.lastShown = 0;
+    this.joining = false; // true while an on-chain entry payment is in flight
     this.SHOW_INTERVAL = 10 * 60 * 1000; // Show every 10 minutes
   }
 
@@ -54,6 +57,11 @@ export class TournamentUI {
 
   render() {
     if (!this.widget) return;
+
+    // While an on-chain join payment is in flight, don't rebuild the widget —
+    // otherwise the disabled "Joining…" button gets replaced by a fresh,
+    // clickable one and the user could pay the entry fee twice.
+    if (this.joining) return;
 
     const schedule = getTournamentSchedule();
     const timeUntil = schedule.timeUntil;
@@ -132,7 +140,7 @@ export class TournamentUI {
               <span class="detail-value">${formatMoney(schedule.nextTournament.prizePool[0])}</span>
             </div>
           </div>
-          ${timeUntil < 60000 ? '<button class="btn-join-tournament">Join Tournament</button>' : ''}
+          ${timeUntil < 60000 ? `<button class="btn-join-tournament">🏆 Join · ${formatMoney(schedule.nextTournament.entryFee)}</button>` : ''}
         </div>
       `;
 
@@ -179,33 +187,54 @@ export class TournamentUI {
     return `${minutes}m`;
   }
 
-  joinTournament(tournamentType) {
-    const check = canJoinTournament({ entryFee: tournamentType.entryFee }, S.profile.money);
-    
-    if (!check.ok) {
+  async joinTournament(tournamentType) {
+    // Entry is paid in REAL on-chain $TIDE (transferred to the treasury),
+    // exactly like equipment/map unlocks — NOT in-game money. payTide() reads
+    // the wallet balance across both SPL Token and Token-2022 and throws with a
+    // precise "have X, need Y" message if there genuinely aren't enough tokens.
+    if (!isOnChainPayEnabled()) {
       audio.play("error");
-      this.showToast(check.reason, "error");
+      this.showToast("Connect your wallet to join tournaments", "error");
       return;
     }
 
-    // Deduct entry fee
-    S.profile.money -= tournamentType.entryFee;
-    
-    // Initialize tournament
-    S.tournament.currentTournament = {
-      type: tournamentType,
-      entryFee: tournamentType.entryFee,
-      started: false,
-      score: 0,
-      catches: [],
-    };
+    this.joining = true;
+    const joinBtn = this.widget?.querySelector('.btn-join-tournament');
+    if (joinBtn) {
+      joinBtn.disabled = true;
+      joinBtn.textContent = "Joining…";
+    }
 
-    startTournament(S.tournament.currentTournament);
-    audio.play("tournamentStart");
-    saveGame();
-    
-    this.showToast(`Tournament started! ${tournamentType.description}`, "success");
-    this.render();
+    try {
+      const sig = await payTide(tournamentType.entryFee, { memo: `tidal:tournament:${tournamentType.id}` });
+
+      // Initialize + start tournament only after payment confirms on-chain.
+      S.tournament.currentTournament = {
+        type: tournamentType,
+        entryFee: tournamentType.entryFee,
+        started: false,
+        score: 0,
+        catches: [],
+      };
+      startTournament(S.tournament.currentTournament);
+      audio.play("tournamentStart");
+      saveGame();
+
+      events.emit("toast", {
+        msg: `Joined ${tournamentType.name} — ${formatMoney(tournamentType.entryFee)} · ${shortAddress(sig, 6, 6)}`,
+        kind: "gold",
+        href: explorerTxUrl(sig),
+      });
+      events.emit("wallet:refresh");
+      this.joining = false;
+      this.render();
+    } catch (e) {
+      console.error("[tidal] tournament join failed", e);
+      audio.play("error");
+      this.showToast(e?.message ?? "On-chain payment failed", "error");
+      this.joining = false;
+      this.render();
+    }
   }
 
   endActiveTournament() {
