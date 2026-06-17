@@ -4,7 +4,7 @@
   "name": "Tidal - Web3 Fishing Game",
   "short_name": "Tidal",
   "id": "/",
-  "description": "A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and compete in tournaments.",
+  "description": "A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and own your catches.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["fullscreen", "standalone", "minimal-ui"],
@@ -58,7 +58,7 @@
       "sizes": "2533x1258",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Tidal title screen — live weather, tournaments, and the global Fishermans Hole chat"
+      "label": "Tidal title screen — live weather and the global Fishermans Hole chat"
     },
     {
       "src": "/screenshots/screenshot-2.png",

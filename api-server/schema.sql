@@ -61,24 +61,6 @@ CREATE INDEX IF NOT EXISTS idx_catches_species ON catches(species_id);
 CREATE INDEX IF NOT EXISTS idx_catches_rarity ON catches(rarity);
 CREATE INDEX IF NOT EXISTS idx_catches_location ON catches(location);
 
--- Daily challenges table
-CREATE TABLE IF NOT EXISTS daily_challenges (
-  id SERIAL PRIMARY KEY,
-  player_id INTEGER REFERENCES players(id) ON DELETE CASCADE,
-  challenge_date DATE NOT NULL,
-  challenge_id VARCHAR(100) NOT NULL,
-  challenge_type VARCHAR(50) NOT NULL,
-  target INTEGER NOT NULL,
-  progress INTEGER DEFAULT 0,
-  completed BOOLEAN DEFAULT FALSE,
-  reward INTEGER NOT NULL,
-  completed_at TIMESTAMP,
-  
-  UNIQUE(player_id, challenge_date, challenge_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_challenges_player_date ON daily_challenges(player_id, challenge_date);
-
 -- Achievements table
 CREATE TABLE IF NOT EXISTS achievements (
   id SERIAL PRIMARY KEY,
@@ -105,20 +87,6 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_journal_player ON journal_entries(player_id);
-
--- Tournament scores
-CREATE TABLE IF NOT EXISTS tournament_scores (
-  id SERIAL PRIMARY KEY,
-  player_id INTEGER REFERENCES players(id) ON DELETE CASCADE,
-  tournament_date DATE NOT NULL,
-  score INTEGER DEFAULT 0,
-  catches INTEGER DEFAULT 0,
-  best_catch VARCHAR(50),
-  
-  UNIQUE(player_id, tournament_date)
-);
-
-CREATE INDEX IF NOT EXISTS idx_tournament_date ON tournament_scores(tournament_date, score DESC);
 
 -- Leaderboard view (top 100 players by earnings)
 CREATE OR REPLACE VIEW leaderboard AS
