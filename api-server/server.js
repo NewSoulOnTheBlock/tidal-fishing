@@ -25,6 +25,7 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://tidalfishing.fun';
 
 // Solana program IDs
 const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+const TOKEN_2022_PROGRAM_ID = new PublicKey('TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb');
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
 
 // Middleware
@@ -58,15 +59,30 @@ try {
 const connection = new Connection(RPC_URL, 'confirmed');
 
 // Helper functions
-function getAssociatedTokenAddressSync(mint, owner) {
-  const [address] = PublicKey.findProgramAddressSync(
+async function getAssociatedTokenAddress(mint, owner) {
+  // Try both Token programs (classic SPL Token and Token-2022)
+  const [classicAta] = PublicKey.findProgramAddressSync(
     [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
     ASSOCIATED_TOKEN_PROGRAM_ID
   );
-  return address;
+  const [token2022Ata] = PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), TOKEN_2022_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  );
+  
+  // Check which one exists
+  const [classicInfo, t2022Info] = await Promise.all([
+    connection.getAccountInfo(classicAta),
+    connection.getAccountInfo(token2022Ata),
+  ]);
+  
+  if (t2022Info) {
+    return { address: token2022Ata, programId: TOKEN_2022_PROGRAM_ID };
+  }
+  return { address: classicAta, programId: TOKEN_PROGRAM_ID };
 }
 
-function createAssociatedTokenAccountIx(payer, ata, owner, mint) {
+function createAssociatedTokenAccountIx(payer, ata, owner, mint, tokenProgram) {
   return new TransactionInstruction({
     programId: ASSOCIATED_TOKEN_PROGRAM_ID,
     keys: [
@@ -75,18 +91,18 @@ function createAssociatedTokenAccountIx(payer, ata, owner, mint) {
       { pubkey: owner, isSigner: false, isWritable: false },
       { pubkey: mint, isSigner: false, isWritable: false },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: tokenProgram, isSigner: false, isWritable: false },
     ],
     data: Buffer.alloc(0),
   });
 }
 
-function createTransferIx(source, dest, owner, amount) {
+function createTransferIx(source, dest, owner, amount, tokenProgram) {
   const data = Buffer.alloc(9);
   data.writeUInt8(3, 0); // SPL Token: Transfer
   data.writeBigUInt64LE(amount, 1);
   return new TransactionInstruction({
-    programId: TOKEN_PROGRAM_ID,
+    programId: tokenProgram,
     keys: [
       { pubkey: source, isSigner: false, isWritable: true },
       { pubkey: dest, isSigner: false, isWritable: true },
@@ -117,13 +133,14 @@ app.get('/api/treasury/balance', async (req, res) => {
     }
 
     const mintPk = new PublicKey(TIDE_MINT_STR);
-    const ata = getAssociatedTokenAddressSync(mintPk, treasuryKeypair.publicKey);
+    const { address: ata } = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey);
     
     const balance = await connection.getTokenAccountBalance(ata);
     
     res.json({
       address: treasuryKeypair.publicKey.toBase58(),
       mint: TIDE_MINT_STR,
+      tokenAccount: ata.toBase58(),
       balance: {
         raw: balance.value.amount,
         ui: balance.value.uiAmountString,
@@ -168,17 +185,17 @@ app.post('/api/withdraw', async (req, res) => {
     const mintPk = new PublicKey(TIDE_MINT_STR);
     const rawAmount = BigInt(Math.round(amount * 10 ** TIDE_DECIMALS));
 
-    const sourceAta = getAssociatedTokenAddressSync(mintPk, treasuryKeypair.publicKey);
-    const destAta = getAssociatedTokenAddressSync(mintPk, recipientPk);
+    const source = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey);
+    const dest = await getAssociatedTokenAddress(mintPk, recipientPk);
 
     // Build transaction
     const ixs = [];
-    ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 80_000 }));
+    ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 150_000 }));
 
     // Check treasury balance
     let sourceBalance = 0n;
     try {
-      const acc = await connection.getTokenAccountBalance(sourceAta);
+      const acc = await connection.getTokenAccountBalance(source.address);
       sourceBalance = BigInt(acc.value.amount);
     } catch (error) {
       return res.status(500).json({ error: 'Treasury has no $TIDE token account' });
@@ -191,13 +208,13 @@ app.post('/api/withdraw', async (req, res) => {
     }
 
     // Create recipient ATA if needed
-    const destInfo = await connection.getAccountInfo(destAta);
+    const destInfo = await connection.getAccountInfo(dest.address);
     if (!destInfo) {
-      ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, destAta, recipientPk, mintPk));
+      ixs.push(createAssociatedTokenAccountIx(treasuryKeypair.publicKey, dest.address, recipientPk, mintPk, dest.programId));
     }
 
     // Add transfer instruction
-    ixs.push(createTransferIx(sourceAta, destAta, treasuryKeypair.publicKey, rawAmount));
+    ixs.push(createTransferIx(source.address, dest.address, treasuryKeypair.publicKey, rawAmount, source.programId));
 
     // Create and sign transaction
     const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
