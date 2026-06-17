@@ -23,7 +23,7 @@ const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ
 const TOKEN_2022_PROGRAM_ID = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 
-const TIDE_DECIMALS = Number(import.meta.env.VITE_TIDE_DECIMALS ?? 9);
+const TIDE_DECIMALS = Number(import.meta.env.VITE_TIDE_DECIMALS ?? 6);
 
 /** True if a wallet is connected AND the $TIDE mint is configured. */
 export function isOnChainPayEnabled() {
