@@ -15,8 +15,20 @@ class AudioManager {
     this.ambienceProfile = null;
     this.ambienceSegment = "day";
     this.reelAccum = 0;
-    this.bgMusic = null; // { audio: HTMLAudioElement, gainNode: GainNode }
+    this.bgMusic = null; // { audio: HTMLAudioElement, gainNode: GainNode, currentTrack: number }
     this.bgMusicVolume = 0.15; // Background music at 15% volume
+    
+    // Music playlist - 6 tracks that cycle
+    this.musicPlaylist = [
+      '/music/track1-lake-fishing.mp3',
+      '/music/track2-acoustic-fields.mp3',
+      '/music/track3-whistle-folk.mp3',
+      '/music/track4-open-waters.mp3',
+      '/music/track5-country-ballad.mp3',
+      '/music/track6-fishing-village.mp3',
+    ];
+    this.currentTrackIndex = 0;
+    this.isPlaylistInitialized = false;
   }
 
   /** Must be called from a user gesture. Safe to call repeatedly. */
@@ -59,12 +71,44 @@ class AudioManager {
   }
 
   startBackgroundMusic() {
-    if (this.bgMusic) return; // Already started
+    if (this.bgMusic && this.bgMusic.audio && !this.bgMusic.audio.paused) {
+      return; // Already playing
+    }
     if (!this.ctx) return;
     
+    // If we have a paused track, resume it
+    if (this.bgMusic && this.bgMusic.audio) {
+      this.bgMusic.audio.play().catch(() => {});
+      return;
+    }
+    
     try {
-      const audio = new Audio('/background-music.mp3');
-      audio.loop = true;
+      // Start with first track in playlist
+      this.playTrack(this.currentTrackIndex);
+    } catch (err) {
+      console.warn('Background music failed to load:', err);
+    }
+  }
+
+  playTrack(index) {
+    if (!this.ctx) return;
+    
+    // Stop current track if playing
+    if (this.bgMusic && this.bgMusic.audio) {
+      this.bgMusic.audio.pause();
+      this.bgMusic.audio.currentTime = 0;
+      if (this.bgMusic.source) {
+        try {
+          this.bgMusic.source.disconnect();
+        } catch {}
+      }
+    }
+    
+    try {
+      const trackUrl = this.musicPlaylist[index];
+      console.log(`[audio] Loading track ${index + 1}/${this.musicPlaylist.length}: ${trackUrl}`);
+      
+      const audio = new Audio(trackUrl);
       audio.volume = 1.0; // Control via gain node instead
       
       // Connect to Web Audio for volume control
@@ -75,15 +119,57 @@ class AudioManager {
       source.connect(gainNode);
       gainNode.connect(this.ctx.destination);
       
-      this.bgMusic = { audio, gainNode, source };
+      this.bgMusic = { audio, gainNode, source, currentTrack: index };
+      
+      // When track ends, play next in playlist
+      audio.addEventListener('ended', () => {
+        console.log(`[audio] Track ${index + 1} ended, loading next track`);
+        this.currentTrackIndex = (index + 1) % this.musicPlaylist.length;
+        this.playTrack(this.currentTrackIndex);
+      });
+      
+      // Handle errors
+      audio.addEventListener('error', (e) => {
+        console.error(`[audio] Error loading track ${index + 1}:`, e);
+        // Try next track after a delay
+        setTimeout(() => {
+          this.currentTrackIndex = (index + 1) % this.musicPlaylist.length;
+          this.playTrack(this.currentTrackIndex);
+        }, 1000);
+      });
       
       // Start playing
-      audio.play().catch(() => {
-        // Autoplay blocked, will retry on next user interaction
+      audio.play().catch((err) => {
+        console.warn('[audio] Autoplay blocked, will retry on next user interaction:', err);
       });
+      
     } catch (err) {
-      console.warn('Background music failed to load:', err);
+      console.warn(`[audio] Failed to play track ${index}:`, err);
     }
+  }
+
+  // Skip to next track in playlist
+  nextTrack() {
+    if (!this.ctx || !this.bgMusic) return;
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.musicPlaylist.length;
+    this.playTrack(this.currentTrackIndex);
+  }
+
+  // Skip to previous track in playlist
+  previousTrack() {
+    if (!this.ctx || !this.bgMusic) return;
+    this.currentTrackIndex = (this.currentTrackIndex - 1 + this.musicPlaylist.length) % this.musicPlaylist.length;
+    this.playTrack(this.currentTrackIndex);
+  }
+
+  // Get current track info
+  getCurrentTrack() {
+    if (!this.bgMusic) return null;
+    return {
+      index: this.currentTrackIndex,
+      total: this.musicPlaylist.length,
+      name: this.musicPlaylist[this.currentTrackIndex].split('/').pop().replace('.mp3', ''),
+    };
   }
 
   stopBackgroundMusic() {
