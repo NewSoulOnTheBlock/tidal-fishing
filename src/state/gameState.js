@@ -60,6 +60,9 @@ export function createDefaultState() {
       money: CONFIG.economy.startMoney,
       xp: 0,
       level: 1,
+      username: "",
+      bio: "",
+      avatar: "default",
     },
     gear: {
       owned: { rods: [0], reels: [0], lines: [0], baits: [0] },

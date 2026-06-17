@@ -38,6 +38,47 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
+// Ensure ban-system tables exist (idempotent — runs on every boot).
+// Self-heals deploys where schema.sql was never applied manually, which
+// otherwise causes /api/catch/validate to 500 and breaks all fishing.
+async function initDatabase() {
+  const ddl = `
+    CREATE TABLE IF NOT EXISTS banned_wallets (
+      id SERIAL PRIMARY KEY,
+      wallet_address VARCHAR(44) UNIQUE NOT NULL,
+      reason TEXT,
+      banned_at TIMESTAMP DEFAULT NOW(),
+      banned_by VARCHAR(100) DEFAULT 'system'
+    );
+    CREATE TABLE IF NOT EXISTS banned_ips (
+      id SERIAL PRIMARY KEY,
+      ip_address VARCHAR(45) UNIQUE NOT NULL,
+      reason TEXT,
+      banned_at TIMESTAMP DEFAULT NOW(),
+      banned_by VARCHAR(100) DEFAULT 'system'
+    );
+    CREATE INDEX IF NOT EXISTS idx_banned_wallets ON banned_wallets(wallet_address);
+    CREATE INDEX IF NOT EXISTS idx_banned_ips ON banned_ips(ip_address);
+    CREATE TABLE IF NOT EXISTS ip_activity (
+      id SERIAL PRIMARY KEY,
+      ip_address VARCHAR(45) NOT NULL,
+      wallet_address VARCHAR(44),
+      action VARCHAR(50) NOT NULL,
+      timestamp TIMESTAMP DEFAULT NOW(),
+      metadata JSONB
+    );
+    CREATE INDEX IF NOT EXISTS idx_ip_activity_lookup ON ip_activity(ip_address, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_ip_activity_wallet ON ip_activity(wallet_address, timestamp DESC);
+  `;
+  try {
+    await pool.query(ddl);
+    console.log('✅ Ban-system tables ready');
+  } catch (err) {
+    console.error('❌ Failed to initialize ban-system tables:', err);
+  }
+}
+initDatabase();
+
 // Environment variables
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
 const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || '7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump';

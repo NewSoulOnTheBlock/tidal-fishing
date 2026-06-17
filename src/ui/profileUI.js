@@ -3,6 +3,7 @@
 import { S, events } from "../state/gameState.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { updateProfile, getPlayerProfile } from "../web3/database.js";
+import { saveGame } from "../state/saveLoad.js";
 import { PROFILE_AVATARS, getAvatar } from "../data/profileAvatars.js";
 import { ACHIEVEMENTS } from "../progression/achievements.js";
 import { formatMoney } from "../utils/utils.js";
@@ -15,48 +16,71 @@ export class ProfileUI {
     this.currentProfile = null;
   }
 
+  /** Build a profile object from local game state — used as the source of
+   *  truth so edits work instantly and even when the API server is down. */
+  buildLocalProfile(walletAddress) {
+    return {
+      player: {
+        wallet_address: walletAddress,
+        username: S.profile.username || "",
+        bio: S.profile.bio || "",
+        profile_picture: S.profile.avatar || "default",
+        level: S.profile.level ?? 1,
+        xp: S.profile.xp ?? 0,
+        money: Math.floor(S.profile.money ?? 0),
+        total_catches: S.stats?.catches ?? 0,
+        total_earned: S.stats?.earned ?? 0,
+        perfect_hooks: S.stats?.perfectHooks ?? 0,
+        login_streak: S.dailyLogin?.streak ?? 0,
+        created_at: S.profile.createdAt || new Date().toISOString(),
+      },
+      achievements: (S.achievements?.unlocked || []).map((id) => ({ achievement_id: id })),
+    };
+  }
+
   async show() {
-    console.log("[ProfileUI] show() called");
     const publicKey = currentPublicKey();
-    console.log("[ProfileUI] publicKey:", publicKey);
-    
+
     if (!publicKey) {
-      console.log("[ProfileUI] No wallet connected");
-      events.emit("toast", { 
-        msg: "Connect your wallet to view your profile", 
-        kind: "warn" 
+      events.emit("toast", {
+        msg: "Connect your wallet to view your profile",
+        kind: "warn",
       });
       return;
     }
 
     const walletAddress = publicKey.toString();
-    console.log("[ProfileUI] Loading profile for:", walletAddress);
-    
-    // Load profile from database
-    this.currentProfile = await getPlayerProfile(walletAddress);
-    console.log("[ProfileUI] Profile loaded:", this.currentProfile);
-    
-    if (!this.currentProfile) {
-      console.log("[ProfileUI] Failed to load profile");
-      events.emit("toast", { 
-        msg: "Failed to load profile", 
-        kind: "error" 
-      });
-      return;
+
+    // Local state is the source of truth (instant, offline-safe).
+    this.currentProfile = this.buildLocalProfile(walletAddress);
+
+    // Best-effort: merge any server-side values on top (achievements, stats).
+    try {
+      const remote = await getPlayerProfile(walletAddress);
+      if (remote?.player) {
+        // Prefer locally-edited identity fields; fill the rest from server.
+        this.currentProfile = {
+          player: {
+            ...remote.player,
+            username: S.profile.username || remote.player.username || "",
+            bio: S.profile.bio || remote.player.bio || "",
+            profile_picture: S.profile.avatar || remote.player.profile_picture || "default",
+          },
+          achievements: remote.achievements?.length
+            ? remote.achievements
+            : this.currentProfile.achievements,
+        };
+      }
+    } catch (e) {
+      console.warn("[ProfileUI] Using local profile (server unavailable):", e?.message);
     }
 
-    console.log("[ProfileUI] Creating panel...");
     this.panel = document.createElement("div");
     this.panel.id = "profile-panel";
     this.panel.className = "modal-overlay";
-    
     this.panel.innerHTML = this.renderProfile();
-    
-    console.log("[ProfileUI] Appending to body...");
     document.body.appendChild(this.panel);
-    console.log("[ProfileUI] Panel appended, binding events...");
     this.bindEvents();
-    console.log("[ProfileUI] Done!");
   }
 
   renderProfile() {
@@ -177,44 +201,34 @@ export class ProfileUI {
   }
 
   bindEvents() {
-    console.log("[ProfileUI] bindEvents() called");
     const closeBtn = this.panel.querySelector('.btn-close');
     closeBtn.addEventListener('click', () => this.hide());
-    
+
     this.panel.addEventListener('click', (e) => {
       if (e.target === this.panel) this.hide();
     });
 
-    // Edit username
     const editUsernameBtn = this.panel.querySelector('.btn-edit-username');
-    console.log("[ProfileUI] Edit username button:", editUsernameBtn);
     if (editUsernameBtn) {
       editUsernameBtn.addEventListener('click', (e) => {
-        console.log("[ProfileUI] Username edit button clicked!");
         e.preventDefault();
         e.stopPropagation();
         this.editUsername();
       });
     }
 
-    // Edit bio
     const editBioBtn = this.panel.querySelector('.btn-edit-bio');
-    console.log("[ProfileUI] Edit bio button:", editBioBtn);
     if (editBioBtn) {
       editBioBtn.addEventListener('click', (e) => {
-        console.log("[ProfileUI] Bio edit button clicked!");
         e.preventDefault();
         e.stopPropagation();
         this.editBio();
       });
     }
 
-    // Change avatar
     const changeAvatarBtn = this.panel.querySelector('.btn-change-avatar');
-    console.log("[ProfileUI] Change avatar button:", changeAvatarBtn);
     if (changeAvatarBtn) {
       changeAvatarBtn.addEventListener('click', (e) => {
-        console.log("[ProfileUI] Change avatar button clicked!");
         e.preventDefault();
         e.stopPropagation();
         this.selectAvatar();
@@ -222,100 +236,136 @@ export class ProfileUI {
     }
   }
 
-  async editUsername() {
-    console.log("[ProfileUI] editUsername() called");
-    const currentUsername = this.currentProfile.player.username || '';
-    console.log("[ProfileUI] Current username:", currentUsername);
-    
-    const newUsername = prompt('Enter your new username (max 50 characters):', currentUsername);
-    console.log("[ProfileUI] New username from prompt:", newUsername);
-    
-    if (newUsername === null || newUsername === currentUsername) {
-      console.log("[ProfileUI] Username unchanged, returning");
-      return;
-    }
-    
-    if (newUsername.length > 50) {
-      console.log("[ProfileUI] Username too long");
-      events.emit("toast", { 
-        msg: "Username must be 50 characters or less", 
-        kind: "error" 
+  escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /**
+   * In-DOM input modal. Native prompt()/confirm() are suppressed by browsers
+   * when the PWA runs in standalone display mode, so we render our own.
+   * Resolves with the entered string, or null if cancelled.
+   */
+  openInputModal({ title, label, value = '', maxLength = 100, multiline = false }) {
+    return new Promise((resolve) => {
+      const modal = document.createElement('div');
+      modal.className = 'input-modal-overlay';
+
+      const safeValue = this.escapeHtml(value);
+      const field = multiline
+        ? `<textarea class="input-modal-field" maxlength="${maxLength}" rows="4">${safeValue}</textarea>`
+        : `<input type="text" class="input-modal-field" maxlength="${maxLength}" value="${safeValue}" />`;
+
+      modal.innerHTML = `
+        <div class="input-modal-content">
+          <h3>${this.escapeHtml(title)}</h3>
+          <label class="input-modal-label">${this.escapeHtml(label)}</label>
+          ${field}
+          <div class="input-modal-counter"><span class="char-count">${value.length}</span>/${maxLength}</div>
+          <div class="input-modal-actions">
+            <button class="btn btn-secondary btn-modal-cancel">Cancel</button>
+            <button class="btn btn-primary btn-modal-save">Save</button>
+          </div>
+        </div>
+      `;
+
+      this.panel.appendChild(modal);
+
+      const input = modal.querySelector('.input-modal-field');
+      const counter = modal.querySelector('.char-count');
+      setTimeout(() => { input.focus(); input.select?.(); }, 0);
+
+      input.addEventListener('input', () => {
+        counter.textContent = input.value.length;
       });
-      return;
+
+      const close = (result) => {
+        modal.remove();
+        resolve(result);
+      };
+
+      modal.querySelector('.btn-modal-cancel').addEventListener('click', () => close(null));
+      modal.querySelector('.btn-modal-save').addEventListener('click', () => close(input.value));
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !multiline) {
+          e.preventDefault();
+          close(input.value);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          close(null);
+        }
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close(null);
+      });
+    });
+  }
+
+  /**
+   * Persist a profile change. Local game state is the source of truth so the
+   * edit takes effect (and survives reload) even when the API server is down;
+   * the server sync is best-effort and never blocks the edit.
+   */
+  async persistProfile(localPatch, serverPatch) {
+    Object.assign(S.profile, localPatch);
+    try {
+      saveGame();
+    } catch (e) {
+      console.warn('[ProfileUI] saveGame failed:', e?.message);
     }
 
     const publicKey = currentPublicKey();
-    if (!publicKey) {
-      console.log("[ProfileUI] No public key");
-      return;
-    }
-
-    try {
-      console.log("[ProfileUI] Updating username via API...");
-      events.emit("toast", { 
-        msg: "Updating username...", 
-        kind: "info" 
-      });
-
-      const updated = await updateProfile(publicKey.toString(), { username: newUsername });
-      console.log("[ProfileUI] Update result:", updated);
-      
-      if (updated) {
-        this.currentProfile.player.username = newUsername;
-        events.emit("toast", { 
-          msg: "✅ Username updated!", 
-          kind: "success" 
-        });
-        this.refresh();
+    if (publicKey) {
+      try {
+        await updateProfile(publicKey.toString(), serverPatch);
+      } catch (e) {
+        console.warn('[ProfileUI] Remote profile sync failed (saved locally):', e?.message);
       }
-    } catch (error) {
-      console.error("[ProfileUI] Update error:", error);
-      events.emit("toast", { 
-        msg: "Failed to update username", 
-        kind: "error" 
-      });
     }
+  }
+
+  async editUsername() {
+    const currentUsername = this.currentProfile.player.username || '';
+    const newUsername = await this.openInputModal({
+      title: 'Edit Username',
+      label: 'Username (max 30 characters)',
+      value: currentUsername,
+      maxLength: 30,
+    });
+
+    if (newUsername === null) return;
+    const trimmed = newUsername.trim();
+    if (trimmed === currentUsername) return;
+
+    this.currentProfile.player.username = trimmed;
+    await this.persistProfile({ username: trimmed }, { username: trimmed });
+    events.emit('toast', { msg: '✅ Username updated!', kind: 'success' });
+    this.refresh();
   }
 
   async editBio() {
     const currentBio = this.currentProfile.player.bio || '';
-    const newBio = prompt('Enter your bio (max 200 characters):', currentBio);
-    
-    if (newBio === null || newBio === currentBio) return;
-    
-    if (newBio.length > 200) {
-      events.emit("toast", { 
-        msg: "Bio must be 200 characters or less", 
-        kind: "error" 
-      });
-      return;
-    }
+    const newBio = await this.openInputModal({
+      title: 'Edit Bio',
+      label: 'Bio (max 200 characters)',
+      value: currentBio,
+      maxLength: 200,
+      multiline: true,
+    });
 
-    const publicKey = currentPublicKey();
-    if (!publicKey) return;
+    if (newBio === null) return;
+    const trimmed = newBio.trim();
+    if (trimmed === currentBio) return;
 
-    try {
-      events.emit("toast", { 
-        msg: "Updating bio...", 
-        kind: "info" 
-      });
-
-      const updated = await updateProfile(publicKey.toString(), { bio: newBio });
-      
-      if (updated) {
-        this.currentProfile.player.bio = newBio;
-        events.emit("toast", { 
-          msg: "✅ Bio updated!", 
-          kind: "success" 
-        });
-        this.refresh();
-      }
-    } catch (error) {
-      events.emit("toast", { 
-        msg: "Failed to update bio", 
-        kind: "error" 
-      });
-    }
+    this.currentProfile.player.bio = trimmed;
+    await this.persistProfile({ bio: trimmed }, { bio: trimmed });
+    events.emit('toast', { msg: '✅ Bio updated!', kind: 'success' });
+    this.refresh();
   }
 
   selectAvatar() {
@@ -354,36 +404,15 @@ export class ProfileUI {
   }
 
   async updateAvatar(avatarId) {
-    const publicKey = currentPublicKey();
-    if (!publicKey) return;
-
-    try {
-      events.emit("toast", { 
-        msg: "Updating avatar...", 
-        kind: "info" 
-      });
-
-      const updated = await updateProfile(publicKey.toString(), { profilePicture: avatarId });
-      
-      if (updated) {
-        this.currentProfile.player.profile_picture = avatarId;
-        events.emit("toast", { 
-          msg: "✅ Avatar updated!", 
-          kind: "success" 
-        });
-        this.refresh();
-      }
-    } catch (error) {
-      events.emit("toast", { 
-        msg: "Failed to update avatar", 
-        kind: "error" 
-      });
-    }
+    this.currentProfile.player.profile_picture = avatarId;
+    await this.persistProfile({ avatar: avatarId }, { profilePicture: avatarId });
+    events.emit('toast', { msg: '✅ Avatar updated!', kind: 'success' });
+    this.refresh();
   }
 
   refresh() {
-    const content = this.panel.querySelector('.profile-content');
-    content.innerHTML = this.renderProfile().match(/<div class="profile-content">([\s\S]*)<\/div>\s*<\/div>$/)[1];
+    if (!this.panel) return;
+    this.panel.innerHTML = this.renderProfile();
     this.bindEvents();
   }
 
