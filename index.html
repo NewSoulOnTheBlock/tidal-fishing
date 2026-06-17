@@ -34,6 +34,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./progression.css" />
+  <!-- Telegram Mini App SDK. Must load synchronously before main.js so
+       window.Telegram.WebApp exists at boot. No-op in a normal browser. -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 <div id="app">
@@ -277,9 +280,11 @@
     });
   }
 
-  // Install prompt for PWA
+  // Install prompt for PWA. Skipped inside Telegram — the Mini App is already
+  // an installed surface, and beforeinstallprompt never fires there anyway.
   let deferredPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
+    if (window.Telegram?.WebApp?.initData) return;
     e.preventDefault();
     deferredPrompt = e;
     

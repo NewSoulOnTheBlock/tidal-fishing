@@ -39,6 +39,7 @@ import { ChatUI } from "./ui/chatUI.js";
 import { SocialUI } from "./ui/socialUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { initMobileWalletAdapter } from "./web3/mwa.js";
+import { initTelegram, isTelegram, tgHaptic, tgSetBackButton } from "./platform/telegram.js";
 import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
@@ -52,6 +53,11 @@ import { initWeather } from "./progression/weather.js";
 
 loadGame();
 
+// Detect and configure the Telegram Mini App host (no-op in a normal browser):
+// expands the webview, themes the chrome, disables swipe-to-close so fishing
+// gestures work, and exposes safe-area insets to CSS.
+initTelegram();
+
 // Register Solana Mobile Wallet Adapter so installed mobile wallets appear in
 // the connect modal automatically (no-op on desktop unless VITE_MWA_REMOTE_HOST
 // is set; see src/web3/mwa.js).
@@ -62,6 +68,26 @@ S.progressionJournal = initJournal(S);
 // S.dailyLogin = initDailyLogin(S); // DISABLED - daily rewards removed
 S.achievements = initAchievements(S);
 S.weather = initWeather(S);
+
+// Telegram-only polish (no-ops in a normal browser): haptic feedback on the key
+// fishing beats, plus a native Back button that closes the full-screen menus.
+if (isTelegram()) {
+  events.on("bite:start", () => tgHaptic("medium"));
+  events.on("bite:hooked", ({ isPerfect } = {}) =>
+    tgHaptic(isPerfect ? "success" : "heavy")
+  );
+  events.on("fight:dodge", () => tgHaptic("light"));
+  events.on("fight:nearsnap", () => tgHaptic("warning"));
+  events.on("fight:save", () => tgHaptic("success"));
+  events.on("fight:snap", () => tgHaptic("error"));
+  events.on("fight:landed", () => tgHaptic("success"));
+  events.on("fight:escape", () => tgHaptic("error"));
+
+  const SCREEN_PHASES = new Set([Phase.SHOP, Phase.JOURNAL, Phase.MAP]);
+  events.on("phase", ({ to }) => {
+    tgSetBackButton(SCREEN_PHASES.has(to), handleEscape);
+  });
+}
 
 // Daily login check DISABLED - no more daily rewards
 // const dailyCheck = checkDailyLogin(S.dailyLogin);

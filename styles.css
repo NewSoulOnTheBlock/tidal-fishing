@@ -1920,3 +1920,38 @@ kbd {
     font-size: 14px;
   }
 }
+
+/* ============================================================
+   TIDAL — Telegram Mini App safe-area + layout (.tg only)
+   The `.tg` class is added to <html>/<body> by src/platform/telegram.js when
+   running inside Telegram. --tg-safe-* are populated from WebApp.safeAreaInset
+   + contentSafeAreaInset so HUD chrome clears the device notch AND Telegram's
+   own header. All rules are no-ops in a normal browser (class never added).
+   ============================================================ */
+
+:root {
+  --tg-safe-top: 0px;
+  --tg-safe-bottom: 0px;
+  --tg-safe-left: 0px;
+  --tg-safe-right: 0px;
+}
+
+/* Push top-anchored chrome below the Telegram header / notch. */
+.tg .hud-topleft,
+.tg .hud-topright,
+.tg #wallet-mount { margin-top: var(--tg-safe-top, 0px); }
+
+/* Lift bottom-anchored chrome above the home indicator. */
+.tg .hud-bottomleft,
+.tg .hud-bottomright,
+.tg .prompt,
+.tg .power-wrap,
+.tg .reel-wrap { margin-bottom: var(--tg-safe-bottom, 0px); }
+
+/* Keep left/right-anchored chrome clear of landscape notches. */
+.tg .hud-topleft,
+.tg .hud-bottomleft { margin-left: var(--tg-safe-left, 0px); }
+
+.tg .hud-topright,
+.tg .hud-bottomright,
+.tg #wallet-mount { margin-right: var(--tg-safe-right, 0px); }

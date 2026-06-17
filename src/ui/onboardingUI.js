@@ -7,6 +7,7 @@ import { S, events } from "../state/gameState.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { updateProfile } from "../web3/database.js";
 import { saveGame } from "../state/saveLoad.js";
+import { isTelegram, tgSuggestedName } from "../platform/telegram.js";
 
 export class OnboardingUI {
   constructor() {
@@ -86,6 +87,16 @@ export class OnboardingUI {
       if (validate()) this.finish();
       else error.hidden = false;
     });
+
+    // Inside Telegram, pre-fill the angler name from the player's Telegram
+    // username so most users can simply tap "Start Fishing". Still editable.
+    if (isTelegram()) {
+      const suggested = tgSuggestedName();
+      if (suggested && !input.value) {
+        input.value = suggested;
+        validate();
+      }
+    }
 
     // No overlay-click dismissal and no close button: onboarding is mandatory.
   }
