@@ -6,21 +6,25 @@ import { S, events } from "../state/gameState.js";
 // Rate limiting config
 const RATE_LIMITS = {
   // Maximum catches per time period
-  maxCatchesPerMinute: 10,
-  maxCatchesPerHour: 300,
-  maxCatchesPerDay: 2000,
+  maxCatchesPerMinute: 5,    // Reduced from 10
+  maxCatchesPerHour: 150,    // Reduced from 300
+  maxCatchesPerDay: 800,     // Reduced from 2000
   
   // Maximum earnings per time period
-  maxEarningsPerHour: 16666,  // ~16.7k $TIDE per hour
-  maxEarningsPerDay: 100000,  // 100k $TIDE per day
+  maxEarningsPerHour: 5000,   // 5k $TIDE per hour (reduced from 16.7k)
+  maxEarningsPerDay: 30000,   // 30k $TIDE per day (reduced from 100k)
   
   // Cooldowns
-  minCatchInterval: 3000,  // 3 seconds between catches
-  suspiciousInterval: 1000, // < 1 second is suspicious
+  minCatchInterval: 5000,     // 5 seconds between catches (increased from 3s)
+  suspiciousInterval: 2000,   // < 2 seconds is suspicious (increased from 1s)
   
   // Pattern detection
-  maxIdenticalCatchesInRow: 5, // Same fish repeatedly
-  maxPerfectHooksInRow: 10,    // Too many perfect hooks
+  maxIdenticalCatchesInRow: 3,  // Same fish repeatedly (reduced from 5)
+  maxPerfectHooksInRow: 5,      // Too many perfect hooks (reduced from 10)
+  
+  // Session limits
+  maxSessionDuration: 14400000, // 4 hours max session before forced break (new)
+  requiredBreakDuration: 1800000, // 30 minute break required (new)
 };
 
 // Anti-farming state (stored in memory per session)
@@ -33,6 +37,9 @@ let antiFarmingState = {
   suspiciousActivity: false,
   warningCount: 0,
   banned: false,
+  sessionStartTime: Date.now(),
+  onBreak: false,
+  breakStartTime: 0,
 };
 
 /**
@@ -49,6 +56,34 @@ export function canCatch() {
     };
   }
   
+  // Check if on required break
+  if (antiFarmingState.onBreak) {
+    const breakElapsed = now - antiFarmingState.breakStartTime;
+    if (breakElapsed < RATE_LIMITS.requiredBreakDuration) {
+      const remaining = Math.ceil((RATE_LIMITS.requiredBreakDuration - breakElapsed) / 60000);
+      return {
+        allowed: false,
+        reason: `Required break time. Resume in ${remaining} minutes.`
+      };
+    } else {
+      // Break is over, reset session
+      antiFarmingState.onBreak = false;
+      antiFarmingState.sessionStartTime = now;
+      console.log("[AntiBot] Break complete, session reset");
+    }
+  }
+  
+  // Check session duration (force break after 4 hours)
+  const sessionDuration = now - antiFarmingState.sessionStartTime;
+  if (sessionDuration > RATE_LIMITS.maxSessionDuration) {
+    antiFarmingState.onBreak = true;
+    antiFarmingState.breakStartTime = now;
+    return {
+      allowed: false,
+      reason: "Max session time reached. Take a 30 minute break!"
+    };
+  }
+  
   // Check minimum interval
   const timeSinceLastCatch = now - antiFarmingState.lastCatch;
   if (timeSinceLastCatch < RATE_LIMITS.minCatchInterval) {
@@ -61,9 +96,10 @@ export function canCatch() {
   // Check catches per minute
   const catchesLastMinute = antiFarmingState.catches.filter(t => now - t < 60000).length;
   if (catchesLastMinute >= RATE_LIMITS.maxCatchesPerMinute) {
+    antiFarmingState.warningCount++;
     return {
       allowed: false,
-      reason: "Catch rate too high. Take a breather!"
+      reason: "Catch rate too high. Slow down!"
     };
   }
   
@@ -80,7 +116,7 @@ export function canCatch() {
   // Check catches per day
   const catchesLastDay = antiFarmingState.catches.filter(t => now - t < 86400000).length;
   if (catchesLastDay >= RATE_LIMITS.maxCatchesPerDay) {
-    antiFarmingState.warningCount++;
+    antiFarmingState.warningCount += 2;
     return {
       allowed: false,
       reason: "Daily catch limit reached. Come back tomorrow!"
@@ -171,14 +207,23 @@ export function recordCatchAntiBot(fish, perfectHook = false) {
   // Cleanup old catches (older than 24 hours)
   antiFarmingState.catches = antiFarmingState.catches.filter(t => now - t < 86400000);
   
-  // Ban if too many warnings
-  if (antiFarmingState.warningCount >= 10) {
+  // More aggressive ban threshold
+  if (antiFarmingState.warningCount >= 5) {  // Reduced from 10
     antiFarmingState.banned = true;
     events.emit("toast", {
       msg: "⚠️ Account suspended for suspicious activity",
       kind: "error"
     });
     console.error("[AntiBot] Account banned for excessive warnings");
+  }
+  
+  // Log suspicious patterns to console for monitoring
+  if (antiFarmingState.suspiciousActivity) {
+    console.warn("[AntiBot] Suspicious pattern detected:", {
+      warnings: antiFarmingState.warningCount,
+      perfectHooksInRow: antiFarmingState.perfectHooksInRow,
+      identicalCatches: antiFarmingState.identicalCatches.length,
+    });
   }
 }
 
@@ -235,5 +280,27 @@ export function resetAntiFarming() {
     suspiciousActivity: false,
     warningCount: 0,
     banned: false,
+    sessionStartTime: Date.now(),
+    onBreak: false,
+    breakStartTime: 0,
+  };
+}
+
+/**
+ * Get session info
+ */
+export function getSessionInfo() {
+  const now = Date.now();
+  const sessionDuration = now - antiFarmingState.sessionStartTime;
+  const sessionRemaining = RATE_LIMITS.maxSessionDuration - sessionDuration;
+  
+  return {
+    sessionDuration,
+    sessionRemaining,
+    sessionMaxDuration: RATE_LIMITS.maxSessionDuration,
+    onBreak: antiFarmingState.onBreak,
+    breakRemaining: antiFarmingState.onBreak 
+      ? RATE_LIMITS.requiredBreakDuration - (now - antiFarmingState.breakStartTime)
+      : 0,
   };
 }
