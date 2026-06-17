@@ -22,7 +22,7 @@ export async function withdrawTide(amount) {
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
 
   // Use Render API server (deployed separately from Vercel)
-  const API_URL = import.meta.env.VITE_API_URL || "https://tidal-api.onrender.com";
+  const API_URL = import.meta.env.VITE_API_URL || "https://tidal-fishing.onrender.com";
 
   const res = await fetch(`${API_URL}/api/withdraw`, {
     method: "POST",
