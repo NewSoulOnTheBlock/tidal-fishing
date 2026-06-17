@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="c192" width="192" height="192"></canvas>
+<canvas id="c512" width="512" height="512"></canvas>
+<script>
+function drawIcon(canvas) {
+  const ctx = canvas.getContext('2d');
+  const size = canvas.width;
+  
+  // Gradient background
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, '#4A9EFF');
+  gradient.addColorStop(1, '#26DE81');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  
+  // White circle
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size*0.35, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Fish emoji or symbol
+  ctx.font = size*0.5 + 'px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#4A9EFF';
+  ctx.fillText('🐟', size/2, size/2);
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+
+// Auto-download
+setTimeout(() => {
+  ['c192', 'c512'].forEach(id => {
+    const link = document.createElement('a');
+    link.download = 'icon-' + document.getElementById(id).width + '.png';
+    link.href = document.getElementById(id).toDataURL();
+    link.click();
+  });
+}, 100);
+</script>
+</body>
+</html>
