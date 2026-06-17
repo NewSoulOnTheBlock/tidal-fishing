@@ -19,6 +19,27 @@ import { connection, TIDE_MINT } from "./solana.js";
 import { signAndSendTransaction, currentPublicKey, signTransaction } from "./wallet.js";
 import { fetchSplBalance } from "./token.js";
 
+// Base58 encoding for signatures
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function base58Encode(bytes) {
+  const alphabet = BASE58_ALPHABET;
+  let num = 0n;
+  for (const byte of bytes) {
+    num = num * 256n + BigInt(byte);
+  }
+  if (num === 0n) return alphabet[0];
+  let result = '';
+  while (num > 0n) {
+    result = alphabet[Number(num % 58n)] + result;
+    num = num / 58n;
+  }
+  for (const byte of bytes) {
+    if (byte !== 0) break;
+    result = alphabet[0] + result;
+  }
+  return result;
+}
+
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const TOKEN_2022_PROGRAM_ID = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
@@ -86,7 +107,9 @@ export async function payTide(uiAmount, { memo } = {}) {
   const serialized = tx.serialize({ requireAllSignatures: false });
   let signature;
   try {
-    signature = await signAndSendTransaction(serialized);
+    const sigBytes = await signAndSendTransaction(serialized);
+    // Convert Uint8Array signature to base58 string
+    signature = typeof sigBytes === 'string' ? sigBytes : base58Encode(sigBytes);
   } catch (e) {
     // Wallet doesn't support sign+send — fall back to sign + manual send.
     if (!/signAndSend/.test(e?.message ?? "")) throw e;
