@@ -73,9 +73,9 @@ export class WalletPanel {
       const earned = Math.floor(S.profile.money);
       const mintConfigured = !!TIDE_MINT;
       
-      // NEW: Check on-chain $TIDE balance for 2.5M requirement
+      // Check on-chain $TIDE balance against the hold requirement.
       const tideBalance = this.lastTideBalance || 0;
-      const MIN_HOLD_REQUIREMENT = 2_500_000; // 2.5 million $TIDE
+      const MIN_HOLD_REQUIREMENT = 1_000_000; // 1 million $TIDE
       const meetsHoldRequirement = tideBalance >= MIN_HOLD_REQUIREMENT;
       
       const canWithdraw = mintConfigured && earned > 0 && !this.withdrawing && meetsHoldRequirement;
@@ -87,7 +87,7 @@ export class WalletPanel {
           : this.withdrawing
             ? "Withdrawing…"
             : !meetsHoldRequirement
-              ? `Hold 2.5M $TIDE to Withdraw`
+              ? `Hold 1M $TIDE to Withdraw`
               : `Withdraw ${formatMoney(earned)}`;
         const subnote = !mintConfigured
           ? `Withdrawals activate once $TIDE goes live`
