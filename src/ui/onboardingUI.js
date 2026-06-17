@@ -105,20 +105,24 @@ export class OnboardingUI {
       console.warn("[onboarding] local save failed:", e?.message);
     }
 
-    // Best-effort: persist to the server so the name follows the wallet.
-    const publicKey = currentPublicKey();
-    if (publicKey) {
-      try {
-        await updateProfile(publicKey.toString(), { username: name });
-      } catch (e) {
-        console.warn("[onboarding] server name save failed (saved locally):", e?.message);
-      }
-    }
-
+    // Advance the UI IMMEDIATELY. A fresh wallet has no Sign-In-With-Solana
+    // session yet, so an *awaited* authenticated write here would stall behind a
+    // signature prompt (or the 12s network timeout) and the overlay would appear
+    // frozen — "Start Fishing" doing nothing. Closing first guarantees the player
+    // always gets into the game; the server save is best-effort.
     this.close();
     events.emit("toast", { msg: `🎉 Welcome aboard, ${name}! Tight lines!`, kind: "gold" });
     // First-time anglers get the how-to-fish walkthrough right after naming.
     events.emit("onboarding:complete");
+
+    // Best-effort: persist the name to the server in the background so it follows
+    // the wallet across devices. Fire-and-forget — its success must not gate play.
+    const publicKey = currentPublicKey();
+    if (publicKey) {
+      updateProfile(publicKey.toString(), { username: name }).catch((e) => {
+        console.warn("[onboarding] server name save failed (saved locally):", e?.message);
+      });
+    }
   }
 
   close() {
