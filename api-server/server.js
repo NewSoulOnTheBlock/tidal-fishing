@@ -69,6 +69,14 @@ async function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_ip_activity_lookup ON ip_activity(ip_address, timestamp DESC);
     CREATE INDEX IF NOT EXISTS idx_ip_activity_wallet ON ip_activity(wallet_address, timestamp DESC);
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id SERIAL PRIMARY KEY,
+      wallet_address VARCHAR(44) NOT NULL,
+      username VARCHAR(50),
+      message VARCHAR(280) NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_chat_created ON chat_messages(id DESC);
   `;
   try {
     await pool.query(ddl);
@@ -682,6 +690,94 @@ app.get('/api/leaderboard', async (req, res) => {
   } catch (error) {
     console.error('[leaderboard] Error:', error);
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+// 4b. Global troll box — fetch recent chat messages.
+// ?since=<id> returns only newer messages (for incremental polling);
+// otherwise returns the latest `limit` messages (oldest-first for appending).
+app.get('/api/chat', async (req, res) => {
+  const since = parseInt(req.query.since, 10);
+  const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+  try {
+    let result;
+    if (Number.isFinite(since) && since > 0) {
+      result = await pool.query(
+        `SELECT id, wallet_address, username, message, created_at
+         FROM chat_messages WHERE id > $1 ORDER BY id ASC LIMIT $2`,
+        [since, limit]
+      );
+    } else {
+      // Latest N, then flip to chronological order for the client.
+      const r = await pool.query(
+        `SELECT id, wallet_address, username, message, created_at
+         FROM chat_messages ORDER BY id DESC LIMIT $1`,
+        [limit]
+      );
+      r.rows.reverse();
+      result = r;
+    }
+    res.json({ messages: result.rows });
+  } catch (error) {
+    console.error('[chat] Fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch chat' });
+  }
+});
+
+// 4c. Global troll box — post a chat message.
+// Banned wallets are already blocked by checkBans (walletAddress in body).
+// Requires a chosen angler name, enforces a length cap + per-wallet cooldown.
+app.post('/api/chat', async (req, res) => {
+  const { walletAddress, username } = req.body;
+  let { message } = req.body;
+
+  if (!walletAddress || walletAddress.length < 32) {
+    return res.status(400).json({ error: 'Valid wallet address required' });
+  }
+  if (!username || !username.trim()) {
+    return res.status(400).json({ error: 'Set an angler name before chatting', code: 'NAME_REQUIRED' });
+  }
+  if (typeof message !== 'string') {
+    return res.status(400).json({ error: 'Message required' });
+  }
+
+  // Sanitize: strip control chars, collapse whitespace runs, trim, cap length.
+  message = message.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 280);
+  if (!message) {
+    return res.status(400).json({ error: 'Message is empty' });
+  }
+  const cleanName = username.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 50);
+
+  try {
+    // Per-wallet cooldown (anti-flood): reject if last post was < 1.5s ago.
+    const last = await pool.query(
+      `SELECT created_at FROM chat_messages WHERE wallet_address = $1 ORDER BY id DESC LIMIT 1`,
+      [walletAddress]
+    );
+    if (last.rows.length > 0) {
+      const elapsed = Date.now() - new Date(last.rows[0].created_at).getTime();
+      if (elapsed < 1500) {
+        return res.status(429).json({ error: 'Slow down a sec', code: 'RATE_LIMIT' });
+      }
+    }
+
+    const inserted = await pool.query(
+      `INSERT INTO chat_messages (wallet_address, username, message)
+       VALUES ($1, $2, $3)
+       RETURNING id, wallet_address, username, message, created_at`,
+      [walletAddress, cleanName, message]
+    );
+
+    // Keep the table bounded — drop everything but the newest 500 messages.
+    pool.query(
+      `DELETE FROM chat_messages
+       WHERE id < (SELECT MIN(id) FROM (SELECT id FROM chat_messages ORDER BY id DESC LIMIT 500) t)`
+    ).catch(() => {});
+
+    res.json({ success: true, message: inserted.rows[0] });
+  } catch (error) {
+    console.error('[chat] Post error:', error);
+    res.status(500).json({ error: 'Failed to post message' });
   }
 });
 

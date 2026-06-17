@@ -2132,3 +2132,126 @@ body.weather-cloudy {
   .onboarding-hero { padding: 26px 20px 16px; }
   .onboarding-body { padding: 18px 20px 22px; }
 }
+
+/* ==================== Troll Box (global chat) ==================== */
+.trollbox {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: 440px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, rgba(20,30,46,0.97) 0%, rgba(28,40,58,0.97) 100%);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.5);
+  z-index: 900;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  font-size: 0.9rem;
+}
+
+.trollbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(95,212,255,0.14), transparent);
+  border-bottom: 1px solid var(--stroke);
+  user-select: none;
+}
+
+.trollbox-title { font-weight: 800; color: #eaf7ff; font-size: 0.92rem; }
+.trollbox-sub { font-weight: 600; font-size: 0.7rem; color: var(--accent); opacity: 0.8; margin-left: 4px; }
+
+.trollbox-toggle {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #cfe6f2;
+  width: 26px;
+  height: 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 0.95rem;
+}
+.trollbox-toggle:hover { background: rgba(255,255,255,0.18); }
+
+.trollbox.collapsed { max-height: none; }
+.trollbox.collapsed .trollbox-messages,
+.trollbox.collapsed .trollbox-footer { display: none; }
+
+.trollbox-messages {
+  flex: 1;
+  min-height: 140px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.trollbox-messages::-webkit-scrollbar { width: 7px; }
+.trollbox-messages::-webkit-scrollbar-thumb { background: rgba(95,212,255,0.3); border-radius: 4px; }
+
+.trollbox-empty { margin: auto; color: #7f8ea0; font-size: 0.82rem; text-align: center; }
+
+.trollbox-msg { line-height: 1.35; word-break: break-word; }
+.trollbox-name { font-weight: 700; color: var(--accent); margin-right: 6px; }
+.trollbox-msg.mine .trollbox-name { color: var(--gold); }
+.trollbox-text { color: #dce7f0; }
+
+.trollbox-footer {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.25);
+}
+
+.trollbox-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  font-size: 0.86rem;
+  outline: none;
+}
+.trollbox-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(95,212,255,0.2); }
+
+.trollbox-send {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: none;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #5fd4ff, #1b76bf);
+  color: #06222e;
+  font-weight: 800;
+  cursor: pointer;
+}
+.trollbox-send:hover { filter: brightness(1.08); }
+
+.trollbox-locked { width: 100%; text-align: center; font-size: 0.82rem; color: #7f8ea0; padding: 4px; }
+.trollbox-setname {
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed var(--accent);
+  border-radius: 9px;
+  background: rgba(95,212,255,0.08);
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+.trollbox-setname:hover { background: rgba(95,212,255,0.16); }
+
+@media (max-width: 560px) {
+  .trollbox { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 50vh; }
+  .trollbox-messages { max-height: 34vh; }
+}

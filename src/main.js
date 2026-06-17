@@ -34,6 +34,7 @@ import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
+import { ChatUI } from "./ui/chatUI.js";
 import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { recordCatchToDB } from "./web3/databaseIntegration.js";
@@ -120,6 +121,22 @@ const onboardingUI = new OnboardingUI();
 
 // First-time wallet sign-in: force the angler-name onboarding flow.
 events.on("onboarding:needed", () => onboardingUI.show());
+
+// Global Troll Box (global chat) — only on the browser-tab web version,
+// hidden in the installed/standalone PWA.
+function isInstalledPWA() {
+  const mm = (q) => window.matchMedia && window.matchMedia(q).matches;
+  return (
+    mm("(display-mode: standalone)") ||
+    mm("(display-mode: minimal-ui)") ||
+    mm("(display-mode: fullscreen)") ||
+    window.navigator.standalone === true
+  );
+}
+if (!isInstalledPWA()) {
+  const chatUI = new ChatUI();
+  chatUI.mount();
+}
 
 // Initialize weather and challenges widgets
 weatherUI.init();
