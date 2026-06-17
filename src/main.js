@@ -31,6 +31,7 @@ import { DailyLoginUI } from "./ui/dailyLoginUI.js";
 import { ChallengesUI } from "./ui/challengesUI.js";
 import { AchievementsUI } from "./ui/achievementsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
+import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
@@ -497,6 +498,14 @@ window.addEventListener("keydown", (e) => {
       // Open achievements
       if (!paused && isGameplayPhase(machine.current)) {
         achievementsUI.show();
+      }
+      break;
+    case "KeyP":
+      // Open Profile
+      if (!paused && isGameplayPhase(machine.current)) {
+        audio.init();
+        audio.play("click");
+        profileUI.show();
       }
       break;
     case "KeyL":

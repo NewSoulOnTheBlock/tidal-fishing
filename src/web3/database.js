@@ -165,3 +165,51 @@ export async function getPlayerJournal(walletAddress) {
     return { journal: [] };
   }
 }
+
+/**
+ * Update player profile (username, profile picture, bio)
+ * @param {string} walletAddress
+ * @param {Object} updates - { username, profilePicture, bio }
+ */
+export async function updateProfile(walletAddress, updates) {
+  try {
+    const res = await fetch(`${API_URL}/api/player/profile`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        walletAddress, 
+        ...updates 
+      }),
+    });
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to update profile');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[database] Profile update error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get player profile (public view with achievements)
+ * @param {string} walletAddress
+ */
+export async function getPlayerProfile(walletAddress) {
+  try {
+    const res = await fetch(`${API_URL}/api/player/profile/${walletAddress}`);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Failed to fetch profile');
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('[database] Profile fetch error:', error);
+    return null;
+  }
+}

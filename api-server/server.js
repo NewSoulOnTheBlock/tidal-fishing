@@ -274,7 +274,114 @@ app.post('/api/withdraw', async (req, res) => {
 });
 
 // ============================================================================
-// DATABASE ENDPOINTS
+// PROFILE ENDPOINTS
+// ============================================================================
+
+// Update player profile (username, profile picture, bio)
+app.patch('/api/player/profile', async (req, res) => {
+  try {
+    const { walletAddress, username, profilePicture, bio } = req.body;
+    
+    if (!walletAddress) {
+      return res.status(400).json({ error: 'walletAddress required' });
+    }
+
+    // Build dynamic update query
+    const updates = [];
+    const values = [];
+    let paramCount = 1;
+
+    if (username !== undefined) {
+      updates.push(`username = $${paramCount++}`);
+      values.push(username);
+    }
+    if (profilePicture !== undefined) {
+      updates.push(`profile_picture = $${paramCount++}`);
+      values.push(profilePicture);
+    }
+    if (bio !== undefined) {
+      updates.push(`bio = $${paramCount++}`);
+      values.push(bio);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    values.push(walletAddress);
+    
+    const result = await pool.query(
+      `UPDATE players 
+       SET ${updates.join(', ')}, last_login = NOW()
+       WHERE wallet_address = $${paramCount}
+       RETURNING id, wallet_address, username, profile_picture, bio, level, xp, total_catches, total_earned`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    res.json({ 
+      success: true,
+      player: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Get player profile (public view)
+app.get('/api/player/profile/:wallet', async (req, res) => {
+  try {
+    const { wallet } = req.params;
+    
+    const result = await pool.query(
+      `SELECT 
+        wallet_address,
+        username,
+        profile_picture,
+        bio,
+        level,
+        xp,
+        money,
+        total_catches,
+        total_earned,
+        perfect_hooks,
+        unlocked_locations,
+        login_streak,
+        created_at
+      FROM players 
+      WHERE wallet_address = $1`,
+      [wallet]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    // Get achievements
+    const achievementsResult = await pool.query(
+      `SELECT achievement_id, unlocked_at 
+       FROM achievements 
+       WHERE player_id = (SELECT id FROM players WHERE wallet_address = $1)
+       ORDER BY unlocked_at ASC`,
+      [wallet]
+    );
+
+    res.json({
+      player: result.rows[0],
+      achievements: achievementsResult.rows
+    });
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+// ============================================================================
+// EXISTING ENDPOINTS
 // ============================================================================
 
 // 1. Auth - Get or create player profile

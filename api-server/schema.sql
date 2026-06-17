@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS players (
   id SERIAL PRIMARY KEY,
   wallet_address VARCHAR(44) UNIQUE NOT NULL,
   username VARCHAR(50),
+  profile_picture VARCHAR(255) DEFAULT 'default',
+  bio TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   last_login TIMESTAMP DEFAULT NOW(),
   total_play_time INTEGER DEFAULT 0,
