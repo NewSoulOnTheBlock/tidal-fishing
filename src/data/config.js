@@ -37,6 +37,13 @@ export const CONFIG = {
     retrieveHoldTime: 0.35, // hold-click this long while waiting to retrieve
     retrieveSpeed: 11,
     deepWaitMult: 1.15, // deep water bites take slightly longer
+    perfectFrac: 0.3, // tap within the first 30% of the window = a perfect hook
+    // active lure jig (a quick tap while waiting)
+    jigCooldown: 0.55, // min seconds between jigs
+    jigWaitMult: 0.8, // each jig multiplies the remaining wait (faster bite)
+    jigNibbleChance: 0.4, // a jig may provoke an immediate teaser nibble
+    jigRareStep: 0.06, // rarity weight boost per jig (capped by jigRareMax)
+    jigRareMax: 3, // jigs counted toward the rarity boost
   },
 
   reel: {
@@ -55,6 +62,21 @@ export const CONFIG = {
     minFishDist: 2.2,
     tiredStrengthMult: 0.62, // fish weakens after its stamina runs out
     tiredSurgeSpacing: 1.6,
+    // tension "green zone": reward keeping tension in the band, punish over-reel
+    sweetLow: 45,
+    sweetHigh: 78,
+    sweetReelBonus: 1.55, // progress gain x this while reeling inside the band
+    overReelTensionMult: 1.4, // tension gain x this while reeling above the band
+    // perfect-hook payoff (applied in fight.start when the hook was perfect)
+    perfectStartTension: 8, // replaces startTension on a perfect hook
+    perfectProgressBonus: 12, // added to startProgress on a perfect hook
+    perfectGrace: 1.1, // seconds of surge immunity after a perfect hook
+    // active surge dodge (tap during the telegraph)
+    dodgeSoften: 0.4, // a dodged surge's strength + duration scale by this
+    // near-snap save (release just after tension crosses 100)
+    snapSaveWindow: 0.32, // seconds to release in after crossing 100
+    snapSaveTension: 80, // tension is dropped to this on a successful save
+    snapSavesPerFight: 1, // free saves granted per fight
   },
 
   economy: {
@@ -70,6 +92,20 @@ export const CONFIG = {
     cloudyChance: 0.45,
     cloudyBiteMult: 1.18, // bites come faster under clouds
     cloudyRareBoost: 1.12,
+  },
+
+  // Drifting "feeding spots" (visible fish shadows / ripple rings) the player
+  // can cast toward for faster bites and a better shot at rarer fish.
+  feeding: {
+    maxSpots: 3,
+    radius: 3.6, // m: how close the bobber must land to count as "in the spot"
+    spawnEvery: [5, 11], // seconds between spawn attempts while a slot is free
+    ttl: [16, 28], // seconds a spot lives before drifting away
+    fade: 1.1, // seconds to fade in/out
+    driftSpeed: 0.32, // m/s lateral drift
+    biteMult: 1.85, // remaining bite wait is divided by this inside a spot
+    rareBoost: 1.6, // rarity weight boost inside a spot
+    rippleEvery: [0.9, 1.8], // seconds between ambient feeding ripples
   },
 
   camera: {

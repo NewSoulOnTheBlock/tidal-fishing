@@ -5,7 +5,7 @@
 import { CONFIG } from "../data/config.js";
 import { events } from "../state/gameState.js";
 import { rollFish, rollBiteWait } from "../fish/spawning.js";
-import { chance, randRange } from "../utils/utils.js";
+import { chance, randRange, clamp } from "../utils/utils.js";
 
 export class BiteSystem {
   /**
@@ -23,12 +23,18 @@ export class BiteSystem {
     this.fish = null;
     this.nibbles = [];
     this.nibbleEnd = 0;
+    this.spotBonus = null;
+    this.jigCount = 0;
+    this._lastJig = -10;
   }
 
-  begin(zone) {
+  begin(zone, spotBonus = null) {
     const env = this.getEnv();
     this.zone = zone;
-    this.wait = rollBiteWait({ ...env, zone });
+    this.spotBonus = spotBonus;
+    this.jigCount = 0;
+    this._lastJig = -10;
+    this.wait = rollBiteWait({ ...env, zone, spotBonus });
     this.t = 0;
     this.fish = null;
     this.state = "waiting";
@@ -44,6 +50,38 @@ export class BiteSystem {
     this.bobber.setDip(0);
   }
 
+  /** Remaining hook-window as a 0..1 fraction (1 = just opened, 0 = gone). */
+  get hookFrac() {
+    if (this.state !== "window" || !this.fish) return 0;
+    return clamp(this.windowT / this.fish.hookWindow, 0, 1);
+  }
+
+  /** Combined rarity-weight boost from the feeding spot + accumulated jigs. */
+  combinedRareBoost() {
+    const C = CONFIG.bite;
+    const jig = 1 + (this.jigCount || 0) * C.jigRareStep;
+    const spot = this.spotBonus?.rareBoost ?? 1;
+    return jig * spot;
+  }
+
+  /** A quick tap while waiting: jigs the lure to hurry a bite + nudge rarity. */
+  jig() {
+    if (this.state !== "waiting") return false;
+    const C = CONFIG.bite;
+    if (this.t - this._lastJig < C.jigCooldown) return false;
+    this._lastJig = this.t;
+    this.jigCount = Math.min((this.jigCount || 0) + 1, C.jigRareMax);
+    // pull the bite closer by shrinking the remaining wait
+    const remaining = this.wait - this.t;
+    this.wait = this.t + Math.max(0.35, remaining * C.jigWaitMult);
+    // the twitch flicks the bobber and may provoke an immediate teaser nibble
+    this.bobber.setDip(0.12);
+    this.nibbleEnd = this.t + 0.22;
+    if (chance(C.jigNibbleChance)) events.emit("bite:nibble");
+    events.emit("bite:jig");
+    return true;
+  }
+
   /** Player pressed during the window. Returns the hooked fish or null. */
   hookAttempt() {
     if (this.state !== "window") return null;
@@ -51,8 +89,8 @@ export class BiteSystem {
     // Calculate if this was a perfect hook (within first 30% of window)
     const totalWindow = fish.hookWindow;
     const elapsedInWindow = fish.hookWindow - this.windowT;
-    const isPerfect = (elapsedInWindow / totalWindow) <= 0.3;
-    
+    const isPerfect = (elapsedInWindow / totalWindow) <= CONFIG.bite.perfectFrac;
+
     this.state = "idle";
     this.fish = null;
     events.emit("bite:hooked", { fish, isPerfect });
@@ -76,7 +114,7 @@ export class BiteSystem {
 
       if (this.t >= this.wait) {
         const env = this.getEnv();
-        this.fish = rollFish({ ...env, zone: this.zone });
+        this.fish = rollFish({ ...env, zone: this.zone, rareBoost: this.combinedRareBoost() });
         this.windowT = this.fish.hookWindow;
         this.state = "window";
         this.bobber.setDip(0.42);
@@ -88,8 +126,8 @@ export class BiteSystem {
         const fish = this.fish;
         this.fish = null;
         this.bobber.setDip(0);
-        // fish swims off, the wait restarts automatically
-        this.begin(this.zone);
+        // fish swims off, the wait restarts automatically (still in the spot)
+        this.begin(this.zone, this.spotBonus);
         events.emit("bite:missed", { fish });
       }
     }

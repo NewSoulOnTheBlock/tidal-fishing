@@ -52,6 +52,14 @@ html, body {
   from { box-shadow: inset 0 0 110px rgba(255, 60, 80, 0.22); }
   to   { box-shadow: inset 0 0 170px rgba(255, 60, 80, 0.45); }
 }
+#vignette.snap-warn {
+  box-shadow: inset 0 0 200px rgba(255, 28, 50, 0.6);
+  animation: snapWarn 0.16s ease-in-out infinite alternate;
+}
+@keyframes snapWarn {
+  from { box-shadow: inset 0 0 150px rgba(255, 28, 50, 0.45); }
+  to   { box-shadow: inset 0 0 230px rgba(255, 28, 50, 0.78); }
+}
 
 .hidden { display: none !important; }
 
@@ -265,8 +273,46 @@ kbd {
   background: rgba(0, 0, 0, 0.5); border: 1px solid var(--stroke);
 }
 .bar-fill { height: 100%; width: 0%; border-radius: 8px; transition: width 0.08s linear; }
+.tension-bar { position: relative; }
+.tension-sweet {
+  position: absolute; top: 0; bottom: 0; left: 45%; width: 33%; z-index: 2;
+  background: rgba(62, 201, 126, 0.28);
+  border-left: 1px solid rgba(160, 255, 200, 0.75);
+  border-right: 1px solid rgba(160, 255, 200, 0.75);
+  pointer-events: none;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+.tension-sweet.active {
+  background: rgba(120, 255, 180, 0.5);
+  box-shadow: inset 0 0 12px rgba(120, 255, 180, 0.85);
+}
 .tension-fill { background: linear-gradient(90deg, #3ec97e, #ffd95e 55%, #ff5d6c 85%); }
+.tension-fill.sweet { filter: brightness(1.18) saturate(1.2); }
 .progress-fill { background: linear-gradient(90deg, #46c6ff, #7ee0ff); }
+
+.surge-banner.snap {
+  color: #fff;
+  background: linear-gradient(90deg, rgba(255, 30, 50, 0), rgba(255, 30, 50, 0.95), rgba(255, 30, 50, 0));
+  animation: surgeFlash 0.12s ease-in-out infinite alternate;
+}
+.surge-banner.dodged {
+  color: #06222c;
+  background: linear-gradient(90deg, rgba(120, 255, 180, 0), rgba(120, 255, 180, 0.9), rgba(120, 255, 180, 0));
+}
+.dodge-btn {
+  align-self: center; pointer-events: auto;
+  margin-top: 2px; padding: 9px 28px;
+  font-weight: 800; font-size: 1rem; letter-spacing: 0.04em;
+  color: #06222c; background: linear-gradient(90deg, #ffd95e, #ffb347);
+  border: none; border-radius: 10px; cursor: pointer;
+  box-shadow: 0 0 18px rgba(255, 200, 87, 0.6);
+  animation: dodgePulse 0.4s ease-in-out infinite alternate;
+}
+.dodge-btn:active { transform: scale(0.95); }
+@keyframes dodgePulse {
+  from { box-shadow: 0 0 12px rgba(255, 200, 87, 0.45); }
+  to   { box-shadow: 0 0 26px rgba(255, 200, 87, 0.9); }
+}
 
 /* bite indicator */
 .bite-indicator {
@@ -277,6 +323,24 @@ kbd {
   animation: biteBounce 0.3s ease-in-out infinite alternate;
 }
 @keyframes biteBounce { from { margin-top: 0; } to { margin-top: -14px; } }
+
+/* closing reticle around the bobber during a bite */
+.bite-ring {
+  position: absolute; z-index: 11; pointer-events: none;
+  width: 84px; height: 84px; border-radius: 50%;
+  border: 4px solid rgba(255, 217, 94, 0.9);
+  box-shadow: 0 0 16px rgba(255, 217, 94, 0.55), inset 0 0 12px rgba(255, 217, 94, 0.35);
+  transform: translate(-50%, -50%);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.bite-ring.perfect {
+  border-color: rgba(120, 255, 180, 0.95);
+  box-shadow: 0 0 18px rgba(120, 255, 180, 0.8), inset 0 0 14px rgba(120, 255, 180, 0.5);
+}
+.bite-ring.late {
+  border-color: rgba(255, 93, 108, 0.95);
+  box-shadow: 0 0 18px rgba(255, 93, 108, 0.8), inset 0 0 14px rgba(255, 93, 108, 0.5);
+}
 
 /* toasts */
 #toasts {

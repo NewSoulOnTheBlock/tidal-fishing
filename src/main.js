@@ -18,6 +18,7 @@ import { CastingSystem } from "./gameplay/casting.js";
 import { Bobber } from "./gameplay/bobber.js";
 import { BiteSystem } from "./gameplay/biteSystem.js";
 import { ReelFight } from "./gameplay/reelMinigame.js";
+import { FeedingSpots } from "./gameplay/feedingSpots.js";
 import * as economy from "./economy/economy.js";
 import { HUD } from "./ui/hud.js";
 import { Screens } from "./ui/screens.js";
@@ -92,6 +93,7 @@ const bite = new BiteSystem(
   bobber
 );
 const fight = new ReelFight(scene, effects, audio);
+const feedingSpots = new FeedingSpots(scene, effects);
 
 const hud = new HUD();
 const catchCard = new CatchCard();
@@ -193,6 +195,7 @@ function travelTo(locId, silent = false) {
   env.load(loc);
   casting.attachTo(env.playerSpot);
   rig.setAnchor(env.playerSpot);
+  feedingSpots.setBounds(env.playerSpot, CONFIG.cast.minDist, CONFIG.cast.baseMaxDist * economy.getStats().castMult);
   water.setParams(loc.water);
   effects.setLocationAmbient(loc);
   audio.setAmbience(loc.ambience, gclock.segment);
@@ -235,6 +238,7 @@ machine.register(Phase.MENU, {
     if (fight.active) fight.end();
     casting.setBend(0);
     casting.setLineTension(0);
+    feedingSpots.setEnabled(false);
     hud.hide();
     rig.setMode("menu");
     screens.showMenu(S.stats.catches > 0 || S.profile.money !== CONFIG.economy.startMoney || S.profile.level > 1);
@@ -253,6 +257,7 @@ machine.register(Phase.IDLE, {
     casting.setLineTension(0);
     rig.setMode("play");
     rig.setFocus(null);
+    feedingSpots.setEnabled(true);
     hud.show();
     hud.setClock(gclock.hours, gclock.segment);
   },
@@ -281,10 +286,10 @@ machine.register(Phase.WAITING, {});
 machine.register(Phase.BITE, {});
 
 machine.register(Phase.REELING, {
-  enter({ fish }) {
+  enter({ fish, isPerfect }) {
     bobber.hide();
     hud.showReel(true, fish);
-    fight.start(fish, lastBobberPos.clone(), env.playerSpot, economy.getStats());
+    fight.start(fish, lastBobberPos.clone(), env.playerSpot, economy.getStats(), { perfect: !!isPerfect });
     fight.setReeling(inputHeld);
     rig.setFocus(fight.fishPoint);
     audio.play("hook");
@@ -339,10 +344,17 @@ machine.register(Phase.MAP, {
 
 const lastBobberPos = new THREE.Vector3();
 
-events.on("bobber:landed", ({ distance, zone }) => {
+events.on("bobber:landed", ({ distance, zone, pos }) => {
   audio.play("splash", { strength: 0.9 });
-  hud.setZone(`${CONFIG.zones.labels[zone]} waters · ${Math.round(distance)}m out`);
-  bite.begin(zone);
+  const spot = feedingSpots.spotAt(pos ?? bobber.pos);
+  let label = `${CONFIG.zones.labels[zone]} waters · ${Math.round(distance)}m out`;
+  if (spot) {
+    label = `🐟 FEEDING SPOT · ${Math.round(distance)}m out`;
+    audio.play("bite", { strength: 0.5 });
+    hud.toast("Cast into a feeding spot — bites incoming!", "success");
+  }
+  hud.setZone(label);
+  bite.begin(zone, spot);
   machine.set(Phase.WAITING);
 });
 
@@ -373,13 +385,15 @@ events.on("bite:missed", () => {
 
 events.on("bite:hooked", ({ fish, isPerfect }) => {
   lastBobberPos.copy(bobber.pos);
-  
+
   // Track perfect hooks
   if (isPerfect) {
     S.stats.perfectHooks = (S.stats.perfectHooks || 0) + 1;
+    audio.play("plip");
+    hud.toast("PERFECT HOOK! 🎯 Strong hookset", "gold");
   }
-  
-  machine.set(Phase.REELING, { fish });
+
+  machine.set(Phase.REELING, { fish, isPerfect });
 });
 
 events.on("fight:update", (data) => {
@@ -411,8 +425,31 @@ events.on("fight:landed", async ({ fish }) => {
   catchCard.show(fish, result, () => machine.set(Phase.IDLE));
 });
 
+events.on("bite:jig", () => {
+  audio.play("plip");
+  effects.ripple(bobber.pos, 1.2, 0.6);
+});
+
+events.on("fight:dodge", () => {
+  audio.play("whoosh");
+  rig.addShake(0.12);
+  hud.toast("Dodged the surge!", "success");
+});
+
+events.on("fight:nearsnap", () => {
+  audio.play("snap", { strength: 0.4 });
+  hud.shake();
+  rig.addShake(0.3);
+});
+
+events.on("fight:save", () => {
+  audio.play("plip");
+  hud.toast("Saved it! Line held by a thread.", "gold");
+});
+
 events.on("gear", () => {
   casting.castMult = economy.getStats().castMult;
+  feedingSpots.setBounds(env.playerSpot, CONFIG.cast.minDist, CONFIG.cast.baseMaxDist * economy.getStats().castMult);
 });
 casting.castMult = economy.getStats().castMult;
 
@@ -455,6 +492,10 @@ function pressUp() {
     case Phase.REELING:
       fight.setReeling(false);
       break;
+    case Phase.WAITING:
+      // a quick tap (released before the retrieve hold kicks in) jigs the lure
+      if (waitingHoldT < CONFIG.bite.retrieveHoldTime) bite.jig();
+      break;
     default:
       break;
   }
@@ -471,8 +512,8 @@ window.addEventListener("pointerup", (e) => {
   if (e.button !== 0) return;
   if (!inputHeld) return;
   inputHeld = false;
-  waitingHoldT = 0;
   pressUp();
+  waitingHoldT = 0;
 });
 
 window.addEventListener("pointermove", (e) => {
@@ -503,6 +544,11 @@ window.addEventListener("keydown", (e) => {
       break;
     case "KeyR":
       if (!paused && machine.is(Phase.WAITING)) machine.set(Phase.RETRIEVING);
+      break;
+    case "KeyD":
+    case "ShiftLeft":
+    case "ShiftRight":
+      if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
       break;
     case "KeyM":
       toggleScreen(Phase.MAP);
@@ -552,10 +598,18 @@ window.addEventListener("keyup", (e) => {
   if (e.code === "Space" && spaceHeld) {
     spaceHeld = false;
     inputHeld = false;
-    waitingHoldT = 0;
     pressUp();
+    waitingHoldT = 0;
   }
 });
+
+if (hud.dodgeBtn) {
+  hud.dodgeBtn.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
+  });
+}
 
 function toggleScreen(phase) {
   if (paused) return;
@@ -680,6 +734,7 @@ function tick() {
   water.update(dt);
   sky.update(gclock.hours, cloudFactor, currentLoc());
   effects.update(dt, camera, gclock.segment);
+  if (!paused) feedingSpots.update(dt);
 
   if (!paused) {
     const aiming = phase === Phase.IDLE || phase === Phase.CHARGING;
@@ -696,7 +751,9 @@ function tick() {
       case Phase.WAITING:
         bobber.update(dt);
         bite.update(dt);
-        if (inputHeld) {
+        // a bite may have fired this frame and moved us to BITE — don't let the
+        // retrieve-hold logic immediately override it
+        if (machine.is(Phase.WAITING) && inputHeld) {
           waitingHoldT += dt;
           if (waitingHoldT >= CONFIG.bite.retrieveHoldTime) {
             waitingHoldT = 0;
@@ -708,8 +765,14 @@ function tick() {
       case Phase.BITE: {
         bobber.update(dt);
         bite.update(dt);
+        // the window may have just expired (missed) and bumped us to WAITING —
+        // hide the reticle instead of re-showing it over the bobber
+        if (!machine.is(Phase.BITE)) {
+          hud.positionBite(null);
+          break;
+        }
         const p = projectToScreen(bobber.pos, camera, window.innerWidth, window.innerHeight, biteScreenPos);
-        hud.positionBite(p);
+        hud.positionBite(p, bite.hookFrac);
         break;
       }
       case Phase.RETRIEVING:

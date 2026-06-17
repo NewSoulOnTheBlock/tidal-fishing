@@ -25,6 +25,8 @@ export function rollSpecies(ctx) {
     if (!sp.time.includes(segment)) w *= 0.32;
     w *= ctx.bait.bias[sp.rarity] ?? 1;
     if (cloudy && RARITIES[sp.rarity].order >= 2) w *= CONFIG.weather.cloudyRareBoost;
+    // feeding-spot + lure-jig rarity boost favours the better fish
+    if (ctx.rareBoost && ctx.rareBoost !== 1 && RARITIES[sp.rarity].order >= 2) w *= ctx.rareBoost;
     return w;
   };
 
@@ -80,5 +82,7 @@ export function rollBiteWait(ctx) {
   wait /= ctx.location.biteMult;
   if (ctx.weather === "cloudy") wait /= CONFIG.weather.cloudyBiteMult;
   if (ctx.zone === "deep") wait *= CONFIG.bite.deepWaitMult;
+  // casting into a feeding spot brings bites in much faster
+  if (ctx.spotBonus?.biteMult) wait /= ctx.spotBonus.biteMult;
   return clamp(wait, 2, 25);
 }

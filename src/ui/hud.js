@@ -4,6 +4,7 @@
 import { S, events, Phase } from "../state/gameState.js";
 import { xpToNext, getEquipped, inventoryValue } from "../economy/economy.js";
 import { LOCATION_BY_ID } from "../data/locationData.js";
+import { CONFIG } from "../data/config.js";
 import { formatMoney, hourToClock, clamp } from "../utils/utils.js";
 
 const $ = (id) => document.getElementById(id);
@@ -12,9 +13,9 @@ const PROMPTS = {
   [Phase.IDLE]: "Aim with the <b>mouse</b> — hold <b>Click</b> or <b>Space</b> to charge a cast",
   [Phase.CHARGING]: "Release to <b>cast!</b>",
   [Phase.FLYING]: "Nice arc...",
-  [Phase.WAITING]: "Wait for a bite... <b>hold Click</b> or press <b>R</b> to reel back",
+  [Phase.WAITING]: "Wait for a bite — <b>tap</b> to jig the lure · <b>hold</b> Click (or <b>R</b>) to reel back",
   [Phase.BITE]: "HOOK IT! CLICK NOW!",
-  [Phase.REELING]: "<b>Hold Click</b> to reel — release during <b>surges!</b>",
+  [Phase.REELING]: "<b>Hold</b> to reel — ease into the <b>green zone</b>, <b>let go</b> on surges",
   [Phase.CATCH]: "",
   [Phase.RETRIEVING]: "Reeling the line back in...",
 };
@@ -42,10 +43,18 @@ export class HUD {
     this.fightStars = $("fight-stars");
     this.surgeBanner = $("surge-banner");
     this.tensionFill = $("tension-fill");
+    this.tensionSweet = $("tension-sweet");
+    this.dodgeBtn = $("dodge-btn");
     this.progressFill = $("progress-fill");
     this.bite = $("bite-indicator");
+    this.biteRing = $("bite-ring");
     this.toasts = $("toasts");
     this.vignette = $("vignette");
+
+    if (this.tensionSweet) {
+      this.tensionSweet.style.left = `${CONFIG.reel.sweetLow}%`;
+      this.tensionSweet.style.width = `${CONFIG.reel.sweetHigh - CONFIG.reel.sweetLow}%`;
+    }
     this.buttons = [$("btn-map"), $("btn-shop"), $("btn-journal"), $("btn-profile")];
 
     this.bindEvents();
@@ -164,43 +173,77 @@ export class HUD {
       this.fightName.textContent = "Something is hooked...";
       this.fightStars.textContent = "★".repeat(fish.stars) + "☆".repeat(5 - fish.stars);
       this.surgeBanner.classList.add("hidden");
+      this.surgeBanner.classList.remove("snap", "dodged", "telegraph");
+      this.tensionFill.classList.remove("sweet");
       this.tensionFill.style.width = "18%";
       this.progressFill.style.width = "8%";
     }
-    if (!visible) this.vignette.classList.remove("tension-danger");
+    if (this.tensionSweet) this.tensionSweet.classList.remove("active");
+    if (this.dodgeBtn) this.dodgeBtn.classList.add("hidden");
+    if (!visible) {
+      this.vignette.classList.remove("tension-danger", "snap-warn");
+    }
   }
 
-  updateFight({ tension, progress, surge, landing }) {
+  updateFight({ tension, progress, surge, landing, inSweet, canDodge, dodged, snapArmed }) {
     if (landing) {
       this.reelWrap.classList.add("hidden");
-      this.vignette.classList.remove("tension-danger");
+      this.vignette.classList.remove("tension-danger", "snap-warn");
+      if (this.dodgeBtn) this.dodgeBtn.classList.add("hidden");
       this.setPrompt("Got it!");
       return;
     }
     this.tensionFill.style.width = `${tension}%`;
     this.progressFill.style.width = `${progress}%`;
-    this.vignette.classList.toggle("tension-danger", tension > 75);
-    if (surge === "telegraph") {
-      this.surgeBanner.textContent = "IT'S ABOUT TO SURGE...";
-      this.surgeBanner.classList.remove("hidden");
+    this.tensionFill.classList.toggle("sweet", !!inSweet);
+    if (this.tensionSweet) this.tensionSweet.classList.toggle("active", !!inSweet);
+    this.vignette.classList.toggle("tension-danger", tension > 75 && !snapArmed);
+    this.vignette.classList.toggle("snap-warn", !!snapArmed);
+
+    if (this.dodgeBtn) this.dodgeBtn.classList.toggle("hidden", !canDodge);
+
+    if (snapArmed) {
+      this.surgeBanner.textContent = "ON THE BRINK — LET GO!";
+      this.surgeBanner.classList.remove("hidden", "telegraph");
+      this.surgeBanner.classList.add("snap");
+    } else if (dodged && surge === "active") {
+      this.surgeBanner.textContent = "DODGED!";
+      this.surgeBanner.classList.remove("hidden", "telegraph", "snap");
+      this.surgeBanner.classList.add("dodged");
+    } else if (surge === "telegraph") {
+      this.surgeBanner.textContent = canDodge ? "SURGE INCOMING — DODGE!" : "IT'S ABOUT TO SURGE...";
+      this.surgeBanner.classList.remove("hidden", "snap", "dodged");
       this.surgeBanner.classList.add("telegraph");
     } else if (surge === "active") {
       this.surgeBanner.textContent = "SURGE — EASE OFF!";
-      this.surgeBanner.classList.remove("hidden", "telegraph");
+      this.surgeBanner.classList.remove("hidden", "telegraph", "snap", "dodged");
     } else {
       this.surgeBanner.classList.add("hidden");
+      this.surgeBanner.classList.remove("snap", "dodged");
     }
   }
 
-  /** Position the "!" over the bobber; pass null to hide. */
-  positionBite(screenPos) {
+  /** Position the "!" + closing reticle over the bobber; pass null to hide. */
+  positionBite(screenPos, frac = 0) {
     if (!screenPos) {
       this.bite.classList.add("hidden");
+      if (this.biteRing) this.biteRing.classList.add("hidden");
       return;
     }
     this.bite.classList.remove("hidden");
     this.bite.style.left = `${screenPos.x}px`;
     this.bite.style.top = `${screenPos.y}px`;
+    if (this.biteRing) {
+      this.biteRing.classList.remove("hidden");
+      this.biteRing.style.left = `${screenPos.x}px`;
+      this.biteRing.style.top = `${screenPos.y}px`;
+      const f = clamp(frac, 0, 1);
+      const scale = 1 + f * 1.9;
+      this.biteRing.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      // green while the perfect-hook window is still open, then it closes to red
+      this.biteRing.classList.toggle("perfect", f >= 1 - CONFIG.bite.perfectFrac);
+      this.biteRing.classList.toggle("late", f < 0.34);
+    }
   }
 
   toast(msg, kind = "info") {
