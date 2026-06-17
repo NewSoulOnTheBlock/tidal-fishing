@@ -27,7 +27,7 @@ export const FISH_SPECIES = [
   {
     id: "bluegill", name: "Bluegill", rarity: "common",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk"],
-    sizeCm: [10, 26], weightMidKg: 0.3, baseValue: 6,
+    sizeCm: [10, 26], weightMidKg: 0.3, baseValue: 60,
     fight: { strength: 0.62, surgeEvery: [4.5, 7.5], heft: 0.75, stamina: 9 },
     look: { shape: "standard", colorA: 0x5b87b8, colorB: 0xe2954a, finColor: 0x39597e },
     desc: "A curious little sunfish that nips at anything shiny.",
@@ -35,7 +35,7 @@ export const FISH_SPECIES = [
   {
     id: "perch", name: "Yellow Perch", rarity: "common",
     locations: ["lake", "river"], zones: ["shallow", "mid"], time: ["day"],
-    sizeCm: [15, 35], weightMidKg: 0.6, baseValue: 8,
+    sizeCm: [15, 35], weightMidKg: 0.6, baseValue: 80,
     fight: { strength: 0.7, surgeEvery: [4.5, 7], heft: 0.8, stamina: 9 },
     look: { shape: "standard", colorA: 0x8a9a4a, colorB: 0xd8b53e, finColor: 0xc46a2d },
     desc: "Striped and sociable — where there is one, there are many.",
@@ -43,7 +43,7 @@ export const FISH_SPECIES = [
   {
     id: "carp", name: "Common Carp", rarity: "uncommon",
     locations: ["lake"], zones: ["mid"], time: ["dawn", "day", "dusk", "night"],
-    sizeCm: [35, 90], weightMidKg: 4.5, baseValue: 18,
+    sizeCm: [35, 90], weightMidKg: 4.5, baseValue: 180,
     fight: { strength: 1.0, surgeEvery: [4, 6.5], heft: 1.3, stamina: 12 },
     look: { shape: "standard", colorA: 0x9a7b48, colorB: 0xc7a05a, finColor: 0x6e5631 },
     desc: "An old bruiser of still waters. Stubborn on the line.",
@@ -51,7 +51,7 @@ export const FISH_SPECIES = [
   {
     id: "bass", name: "Largemouth Bass", rarity: "uncommon",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["dawn", "dusk"],
-    sizeCm: [25, 60], weightMidKg: 1.8, baseValue: 22,
+    sizeCm: [25, 60], weightMidKg: 1.8, baseValue: 220,
     fight: { strength: 1.1, surgeEvery: [3.8, 6], heft: 1.0, stamina: 11 },
     look: { shape: "standard", colorA: 0x4d7d4f, colorB: 0xa8c39a, finColor: 0x2f5231 },
     desc: "Ambushes lures at first and last light. Loves a fight.",
@@ -59,7 +59,7 @@ export const FISH_SPECIES = [
   {
     id: "pike", name: "Northern Pike", rarity: "rare",
     locations: ["lake"], zones: ["mid", "deep"], time: ["dawn", "day"],
-    sizeCm: [45, 110], weightMidKg: 5.5, baseValue: 45,
+    sizeCm: [45, 110], weightMidKg: 5.5, baseValue: 450,
     fight: { strength: 1.35, surgeEvery: [3.5, 5.5], heft: 1.4, stamina: 13 },
     look: { shape: "slim", colorA: 0x5e7d4e, colorB: 0xc6d38f, finColor: 0x44603a },
     desc: "A freshwater torpedo with a mouth full of needles.",
@@ -67,7 +67,7 @@ export const FISH_SPECIES = [
   {
     id: "catfish", name: "Channel Catfish", rarity: "rare",
     locations: ["lake", "river"], zones: ["deep"], time: ["dusk", "night"],
-    sizeCm: [40, 100], weightMidKg: 6, baseValue: 40,
+    sizeCm: [40, 100], weightMidKg: 6, baseValue: 400,
     fight: { strength: 1.3, surgeEvery: [4, 6.5], heft: 1.55, stamina: 15 },
     look: { shape: "standard", colorA: 0x6b7884, colorB: 0x49525c, finColor: 0x3a424c, whiskers: true },
     desc: "Prowls the dark bottom after sundown. Heavy as a sandbag.",
@@ -75,7 +75,7 @@ export const FISH_SPECIES = [
   {
     id: "koi", name: "Golden Koi", rarity: "epic",
     locations: ["lake"], zones: ["shallow"], time: ["dawn", "day"],
-    sizeCm: [30, 70], weightMidKg: 2.5, baseValue: 110,
+    sizeCm: [30, 70], weightMidKg: 2.5, baseValue: 1100,
     fight: { strength: 1.15, surgeEvery: [3.2, 5.5], heft: 1.0, stamina: 14 },
     look: { shape: "standard", colorA: 0xe88330, colorB: 0xf6f1e6, finColor: 0xd95f2b, glow: true },
     desc: "An escaped jewel. Collectors pay handsomely for one.",
@@ -85,7 +85,7 @@ export const FISH_SPECIES = [
   {
     id: "trout", name: "Rainbow Trout", rarity: "common",
     locations: ["river"], zones: ["shallow", "mid"], time: ["dawn", "day"],
-    sizeCm: [20, 50], weightMidKg: 1.2, baseValue: 14,
+    sizeCm: [20, 50], weightMidKg: 1.2, baseValue: 140,
     fight: { strength: 0.85, surgeEvery: [4, 6.5], heft: 0.85, stamina: 10 },
     look: { shape: "slim", colorA: 0x9fb3c8, colorB: 0xd97b8e, finColor: 0x6e8296 },
     desc: "Quick, clean and beautiful. The river's calling card.",
@@ -93,7 +93,7 @@ export const FISH_SPECIES = [
   {
     id: "grayling", name: "Arctic Grayling", rarity: "uncommon",
     locations: ["river"], zones: ["shallow", "mid"], time: ["day"],
-    sizeCm: [25, 45], weightMidKg: 0.9, baseValue: 26,
+    sizeCm: [25, 45], weightMidKg: 0.9, baseValue: 260,
     fight: { strength: 0.95, surgeEvery: [3.8, 6], heft: 0.85, stamina: 11 },
     look: { shape: "slim", colorA: 0x7d86a8, colorB: 0xb48ccd, finColor: 0x5d6488, tallDorsal: true },
     desc: "Flies a sail-like dorsal fin through the current.",
@@ -101,7 +101,7 @@ export const FISH_SPECIES = [
   {
     id: "eel", name: "River Eel", rarity: "uncommon",
     locations: ["river", "pier"], zones: ["deep"], time: ["night"],
-    sizeCm: [60, 150], weightMidKg: 3, baseValue: 30,
+    sizeCm: [60, 150], weightMidKg: 3, baseValue: 300,
     fight: { strength: 1.05, surgeEvery: [2.8, 4.5], heft: 1.0, stamina: 12 },
     look: { shape: "long", colorA: 0x4f6b51, colorB: 0x39503c, finColor: 0x2c3d2f },
     desc: "Writhes like a live wire. Surges constantly — stay calm.",
@@ -109,7 +109,7 @@ export const FISH_SPECIES = [
   {
     id: "salmon", name: "King Salmon", rarity: "rare",
     locations: ["river"], zones: ["mid", "deep"], time: ["dawn", "dusk"],
-    sizeCm: [50, 100], weightMidKg: 8, baseValue: 60,
+    sizeCm: [50, 100], weightMidKg: 8, baseValue: 600,
     fight: { strength: 1.5, surgeEvery: [3.5, 5.5], heft: 1.5, stamina: 14 },
     look: { shape: "slim", colorA: 0xa9b6bf, colorB: 0xd96459, finColor: 0x77858d },
     desc: "Born upstream, built like an athlete, fights like one too.",
@@ -117,7 +117,7 @@ export const FISH_SPECIES = [
   {
     id: "goldentrout", name: "Golden Trout", rarity: "epic",
     locations: ["river"], zones: ["shallow"], time: ["dawn"],
-    sizeCm: [20, 40], weightMidKg: 0.8, baseValue: 150,
+    sizeCm: [20, 40], weightMidKg: 0.8, baseValue: 1500,
     fight: { strength: 1.1, surgeEvery: [2.8, 4.5], heft: 0.8, stamina: 13 },
     look: { shape: "slim", colorA: 0xf0b53a, colorB: 0xe2703a, finColor: 0xc98e2a, glow: true },
     desc: "Only rises at first light. A living sunbeam.",
@@ -125,7 +125,7 @@ export const FISH_SPECIES = [
   {
     id: "sturgeon", name: "White Sturgeon", rarity: "epic",
     locations: ["river"], zones: ["deep"], time: ["dusk", "night"],
-    sizeCm: [80, 200], weightMidKg: 25, baseValue: 170,
+    sizeCm: [80, 200], weightMidKg: 25, baseValue: 1700,
     fight: { strength: 1.7, surgeEvery: [3.2, 5], heft: 2.0, stamina: 18 },
     look: { shape: "long", colorA: 0x7a7466, colorB: 0x4e493f, finColor: 0x3e3a32, whiskers: true },
     desc: "A river dinosaur. Older than the bridge you cast from.",
@@ -135,7 +135,7 @@ export const FISH_SPECIES = [
   {
     id: "mackerel", name: "Atlantic Mackerel", rarity: "common",
     locations: ["pier", "ocean"], zones: ["shallow", "mid"], time: ["day"],
-    sizeCm: [25, 45], weightMidKg: 0.8, baseValue: 16,
+    sizeCm: [25, 45], weightMidKg: 0.8, baseValue: 160,
     fight: { strength: 0.8, surgeEvery: [4, 6.5], heft: 0.8, stamina: 9 },
     look: { shape: "slim", colorA: 0x4a7fa8, colorB: 0x2f4f68, finColor: 0x3a637f },
     desc: "Travels in flashing silver schools just offshore.",
@@ -143,7 +143,7 @@ export const FISH_SPECIES = [
   {
     id: "flounder", name: "Summer Flounder", rarity: "uncommon",
     locations: ["pier"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk", "night"],
-    sizeCm: [30, 65], weightMidKg: 2, baseValue: 30,
+    sizeCm: [30, 65], weightMidKg: 2, baseValue: 300,
     fight: { strength: 0.95, surgeEvery: [4.5, 7], heft: 1.2, stamina: 11 },
     look: { shape: "flat", colorA: 0xb09a6a, colorB: 0x8a7448, finColor: 0x77633e },
     desc: "A living doormat that hugs the sand until dinner swims by.",
@@ -151,7 +151,7 @@ export const FISH_SPECIES = [
   {
     id: "seabass", name: "Black Sea Bass", rarity: "rare",
     locations: ["pier"], zones: ["mid", "deep"], time: ["dusk", "night"],
-    sizeCm: [30, 60], weightMidKg: 2.5, baseValue: 55,
+    sizeCm: [30, 60], weightMidKg: 2.5, baseValue: 550,
     fight: { strength: 1.3, surgeEvery: [3.5, 5.5], heft: 1.2, stamina: 12 },
     look: { shape: "standard", colorA: 0x3d4757, colorB: 0x232a36, finColor: 0x59658a },
     desc: "Ink-dark and moody. Hunts pilings when the sun drops.",
@@ -159,7 +159,7 @@ export const FISH_SPECIES = [
   {
     id: "snapper", name: "Red Snapper", rarity: "rare",
     locations: ["pier", "ocean"], zones: ["deep"], time: ["day"],
-    sizeCm: [40, 80], weightMidKg: 4.5, baseValue: 70,
+    sizeCm: [40, 80], weightMidKg: 4.5, baseValue: 700,
     fight: { strength: 1.4, surgeEvery: [3.5, 5.5], heft: 1.3, stamina: 13 },
     look: { shape: "standard", colorA: 0xd4574a, colorB: 0xf0907f, finColor: 0xa83a30 },
     desc: "Crimson, keen-eyed and worth every cent at market.",
@@ -169,7 +169,7 @@ export const FISH_SPECIES = [
   {
     id: "mahi", name: "Mahi-Mahi", rarity: "epic",
     locations: ["ocean"], zones: ["mid"], time: ["day"],
-    sizeCm: [70, 140], weightMidKg: 12, baseValue: 220,
+    sizeCm: [70, 140], weightMidKg: 12, baseValue: 2200,
     fight: { strength: 1.8, surgeEvery: [3, 5], heft: 1.6, stamina: 16 },
     look: { shape: "standard", colorA: 0x3fae6a, colorB: 0xf2d348, finColor: 0x2a8a6e, tallDorsal: true },
     desc: "Neon green-and-gold acrobat. Jumps like it hates the sea.",
@@ -177,7 +177,7 @@ export const FISH_SPECIES = [
   {
     id: "tuna", name: "Bluefin Tuna", rarity: "epic",
     locations: ["ocean"], zones: ["deep"], time: ["dawn", "day", "dusk", "night"],
-    sizeCm: [100, 250], weightMidKg: 90, baseValue: 340,
+    sizeCm: [100, 250], weightMidKg: 90, baseValue: 3400,
     fight: { strength: 2.0, surgeEvery: [3, 4.8], heft: 2.4, stamina: 22 },
     look: { shape: "slim", colorA: 0x2b4660, colorB: 0xb8c4cc, finColor: 0xe8c84a },
     desc: "A warm-blooded freight train. Bring your best line.",
@@ -185,7 +185,7 @@ export const FISH_SPECIES = [
   {
     id: "swordfish", name: "Swordfish", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["night"],
-    sizeCm: [150, 300], weightMidKg: 120, baseValue: 650,
+    sizeCm: [150, 300], weightMidKg: 120, baseValue: 6500,
     fight: { strength: 2.2, surgeEvery: [2.6, 4.4], heft: 2.3, stamina: 25 },
     look: { shape: "billed", colorA: 0x53677d, colorB: 0x8fa3b8, finColor: 0x394a5c, glow: true },
     desc: "The night fencer of the deep. Few ever land one.",
@@ -193,10 +193,161 @@ export const FISH_SPECIES = [
   {
     id: "marlin", name: "Blue Marlin", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["day"],
-    sizeCm: [180, 350], weightMidKg: 160, baseValue: 900,
+    sizeCm: [180, 350], weightMidKg: 160, baseValue: 9000,
     fight: { strength: 2.4, surgeEvery: [2.6, 4.2], heft: 2.6, stamina: 28 },
     look: { shape: "billed", colorA: 0x2f5fa8, colorB: 0x7fb3e8, finColor: 0x1d3f78, tallDorsal: true, glow: true },
     desc: "The crown of the ocean. A once-in-a-lifetime battle.",
+  },
+  
+  // ---------------- SILLY & CRAZY FISH ----------------
+  {
+    id: "pizzafish", name: "Deep Dish Pizza Fish", rarity: "rare",
+    locations: ["lake", "river"], zones: ["shallow", "mid"], time: ["day", "dusk"],
+    sizeCm: [30, 50], weightMidKg: 3.5, baseValue: 800,
+    fight: { strength: 1.1, surgeEvery: [4, 6], heft: 1.5, stamina: 10 },
+    look: { shape: "flat", colorA: 0xd4712c, colorB: 0xf4e5a9, finColor: 0x8b4513, glow: true },
+    desc: "Covered in pepperoni spots. Smells suspiciously like marinara. Cannot be explained.",
+  },
+  {
+    id: "wififish", name: "WiFi Router Fish", rarity: "epic",
+    locations: ["pier", "ocean"], zones: ["mid"], time: ["day", "night"],
+    sizeCm: [25, 40], weightMidKg: 1.2, baseValue: 1800,
+    fight: { strength: 0.9, surgeEvery: [5, 8], heft: 0.8, stamina: 12 },
+    look: { shape: "standard", colorA: 0x2c3e50, colorB: 0x3498db, finColor: 0x1abc9c, glow: true },
+    desc: "Broadcasts 5G underwater. Your phone gets full bars near it. Signal drops when caught.",
+  },
+  {
+    id: "bitcoinfish", name: "Bitcoin Fish", rarity: "legendary",
+    locations: ["ocean"], zones: ["deep"], time: ["night"],
+    sizeCm: [40, 70], weightMidKg: 25, baseValue: 50000,
+    fight: { strength: 2.2, surgeEvery: [2.5, 4], heft: 2.8, stamina: 25 },
+    look: { shape: "standard", colorA: 0xf7931a, colorB: 0xffd700, finColor: 0xff8c00, glow: true },
+    desc: "A crypto-currency that got lost in the blockchain and became sentient. Volatility incarnate.",
+  },
+  {
+    id: "discofis", name: "Disco Ball Fish", rarity: "epic",
+    locations: ["lake", "pier"], zones: ["shallow"], time: ["dusk", "night"],
+    sizeCm: [35, 60], weightMidKg: 2, baseValue: 2200,
+    fight: { strength: 1.3, surgeEvery: [3.5, 5.5], heft: 1.1, stamina: 14 },
+    look: { shape: "standard", colorA: 0xc0c0c0, colorB: 0xffd700, finColor: 0xff1493, glow: true },
+    desc: "Spins and sparkles. Plays Bee Gees when reeled in. The 70s called, they want their fish back.",
+  },
+  {
+    id: "ramenfish", name: "Instant Ramen Fish", rarity: "uncommon",
+    locations: ["lake", "river"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk", "night"],
+    sizeCm: [20, 35], weightMidKg: 0.4, baseValue: 350,
+    fight: { strength: 0.7, surgeEvery: [5, 8], heft: 0.6, stamina: 8 },
+    look: { shape: "long", colorA: 0xffd700, colorB: 0xffa500, finColor: 0xff6347 },
+    desc: "Noodle-like body. Comes with a flavor packet. Just add hot water (but don't).",
+  },
+  {
+    id: "catfishcat", name: "Catfish That's Actually a Cat", rarity: "rare",
+    locations: ["lake", "river"], zones: ["mid"], time: ["night"],
+    sizeCm: [40, 70], weightMidKg: 4, baseValue: 900,
+    fight: { strength: 1.4, surgeEvery: [3, 5], heft: 1.3, stamina: 13 },
+    look: { shape: "standard", colorA: 0x8b7355, colorB: 0xd2b48c, finColor: 0x654321, whiskers: true },
+    desc: "Meows underwater. Has nine lives. Hates water but lives in it anyway. Confusing for everyone.",
+  },
+  {
+    id: "clockfish", name: "Clockwork Fish", rarity: "epic",
+    locations: ["river", "ocean"], zones: ["mid", "deep"], time: ["day", "night"],
+    sizeCm: [45, 80], weightMidKg: 8, baseValue: 2500,
+    fight: { strength: 1.7, surgeEvery: [3, 5], heft: 1.9, stamina: 16 },
+    look: { shape: "standard", colorA: 0x8b7355, colorB: 0xcd853f, finColor: 0x4a4a4a, glow: true },
+    desc: "Ticks loudly. Somehow tells correct time in three time zones. May or may not be time travel.",
+  },
+  {
+    id: "laptopfish", name: "Gaming Laptop Fish", rarity: "legendary",
+    locations: ["pier", "ocean"], zones: ["mid"], time: ["night"],
+    sizeCm: [50, 85], weightMidKg: 5.5, baseValue: 8000,
+    fight: { strength: 2.0, surgeEvery: [2.8, 4.5], heft: 2.2, stamina: 20 },
+    look: { shape: "flat", colorA: 0x2c3e50, colorB: 0x34495e, finColor: 0x1abc9c, glow: true },
+    desc: "RGB fins. Runs Cyberpunk at 120fps underwater. Overheats constantly. Weighs more than your dignity.",
+  },
+  {
+    id: "rainbowfish", name: "Double Rainbow Fish", rarity: "epic",
+    locations: ["lake", "river", "pier"], zones: ["shallow", "mid"], time: ["day"],
+    sizeCm: [30, 65], weightMidKg: 2.8, baseValue: 3200,
+    fight: { strength: 1.5, surgeEvery: [3.5, 5.5], heft: 1.2, stamina: 15 },
+    look: { shape: "standard", colorA: 0xff0000, colorB: 0x9400d3, finColor: 0xffff00, glow: true },
+    desc: "ALL the colors. At once. Forever. Cries glitter. Scientists are baffled. Tastes like Skittles.",
+  },
+  {
+    id: "sushifish", name: "Self-Rolling Sushi Fish", rarity: "rare",
+    locations: ["pier", "ocean"], zones: ["shallow", "mid"], time: ["day", "dusk"],
+    sizeCm: [15, 30], weightMidKg: 0.8, baseValue: 1200,
+    fight: { strength: 0.9, surgeEvery: [4, 6.5], heft: 0.7, stamina: 11 },
+    look: { shape: "standard", colorA: 0xf5f5dc, colorB: 0xff6347, finColor: 0x2e8b57 },
+    desc: "Pre-wrapped in rice and seaweed. Comes with soy sauce packet. Deeply existential.",
+  },
+  {
+    id: "blackholefish", name: "Miniature Black Hole Fish", rarity: "legendary",
+    locations: ["ocean"], zones: ["deep"], time: ["night"],
+    sizeCm: [1, 5], weightMidKg: 999, baseValue: 100000,
+    fight: { strength: 5.0, surgeEvery: [1, 2], heft: 9.9, stamina: 50 },
+    look: { shape: "standard", colorA: 0x000000, colorB: 0x1a1a1a, finColor: 0x000000, glow: true },
+    desc: "Infinitely dense. Weighs more than your boat. Reality warps around it. Probably shouldn't exist.",
+  },
+  {
+    id: "cloudfish", name: "Cumulus Cloud Fish", rarity: "epic",
+    locations: ["lake", "river", "ocean"], zones: ["shallow"], time: ["day"],
+    sizeCm: [60, 120], weightMidKg: 0.01, baseValue: 2800,
+    fight: { strength: 0.3, surgeEvery: [8, 12], heft: 0.1, stamina: 6 },
+    look: { shape: "standard", colorA: 0xf0f8ff, colorB: 0xfffafa, finColor: 0xe0ffff, glow: true },
+    desc: "Floats above water. Weighs nothing. Made of actual clouds. Rains when sad. Good for droughts.",
+  },
+  {
+    id: "toasterfish", name: "Brave Little Toaster Fish", rarity: "rare",
+    locations: ["lake", "pier"], zones: ["mid"], time: ["dawn", "day"],
+    sizeCm: [25, 40], weightMidKg: 3, baseValue: 950,
+    fight: { strength: 1.2, surgeEvery: [4, 6], heft: 1.4, stamina: 12 },
+    look: { shape: "standard", colorA: 0xc0c0c0, colorB: 0x808080, finColor: 0xff4500, glow: true },
+    desc: "Makes perfect toast underwater somehow. Brave. Sparks occasionally. Electrically questionable.",
+  },
+  {
+    id: "moonfish", name: "Literal Moon Fish", rarity: "legendary",
+    locations: ["ocean"], zones: ["deep"], time: ["night"],
+    sizeCm: [200, 350], weightMidKg: 73477, baseValue: 500000,
+    fight: { strength: 8.0, surgeEvery: [0.5, 1.5], heft: 12, stamina: 100 },
+    look: { shape: "standard", colorA: 0xf5f5dc, colorB: 0xfffacd, finColor: 0xdcdcdc, glow: true },
+    desc: "The actual moon. Got tired of orbiting. Now swims. Controls tides. NASA is looking for it.",
+  },
+  {
+    id: "memefish", name: "Doge Fish (Much Wow)", rarity: "epic",
+    locations: ["lake", "river", "pier", "ocean"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk", "night"],
+    sizeCm: [35, 70], weightMidKg: 4.2, baseValue: 6900,
+    fight: { strength: 1.6, surgeEvery: [3.5, 5.5], heft: 1.4, stamina: 14 },
+    look: { shape: "standard", colorA: 0xdaa520, colorB: 0xffd700, finColor: 0xff8c00, glow: true },
+    desc: "Such fish. Very catch. Much wow. So swim. Wow. Internet never forgets. Neither does ocean.",
+  },
+  
+  // ---------------- THE JACKPOT ----------------
+  // The Smoking Chicken Fish is the hardest catch in Tidal. Only spawns in
+  // the Deep Ocean at night, with crushing fight stats, an almost impossible
+  // hook window, and a 0.05 spawn weight (50× rarer than a Blue Marlin).
+  // Landing one credits 10,000,000 $TIDE immediately on catch — no need to
+  // hike back to the shop to sell it.
+  {
+    id: "smokingchicken",
+    name: "Smoking Chicken Fish",
+    rarity: "legendary",
+    locations: ["ocean"],
+    zones: ["deep"],
+    time: ["night"],
+    sizeCm: [55, 95],
+    weightMidKg: 4.2,
+    baseValue: 10_000_000,
+    fight: { strength: 3.6, surgeEvery: [0.9, 1.7], heft: 3.2, stamina: 80 },
+    look: {
+      shape: "standard",
+      colorA: 0xf2cdb8, colorB: 0xc78d80, finColor: 0x5b3322,
+      glow: true,
+      image: "/smoking-chicken-fish.png", // overrides the procedural SVG
+    },
+    desc: "Half raw poultry, half deep-sea predator, all attitude. Smokes like a chimney. They say nobody has ever landed one twice.",
+    fixedValue: true,        // baseValue is exact; do not scale by roll
+    hookWindowMult: 0.45,    // a brutally short hook reaction window
+    jackpot: true,           // auto-credits the player on catch (no sell needed)
   },
 ];
 

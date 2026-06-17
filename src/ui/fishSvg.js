@@ -1,8 +1,14 @@
 // Shared inline-SVG fish silhouette used by the catch card, journal and shop.
+// If a species' look has an `image` field, the SVG is replaced with an <img>
+// of that asset (used by special hand-crafted species like the Smoking
+// Chicken Fish).
 
 import { hexToCss } from "../utils/utils.js";
 
 export function fishSVG(look, extraClass = "") {
+  if (look?.image) {
+    return `<img class="fish-svg fish-img ${extraClass}" src="${look.image}" alt="" draggable="false" />`;
+  }
   const body = hexToCss(look.colorA);
   const fins = hexToCss(look.finColor);
   const accent = hexToCss(look.colorB);

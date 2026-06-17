@@ -1,5 +1,5 @@
 // Location-select screen: travel between unlocked waters, unlock new ones
-// with money + level, and see collection progress per spot.
+// with $TIDE + level, and see collection progress per spot.
 
 import { S, events } from "../state/gameState.js";
 import { LOCATIONS } from "../data/locationData.js";
@@ -7,6 +7,8 @@ import { FISH_SPECIES } from "../data/fishData.js";
 import * as economy from "../economy/economy.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney } from "../utils/utils.js";
+import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
+import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -83,6 +85,38 @@ export class MapUI {
           this.render();
         });
         body.appendChild(btn);
+        if (isOnChainPayEnabled() && lvlOk) {
+          const chainBtn = document.createElement("button");
+          chainBtn.className = "btn btn-onchain";
+          chainBtn.innerHTML = `🔥 Burn ${loc.unlock.cost} $TIDE`;
+          chainBtn.title = `Burn ${loc.unlock.cost} on-chain $TIDE on Solana mainnet to unlock`;
+          chainBtn.addEventListener("click", async () => {
+            chainBtn.disabled = true;
+            chainBtn.textContent = "Burning…";
+            try {
+              const sig = await payTide(loc.unlock.cost, { memo: `tidal:loc:${loc.id}` });
+              const res = economy.grantLocationOnChain(loc, sig);
+              if (res.ok) {
+                audio.play("buy");
+                events.emit("toast", {
+                  msg: `${loc.name} unlocked — ${loc.unlock.cost} $TIDE burned · ${shortAddress(sig, 6, 6)}`,
+                  kind: "gold",
+                  href: explorerTxUrl(sig),
+                });
+                events.emit("wallet:refresh");
+              } else {
+                events.emit("toast", { msg: res.reason, kind: "warn" });
+              }
+            } catch (e) {
+              console.error("[tidal] on-chain unlock failed", e);
+              audio.play("error");
+              events.emit("toast", { msg: e?.message ?? "On-chain burn failed", kind: "warn" });
+            } finally {
+              this.render();
+            }
+          });
+          body.appendChild(chainBtn);
+        }
       }
       this.grid.appendChild(card);
     }

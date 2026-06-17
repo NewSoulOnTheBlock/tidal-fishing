@@ -45,7 +45,9 @@ export function rollFish(ctx) {
   const sizeNorm = (sizeCm - minS) / (maxS - minS);
 
   const weightKg = Math.max(0.01, sp.weightMidKg * Math.pow(sizeCm / mid, 2.9));
-  const value = Math.round(sp.baseValue * (0.45 + 0.55 * Math.pow(sizeCm / mid, 2.2)));
+  const value = sp.fixedValue
+    ? sp.baseValue
+    : Math.round(sp.baseValue * (0.45 + 0.55 * Math.pow(sizeCm / mid, 2.2)));
   const rarity = RARITIES[sp.rarity];
   const xp = Math.round(rarity.xp * (0.75 + 0.5 * (sizeCm / mid)));
 
@@ -58,13 +60,14 @@ export function rollFish(ctx) {
     value,
     xp,
     sizeNorm,
+    jackpot: !!sp.jackpot,
     fight: {
       strength: sp.fight.strength * (0.85 + 0.35 * sizeNorm),
       surgeEvery: sp.fight.surgeEvery,
       heft: sp.fight.heft,
       stamina: sp.fight.stamina,
     },
-    hookWindow: CONFIG.bite.hookWindowBase * rarity.hookMult,
+    hookWindow: CONFIG.bite.hookWindowBase * rarity.hookMult * (sp.hookWindowMult ?? 1),
     stars: rarity.stars,
   };
 }

@@ -2,7 +2,7 @@
 // fog, water sun uniforms and tone-mapping exposure from the game clock.
 
 import * as THREE from "three";
-import { Sky } from "three/addons/objects/Sky.js";
+import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { lerp, clamp, smoothstep01, degToRad } from "../utils/utils.js";
 
 export class SkySystem {

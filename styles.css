@@ -297,6 +297,439 @@ kbd {
 @keyframes toastIn { from { opacity: 0; transform: translateY(-12px); } }
 @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
 
+/* ==================== Mobile Responsive for HUD ==================== */
+@media (max-width: 768px) {
+  :root {
+    font-size: 13px;
+  }
+
+  /* Wallet panel - compact mobile version */
+  #wallet-mount {
+    top: 4px !important;
+    right: 4px !important;
+    min-width: 100px !important;
+  }
+
+  .wallet-card {
+    min-width: 100px !important;
+    padding: 4px 6px !important;
+  }
+
+  .wallet-row {
+    gap: 3px !important;
+  }
+
+  .wallet-net {
+    font-size: 0.5rem !important;
+  }
+
+  .wallet-sub {
+    font-size: 0.55rem !important;
+  }
+
+  .wallet-connect {
+    font-size: 0.65rem !important;
+    padding: 4px 8px !important;
+    border-radius: 5px !important;
+  }
+
+  .wallet-dot {
+    width: 5px !important;
+    height: 5px !important;
+  }
+
+  .wallet-addr {
+    font-size: 0.65rem !important;
+  }
+
+  .wallet-disconnect {
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .wallet-balances {
+    gap: 6px !important;
+    padding-top: 3px !important;
+  }
+
+  .wallet-bal-tag {
+    font-size: 0.48rem !important;
+  }
+
+  .wallet-bal-val {
+    font-size: 0.7rem !important;
+  }
+
+  /* Push HUD top-right down less on mobile */
+  .hud-topright {
+    top: 60px !important;
+  }
+
+  /* Optimize HUD positioning */
+  .hud-topleft {
+    top: 4px;
+    left: 4px;
+  }
+
+  .hud-topright {
+    top: 4px;
+    right: 4px;
+  }
+
+  .hud-bottomleft {
+    bottom: 4px;
+    left: 4px;
+    flex-direction: row;
+    gap: 4px;
+    max-width: 50vw;
+  }
+
+  .hud-bottomright {
+    bottom: 4px;
+    right: 4px;
+  }
+
+  .hud-card {
+    padding: 6px 10px;
+    min-width: 100px;
+    backdrop-filter: blur(8px);
+  }
+
+  .money-text {
+    font-size: 1rem;
+  }
+
+  .level-row {
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .xp-text {
+    font-size: 0.65rem;
+    margin-top: 2px;
+  }
+
+  /* Compact top-right card */
+  .hud-clockcard .clock-row {
+    gap: 4px;
+  }
+
+  .clock-text {
+    font-size: 1rem;
+  }
+
+  .seg-chip {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+
+  .weather-chip {
+    display: none; /* Hide on mobile, use weather widget instead */
+  }
+
+  .loc-text {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+
+  .hud-buttons {
+    flex-wrap: nowrap;
+    gap: 3px;
+  }
+
+  .hud-btn {
+    font-size: 0.7rem;
+    padding: 5px 8px;
+    border-radius: 6px;
+  }
+
+  /* Compact gear chips */
+  .gear-chip {
+    padding: 4px 8px;
+    min-width: unset;
+  }
+
+  .gear-label {
+    font-size: 0.55rem;
+  }
+
+  .gear-name {
+    font-size: 0.75rem;
+  }
+
+  .bag-chip {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  /* Gameplay prompts */
+  .prompt {
+    bottom: 60px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    max-width: 90vw;
+    white-space: normal;
+  }
+
+  .prompt.urgent {
+    font-size: 1rem;
+  }
+
+  .zone-hint {
+    bottom: 100px;
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
+
+  /* Power meter optimization */
+  .power-wrap {
+    bottom: 120px;
+    gap: 4px;
+  }
+
+  .power-track {
+    width: min(240px, 70vw);
+    height: 16px;
+  }
+
+  .power-label {
+    font-size: 0.65rem;
+  }
+
+  /* Reel fight - more compact */
+  .reel-wrap {
+    bottom: 90px;
+    width: min(420px, 94vw);
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  .fight-head {
+    margin-bottom: 4px;
+  }
+
+  .fight-name {
+    font-size: 0.9rem;
+  }
+
+  .fight-stars {
+    font-size: 0.8rem;
+  }
+
+  .surge-banner {
+    font-size: 0.9rem;
+    padding: 3px 0;
+  }
+
+  .bar-row {
+    gap: 6px;
+  }
+
+  .bar-tag {
+    width: 50px;
+    font-size: 0.6rem;
+  }
+
+  .bar {
+    height: 14px;
+  }
+
+  /* Bite indicator */
+  .bite-indicator {
+    font-size: 2.2rem;
+  }
+
+  /* Toast notifications */
+  #toasts {
+    top: 8px;
+    max-width: 94vw;
+  }
+
+  .toast {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    max-width: 90vw;
+  }
+
+  /* Hide XP text on very small screens */
+  .xp-text {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 12px;
+  }
+
+  /* Extra compact wallet for very small screens */
+  #wallet-mount {
+    min-width: 90px !important;
+  }
+
+  .wallet-card {
+    min-width: 90px !important;
+    padding: 3px 5px !important;
+  }
+
+  .wallet-net {
+    font-size: 0.45rem !important;
+  }
+
+  .wallet-sub {
+    font-size: 0.5rem !important;
+  }
+
+  .wallet-connect {
+    font-size: 0.6rem !important;
+    padding: 3px 6px !important;
+  }
+
+  .wallet-addr {
+    font-size: 0.6rem !important;
+  }
+
+  .wallet-disconnect {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .wallet-balances {
+    gap: 5px !important;
+  }
+
+  .wallet-bal-tag {
+    font-size: 0.45rem !important;
+  }
+
+  .wallet-bal-val {
+    font-size: 0.65rem !important;
+  }
+
+  .hud-topright {
+    top: 55px !important;
+  }
+
+  .hud-card {
+    padding: 4px 8px;
+    min-width: 90px;
+  }
+
+  .money-text {
+    font-size: 0.95rem;
+  }
+
+  .level-badge {
+    font-size: 0.65rem;
+    padding: 1px 5px;
+  }
+
+  .xp-bar {
+    height: 5px;
+  }
+
+  .clock-text {
+    font-size: 0.9rem;
+  }
+
+  .loc-text {
+    font-size: 0.7rem;
+  }
+
+  .hud-btn {
+    font-size: 0.65rem;
+    padding: 4px 6px;
+  }
+
+  .gear-chip {
+    padding: 3px 6px;
+  }
+
+  .gear-name {
+    font-size: 0.7rem;
+  }
+
+  .bag-chip {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+  }
+
+  .prompt {
+    bottom: 55px;
+    font-size: 0.8rem;
+    padding: 5px 12px;
+  }
+
+  .power-track {
+    width: min(200px, 75vw);
+    height: 14px;
+  }
+
+  .reel-wrap {
+    bottom: 80px;
+    padding: 8px 10px;
+    gap: 5px;
+  }
+
+  .fight-name {
+    font-size: 0.8rem;
+  }
+
+  .bar {
+    height: 12px;
+  }
+
+  .bar-tag {
+    width: 45px;
+    font-size: 0.55rem;
+  }
+
+  .bite-indicator {
+    font-size: 1.8rem;
+  }
+
+  .toast {
+    font-size: 0.75rem;
+    padding: 5px 12px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 900px) and (max-height: 500px) and (orientation: landscape) {
+  .hud-card {
+    padding: 4px 8px;
+  }
+
+  .hud-buttons {
+    gap: 2px;
+  }
+
+  .hud-btn {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+  }
+
+  .prompt {
+    bottom: 40px;
+    font-size: 0.75rem;
+  }
+
+  .power-wrap {
+    bottom: 80px;
+  }
+
+  .reel-wrap {
+    bottom: 60px;
+    padding: 8px 10px;
+  }
+
+  .zone-hint {
+    bottom: 70px;
+  }
+}
+
 /* screen shake */
 #app.shake #canvas-wrap { animation: shakeAnim 0.35s ease; }
 @keyframes shakeAnim {
@@ -474,6 +907,17 @@ kbd {
 
 /* ---------------- catch card ---------------- */
 
+#catch-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 120;
+}
+
+#catch-root > * {
+  pointer-events: auto;
+}
+
 .catch-overlay {
   position: absolute; inset: 0; z-index: 120;
   display: flex; align-items: center; justify-content: center;
@@ -559,4 +1003,212 @@ kbd {
   .hud-bottomleft { display: none; }
   .panel { padding: 18px; }
   .panel-wide { height: 92vh; }
+}
+
+/* ============================================================
+   TIDAL — Web3 wallet panel (Solana)
+   ============================================================ */
+
+#wallet-mount {
+  position: fixed; top: 16px; right: 16px;
+  z-index: 150; pointer-events: auto;
+  min-width: 220px;
+}
+
+/* Push the gameplay HUD top-right column down so the wallet panel above it
+   stays clear of the clock + map/shop/journal/pause buttons. */
+.hud-topright { top: 130px !important; }
+.hud-card.wallet-card { margin-bottom: 0; }
+
+.wallet-card {
+  display: flex; flex-direction: column; gap: 8px;
+  min-width: 220px;
+  border: 1px solid rgba(132, 220, 255, 0.18);
+}
+.wallet-row {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: space-between;
+}
+.wallet-net {
+  font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700;
+}
+.wallet-sub {
+  font-size: 0.7rem; color: var(--dim); letter-spacing: 0.04em;
+}
+.wallet-connect {
+  font-size: 0.82rem; padding: 7px 14px; border-radius: 9px;
+}
+.wallet-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ok); box-shadow: 0 0 8px rgba(98, 217, 139, 0.6);
+  flex-shrink: 0;
+}
+.wallet-addr {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.86rem; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--text); text-decoration: none; flex: 1;
+}
+.wallet-addr:hover { color: var(--accent); }
+.wallet-disconnect {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(255, 93, 108, 0.18); border: 1px solid rgba(255, 93, 108, 0.4);
+  color: var(--danger); cursor: pointer; line-height: 1;
+  font-size: 1rem; font-weight: 700; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.wallet-disconnect:hover { background: rgba(255, 93, 108, 0.32); }
+.wallet-balances {
+  display: flex; gap: 16px; align-items: center;
+  padding-top: 4px; border-top: 1px solid var(--stroke);
+}
+.wallet-bal { display: flex; flex-direction: column; gap: 1px; }
+.wallet-bal-tag {
+  font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--dim); font-weight: 700;
+}
+.wallet-bal-val { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+
+/* picker modal */
+.wallet-modal { display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(2, 8, 14, 0.7); backdrop-filter: blur(6px);
+}
+.wallet-pick-panel { max-width: 380px; }
+.wallet-warn {
+  font-size: 0.78rem; color: var(--gold);
+  background: rgba(255, 200, 87, 0.08);
+  border: 1px solid rgba(255, 200, 87, 0.25);
+  border-radius: 8px; padding: 8px 12px; margin: 8px 0 14px;
+  line-height: 1.4;
+}
+.wallet-pick-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.wallet-pick {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--stroke);
+  border-radius: 12px; padding: 12px 16px;
+  font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  color: var(--text); cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease;
+}
+.wallet-pick:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(132, 220, 255, 0.4); }
+.wallet-pick:disabled { opacity: 0.6; cursor: wait; }
+.wallet-pick-icon { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
+.wallet-pick-name { flex: 1; text-align: left; }
+.wallet-pick-cancel { width: 100%; }
+.wallet-empty { color: var(--dim); font-size: 0.9rem; line-height: 1.55; margin-bottom: 14px; }
+.wallet-empty a { color: var(--accent); }
+.wallet-mobile-hint { 
+  font-size: 0.85rem; 
+  line-height: 1.65; 
+  text-align: left;
+}
+.wallet-mobile-hint strong { 
+  color: var(--text); 
+  font-weight: 700;
+}
+.wallet-err {
+  font-size: 0.82rem; color: var(--danger);
+  background: rgba(255, 93, 108, 0.08); border-radius: 8px;
+  padding: 8px 12px; margin-top: 10px;
+}
+
+.btn-onchain {
+  margin-left: 6px;
+  font-size: 0.78rem;
+  padding: 7px 12px;
+  background: linear-gradient(135deg, rgba(159, 122, 234, 0.22), rgba(102, 126, 234, 0.22));
+  border: 1px solid rgba(159, 122, 234, 0.55);
+  color: #c4b5fd;
+}
+.btn-onchain:hover { background: linear-gradient(135deg, rgba(159, 122, 234, 0.35), rgba(102, 126, 234, 0.35)); border-color: rgba(159, 122, 234, 0.8); }
+.btn-onchain:disabled { opacity: 0.6; cursor: wait; }
+
+/* ============================================================
+   Smoking Chicken Fish — image rendering + JACKPOT card
+   ============================================================ */
+.fish-img {
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5));
+}
+.catch-card .fish-img { width: 200px; height: 170px; }
+
+.catch-ribbon.jackpot {
+  color: #1a0c00;
+  background: linear-gradient(135deg, #ff9b3d, #ffd93d, #ff5d6c, #ffd93d);
+  background-size: 300% 100%;
+  animation: jackpotShine 2s linear infinite;
+  letter-spacing: 0.22em;
+  box-shadow: 0 6px 28px rgba(255, 177, 61, 0.7);
+  font-size: 0.84rem;
+  padding: 7px 22px;
+}
+@keyframes jackpotShine {
+  from { background-position: 0% 50%; }
+  to   { background-position: 300% 50%; }
+}
+
+.catch-card-jackpot {
+  --rarity: #ffd93d;
+  border: 2px solid rgba(255, 217, 61, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(255, 217, 61, 0.3),
+    0 16px 60px rgba(255, 155, 61, 0.45),
+    0 0 80px rgba(255, 93, 108, 0.35);
+  animation: jackpotPulse 1.6s ease-in-out infinite alternate;
+}
+@keyframes jackpotPulse {
+  from { box-shadow: 0 0 0 1px rgba(255, 217, 61, 0.3), 0 16px 60px rgba(255, 155, 61, 0.45), 0 0 80px rgba(255, 93, 108, 0.35); }
+  to   { box-shadow: 0 0 0 1px rgba(255, 217, 61, 0.6), 0 22px 80px rgba(255, 155, 61, 0.7),  0 0 130px rgba(255, 93, 108, 0.6); }
+}
+
+.catch-jackpot-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ffd93d, #ff9b3d);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 24px rgba(255, 217, 61, 0.4);
+  line-height: 1.05;
+  margin: 14px 0 6px;
+}
+.catch-jackpot-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  background: none;
+  -webkit-text-fill-color: var(--gold);
+  margin-top: 2px;
+}
+
+.wallet-withdraw {
+  padding-top: 4px; border-top: 1px solid var(--stroke);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.btn-withdraw {
+  background: linear-gradient(135deg, #1d9dd4, #6ad6a4);
+  border: 1px solid rgba(120, 230, 200, 0.55);
+  color: #052015;
+  font-weight: 700; letter-spacing: 0.04em;
+  padding: 9px 14px; font-size: 0.92rem;
+  width: 100%; box-shadow: 0 6px 22px rgba(106, 214, 164, 0.28);
+}
+.btn-withdraw:hover { filter: brightness(1.08); }
+.btn-withdraw:disabled {
+  background: linear-gradient(135deg, rgba(29, 157, 212, 0.35), rgba(106, 214, 164, 0.35));
+  color: rgba(5, 32, 21, 0.65);
+  box-shadow: none; cursor: not-allowed;
+}
+.wallet-withdraw-sub {
+  font-size: 0.66rem; color: var(--dim); text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   Powered by The Church of the Smoking Chicken Fish 🔥🐔🐟
+   ============================================================ */
+@media (max-width: 520px) {
+  /* Mobile-specific styles */
 }

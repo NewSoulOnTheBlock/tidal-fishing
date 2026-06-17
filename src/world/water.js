@@ -2,7 +2,7 @@
 // procedurally generated tileable normal map so no external textures are needed.
 
 import * as THREE from "three";
-import { Water } from "three/addons/objects/Water.js";
+import { Water } from "three/examples/jsm/objects/Water.js";
 import { CONFIG } from "../data/config.js";
 
 let cachedNormals = null;

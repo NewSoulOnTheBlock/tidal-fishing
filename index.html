@@ -3,19 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>TIDELINE — 3D Fishing Simulator</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="application-name" content="Tidal" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tidal" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#5fd4ff" />
+  <meta name="description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and compete in tournaments." />
+  
+  <!-- Open Graph / Social -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Tidal - Web3 Fishing Game" />
+  <meta property="og:description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and compete in tournaments." />
+  <meta property="og:url" content="https://tidalfishing.fun" />
+  <meta property="og:site_name" content="Tidal" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Tidal - Web3 Fishing Game" />
+  <meta name="twitter:description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and compete in tournaments." />
+  
+  <title>TIDAL — Web3 fishing on Solana</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-    }
-  }
-  </script>
+  <link rel="stylesheet" href="./progression.css" />
 </head>
 <body>
 <div id="app">
@@ -26,7 +44,7 @@
   <div id="hud" class="hidden">
     <div class="hud-corner hud-topleft">
       <div class="hud-card">
-        <div id="hud-money" class="money-text">$0</div>
+        <div id="hud-money" class="money-text">0 $TIDE</div>
         <div class="level-row">
           <span id="hud-level" class="level-badge">Lv 1</span>
           <div class="xp-bar"><div id="hud-xpfill" class="xp-fill"></div></div>
@@ -97,8 +115,8 @@
   <!-- ======================= SCREENS ======================= -->
   <div id="screen-menu" class="screen hidden">
     <div class="menu-box">
-      <h1 class="game-title">TIDELINE</h1>
-      <p class="game-sub">a 3D fishing journey</p>
+      <h1 class="game-title">TIDAL</h1>
+      <p class="game-sub">a web3 fishing journey on Solana</p>
       <div class="menu-buttons">
         <button id="menu-play" class="btn btn-primary btn-big">Play</button>
         <button id="menu-howto" class="btn">How to Play</button>
@@ -169,7 +187,7 @@
     <div class="panel panel-wide">
       <div class="panel-head">
         <h2 class="panel-title">Bait &amp; Tackle</h2>
-        <span id="shop-money" class="money-text">$0</span>
+        <span id="shop-money" class="money-text">0 $TIDE</span>
         <button id="shop-close" class="btn btn-close">Close</button>
       </div>
       <nav id="shop-tabs" class="tab-row"></nav>
@@ -203,10 +221,70 @@
 
   <div id="boot-loader">
     <div class="boot-spin"></div>
-    <div class="boot-text">Loading TIDELINE…</div>
-    <div class="boot-sub">fetching Three.js from CDN</div>
+    <div class="boot-text">Loading TIDAL…</div>
+    <div class="boot-sub">connecting to Solana mainnet</div>
   </div>
 </div>
 <script type="module" src="./src/main.js"></script>
+<script>
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered:', registration.scope);
+          
+          // Check for updates every 60 seconds when page is visible
+          setInterval(() => {
+            if (document.visibilityState === 'visible') {
+              registration.update();
+            }
+          }, 60000);
+        })
+        .catch((error) => {
+          console.log('SW registration failed:', error);
+        });
+    });
+  }
+
+  // Install prompt for PWA
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Show custom install button after 30 seconds of gameplay
+    setTimeout(() => {
+      if (deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+        showInstallPrompt();
+      }
+    }, 30000);
+  });
+
+  function showInstallPrompt() {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-gold pwa-install-toast';
+    toast.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span>📱 Install Tidal as an app!</span>
+        <button onclick="installPWA()" style="background: gold; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">Install</button>
+        <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">Later</button>
+      </div>
+    `;
+    document.getElementById('toasts').appendChild(toast);
+  }
+
+  window.installPWA = async function() {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response: ${outcome}`);
+    deferredPrompt = null;
+    
+    // Remove install prompt
+    document.querySelectorAll('.pwa-install-toast').forEach(el => el.remove());
+  };
+</script>
 </body>
 </html>

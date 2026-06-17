@@ -15,12 +15,15 @@ class AudioManager {
     this.ambienceProfile = null;
     this.ambienceSegment = "day";
     this.reelAccum = 0;
+    this.bgMusic = null; // { audio: HTMLAudioElement, gainNode: GainNode }
+    this.bgMusicVolume = 0.15; // Background music at 15% volume
   }
 
   /** Must be called from a user gesture. Safe to call repeatedly. */
   init() {
     if (this.ctx) {
       if (this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
+      this.startBackgroundMusic();
       return;
     }
     try {
@@ -32,6 +35,7 @@ class AudioManager {
       this.master.connect(this.ctx.destination);
       this.noiseBuffer = this.makeNoiseBuffer(2);
       if (this.ambienceProfile) this.setAmbience(this.ambienceProfile, this.ambienceSegment);
+      this.startBackgroundMusic();
     } catch {
       this.ctx = null;
     }
@@ -49,6 +53,46 @@ class AudioManager {
   setMuted(m) {
     this.muted = m;
     if (this.master) this.master.gain.value = m ? 0 : this.volume;
+    if (this.bgMusic && this.bgMusic.gainNode) {
+      this.bgMusic.gainNode.gain.value = m ? 0 : this.bgMusicVolume;
+    }
+  }
+
+  startBackgroundMusic() {
+    if (this.bgMusic) return; // Already started
+    if (!this.ctx) return;
+    
+    try {
+      const audio = new Audio('/background-music.mp3');
+      audio.loop = true;
+      audio.volume = 1.0; // Control via gain node instead
+      
+      // Connect to Web Audio for volume control
+      const source = this.ctx.createMediaElementSource(audio);
+      const gainNode = this.ctx.createGain();
+      gainNode.gain.value = this.muted ? 0 : this.bgMusicVolume;
+      
+      source.connect(gainNode);
+      gainNode.connect(this.ctx.destination);
+      
+      this.bgMusic = { audio, gainNode, source };
+      
+      // Start playing
+      audio.play().catch(() => {
+        // Autoplay blocked, will retry on next user interaction
+      });
+    } catch (err) {
+      console.warn('Background music failed to load:', err);
+    }
+  }
+
+  stopBackgroundMusic() {
+    if (!this.bgMusic) return;
+    try {
+      this.bgMusic.audio.pause();
+      this.bgMusic.audio.currentTime = 0;
+      this.bgMusic = null;
+    } catch {}
   }
 
   makeNoiseBuffer(seconds) {
@@ -178,6 +222,73 @@ class AudioManager {
         this.tone({ type: "sine", freq: 1175, dur: 0.05, peak: 0.1 });
         this.tone({ type: "sine", freq: 1568, t0: 0.05, dur: 0.09, peak: 0.1 });
         break;
+      case "achievement": {
+        // Triumphant achievement unlock fanfare
+        const melody = [659, 784, 880, 1046, 1318];
+        melody.forEach((f, i) => this.tone({ type: "triangle", freq: f, t0: i * 0.08, dur: 0.18, peak: 0.15 }));
+        this.tone({ type: "sine", freq: 1318, t0: 0.4, dur: 0.5, peak: 0.08 });
+        this.noise({ t0: 0.05, dur: 0.6, peak: 0.04, filterType: "highpass", freq: 4000, attack: 0.15 });
+        break;
+      }
+      case "reward": {
+        // Satisfying reward claim sound
+        this.tone({ type: "sine", freq: 880, dur: 0.08, peak: 0.14 });
+        this.tone({ type: "sine", freq: 1318, t0: 0.08, dur: 0.12, peak: 0.14 });
+        this.tone({ type: "sine", freq: 1760, t0: 0.2, dur: 0.15, peak: 0.1 });
+        break;
+      }
+      case "challenge": {
+        // Challenge complete ding
+        this.tone({ type: "triangle", freq: 988, dur: 0.1, peak: 0.16 });
+        this.tone({ type: "triangle", freq: 1318, t0: 0.1, dur: 0.15, peak: 0.16 });
+        break;
+      }
+      case "dailyLogin": {
+        // Daily login streak sound - warm and welcoming
+        const notes = [523, 659, 784, 1046];
+        notes.forEach((f, i) => this.tone({ type: "sine", freq: f, t0: i * 0.1, dur: 0.2, peak: 0.13 }));
+        this.tone({ type: "triangle", freq: 1318, t0: 0.35, dur: 0.3, peak: 0.08 });
+        break;
+      }
+      case "countdown": {
+        // Tournament countdown tick
+        const intensity = opts.intensity || 0.5;
+        this.tone({ type: "square", freq: 440 + (intensity * 880), dur: 0.08, peak: 0.14 * (1 + intensity) });
+        break;
+      }
+      case "tournamentStart": {
+        // Tournament begins - exciting fanfare
+        const notes = [392, 523, 659, 880, 1046];
+        notes.forEach((f, i) => this.tone({ type: "sawtooth", freq: f, t0: i * 0.07, dur: 0.15, peak: 0.16 }));
+        this.noise({ t0: 0.1, dur: 0.5, peak: 0.08, filterType: "highpass", freq: 6000, attack: 0.2 });
+        break;
+      }
+      case "tournamentEnd": {
+        // Tournament ends - resolution
+        const notes = [1046, 880, 784, 659, 523];
+        notes.forEach((f, i) => this.tone({ type: "triangle", freq: f, t0: i * 0.12, dur: 0.2, peak: 0.14 }));
+        break;
+      }
+      case "jackpot": {
+        // Big win celebration
+        for (let i = 0; i < 8; i++) {
+          this.tone({ 
+            type: "sine", 
+            freq: 523 * Math.pow(2, i / 4), 
+            t0: i * 0.06, 
+            dur: 0.15, 
+            peak: 0.12 - (i * 0.01) 
+          });
+        }
+        this.noise({ t0: 0.2, dur: 1, peak: 0.06, filterType: "highpass", freq: 7000, attack: 0.3 });
+        break;
+      }
+      case "notification": {
+        // Gentle notification ping
+        this.tone({ type: "sine", freq: 880, dur: 0.06, peak: 0.12 });
+        this.tone({ type: "sine", freq: 1318, t0: 0.06, dur: 0.1, peak: 0.08 });
+        break;
+      }
       default:
         break;
     }

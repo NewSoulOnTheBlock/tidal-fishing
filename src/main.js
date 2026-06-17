@@ -1,10 +1,11 @@
-// TIDELINE — bootstrap, game loop, state machine wiring and input routing.
+// TIDAL — bootstrap, game loop, state machine wiring and input routing.
+// Forked from bridge-mind/tideline. Now Web3-native on Solana mainnet.
 
 import * as THREE from "three";
 import { CONFIG } from "./data/config.js";
 import { LOCATION_BY_ID } from "./data/locationData.js";
 import { S, events, machine, Phase, isGameplayPhase } from "./state/gameState.js";
-import { loadGame, saveGame, resetSave } from "./state/saveLoad.js";
+import { loadGame, saveGame, resetSave, setWalletSlot } from "./state/saveLoad.js";
 import { audio } from "./audio/audioManager.js";
 import { createCore } from "./core/scene.js";
 import { GameClock } from "./core/time.js";
@@ -24,13 +25,49 @@ import { ShopUI } from "./ui/shop.js";
 import { JournalUI } from "./ui/journal.js";
 import { MapUI } from "./ui/map.js";
 import { CatchCard } from "./ui/catchCard.js";
+import { WalletPanel } from "./ui/walletPanel.js";
+import { JournalUI as ProgressionJournalUI } from "./ui/journalUI.js";
+import { DailyLoginUI } from "./ui/dailyLoginUI.js";
+import { ChallengesUI } from "./ui/challengesUI.js";
+import { AchievementsUI } from "./ui/achievementsUI.js";
+import { WeatherUI } from "./ui/weatherUI.js";
+import { LeaderboardUI } from "./ui/leaderboardUI.js";
+import { TournamentUI } from "./ui/tournamentUI.js";
+import { onChange as onWalletChange } from "./web3/wallet.js";
+import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
+import { initJournal } from "./progression/journal.js";
+import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js";
+import { initChallenges, rollDailyChallenges } from "./progression/challenges.js";
+import { initAchievements } from "./progression/achievements.js";
+import { initWeather } from "./progression/weather.js";
+import { initTournament } from "./progression/tournament.js";
 
 // ---------------------------------------------------------------------------
 // boot
 // ---------------------------------------------------------------------------
 
 loadGame();
+
+// Initialize progression systems
+S.progressionJournal = initJournal(S);
+S.dailyLogin = initDailyLogin(S);
+S.challenges = initChallenges(S);
+S.achievements = initAchievements(S);
+S.weather = initWeather(S);
+S.tournament = initTournament(S);
+
+// Roll daily challenges for today
+rollDailyChallenges(S.challenges);
+
+// Check for daily login (show notification if available)
+const dailyCheck = checkDailyLogin(S.dailyLogin);
+if (dailyCheck.canClaim) {
+  setTimeout(() => {
+    const dailyUI = new DailyLoginUI();
+    dailyUI.show();
+  }, 2000); // Show after 2 seconds
+}
 
 const container = document.getElementById("canvas-wrap");
 const core = createCore(container);
@@ -57,6 +94,7 @@ const fight = new ReelFight(scene, effects, audio);
 
 const hud = new HUD();
 const catchCard = new CatchCard();
+const walletPanel = new WalletPanel();
 const shopUI = new ShopUI(() => machine.set(Phase.IDLE));
 const journalUI = new JournalUI(() => machine.set(Phase.IDLE));
 const mapUI = new MapUI(
@@ -66,6 +104,21 @@ const mapUI = new MapUI(
     machine.set(Phase.IDLE);
   }
 );
+
+// New progression UIs
+const progressionJournalUI = new ProgressionJournalUI();
+const achievementsUI = new AchievementsUI();
+const challengesUI = new ChallengesUI();
+const weatherUI = new WeatherUI(scene);
+const leaderboardUI = new LeaderboardUI();
+const tournamentUI = new TournamentUI();
+
+// Initialize weather and challenges widgets
+weatherUI.init();
+challengesUI.init();
+achievementsUI.init();
+tournamentUI.init();
+
 const screens = new Screens({
   onPlay: () => machine.set(Phase.IDLE),
   onResume: () => setPaused(false),
@@ -418,6 +471,33 @@ window.addEventListener("keydown", (e) => {
     case "KeyJ":
       toggleScreen(Phase.JOURNAL);
       break;
+    case "KeyC":
+      // Open fish collection journal
+      if (!paused && isGameplayPhase(machine.current)) {
+        progressionJournalUI.show();
+      }
+      break;
+    case "KeyA":
+      // Open achievements
+      if (!paused && isGameplayPhase(machine.current)) {
+        achievementsUI.show();
+      }
+      break;
+    case "KeyL":
+      // Open daily login rewards OR leaderboard (shift+L for leaderboard)
+      if (!paused && isGameplayPhase(machine.current)) {
+        if (e.shiftKey) {
+          leaderboardUI.show();
+        } else {
+          const dailyUI = new DailyLoginUI();
+          dailyUI.show();
+        }
+      }
+      break;
+    case "KeyT":
+      // Tournament info - widget is always visible when relevant
+      // This key could show a detailed tournament history modal in future
+      break;
     case "Escape":
       handleEscape();
       break;
@@ -609,6 +689,35 @@ function tick() {
 }
 
 // ---------------------------------------------------------------------------
+// wallet ↔ save slot
+//
+// When a wallet connects: persist the current (possibly anonymous) progress,
+// then switch the active save slot to that wallet's localStorage namespace.
+// New wallets inherit the local anonymous save on first connection so players
+// don't feel they've lost progress by signing in.
+// ---------------------------------------------------------------------------
+
+let prevWalletAddr = null;
+onWalletChange(({ account }) => {
+  const addr = account?.address ?? null;
+  if (addr === prevWalletAddr) return; // initial subscribe fires with null; ignore
+  prevWalletAddr = addr;
+
+  const had = setWalletSlot(addr);
+  applySettings();
+  travelTo(S.world.current, true);
+  gclock.hours = S.world.hour;
+  hud.refreshAll();
+  if (machine.current !== Phase.MENU) {
+    if (addr) {
+      hud.toast(had ? `Loaded save for ${shortAddress(addr)}` : `New save bound to ${shortAddress(addr)}`, "success");
+    } else {
+      hud.toast("Disconnected — playing on local save", "warn");
+    }
+  }
+});
+
+// ---------------------------------------------------------------------------
 // go
 // ---------------------------------------------------------------------------
 
@@ -627,4 +736,5 @@ requestAnimationFrame(() => {
 });
 
 // small debug handle (used by automated smoke tests; harmless in production)
-window.TIDELINE = { S, machine, version: 1 };
+window.TIDAL = { S, machine, version: 1, walletPanel };
+window.TIDELINE = window.TIDAL; // back-compat for any external smoke test scripts

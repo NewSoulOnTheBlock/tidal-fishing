@@ -1,107 +1,139 @@
-# TIDELINE — 3D Fishing Simulator
+# TIDAL — Web3 fishing on Solana
 
-A complete, single-player 3D fishing game that runs in the browser. Built with
-**Three.js (v0.170, loaded via CDN import map)** and vanilla ES modules —
-**no build step, no npm install, no external assets**. Water, sky, fish,
-scenery and every sound effect are generated procedurally at runtime.
+A 3D fishing game where every fish you sell pays **$TIDE**, every rod or fishing
+spot is unlockable with **$TIDE**, and your progress is bound to your **Solana
+wallet**. Built on Solana mainnet.
 
-**Play it now:** [bridge-mind.github.io/tideline](https://bridge-mind.github.io/tideline/)
+**Play it now:** https://tidal-theta-tawny.vercel.app
 
-Open source under the [MIT license](./LICENSE), shipped by [BridgeMind](https://github.com/bridge-mind).
+Forked from [bridge-mind/tideline](https://github.com/bridge-mind/tideline)
+(Three.js procedural fishing sim, MIT). Tidal adds:
 
-## Run it locally
+- Wallet Standard connect (Phantom / Solflare / Backpack / etc.) — vanilla, no React
+- $TIDE economy — gear and locations cost $TIDE, fish sell for $TIDE
+- Wallet-bound saves — each wallet gets its own progress slot
+- Optional on-chain $TIDE payment flow for gear & locations (gated by env vars)
+- Vite build pipeline, code-split chunks, Vercel deployment
 
-ES modules require a local web server (opening `index.html` via `file://` will not work):
+## Run locally
 
 ```bash
-cd fishing-simulator
-
-# any one of these:
-python3 -m http.server 8642
-npx serve .
-npx http-server -p 8642
+npm install
+npm run dev       # http://localhost:8642
 ```
 
-Then open `http://localhost:8642` in a modern browser (Chrome, Edge, Firefox,
-Safari 16.4+). The only network request is the Three.js CDN fetch on first load.
+Build & preview the production bundle:
 
-## How to play
+```bash
+npm run build
+npm run preview   # http://localhost:8643
+```
 
-| Action | Input |
+Headless smoke test (uses Puppeteer):
+
+```bash
+npm install puppeteer
+npm run smoke                                  # smokes the preview server
+node smoke.mjs https://tidal-theta-tawny.vercel.app/   # smokes the deploy
+```
+
+## Environment
+
+All env vars are optional. Set them in `.env.local` for dev, or in the Vercel
+project settings for production. See [`.env.example`](./.env.example).
+
+| Var | What it does |
 |---|---|
-| Aim | Move the mouse |
-| Charge cast | Hold **Left Click** or **Space** |
-| Cast | Release |
-| Hook a bite | **Click** instantly when the bobber plunges and **!** appears |
-| Reel | Hold **Click** — release during red **surges** or the line snaps |
-| Retrieve bobber | Hold Click while waiting, or press **R** |
-| Shop / Map / Journal | **B** / **M** / **J** (or the HUD buttons, while idle) |
-| Pause | **Esc** |
-
-**The loop:** cast → wait → hook → win the tension fight → earn cash & XP →
-sell fish at the Shop → upgrade rod/reel/line/bait → unlock River Bend, the
-Coastal Pier and the Deep Ocean → complete all 21 species in the Journal.
-
-Tips:
-
-- Long casts reach **deep water**, where rarer, bigger fish live.
-- **Time of day matters** — salmon rise at dawn, swordfish only at night. The
-  in-game day lasts 8 real minutes.
-- Cloudy weather speeds up bites and nudges rare spawns.
-- Watch the tension bar: reel in bursts, rest to recover, and never reel
-  through a surge. Fish tire over time — outlast them.
-- Progress (money, level, gear, locations, journal, time of day) saves to
-  `localStorage` automatically; reset from the menu or settings.
+| `VITE_SOLANA_RPC_URL` | Custom mainnet RPC (Helius / QuickNode / Triton / Alchemy). Strongly recommended — the public endpoint rate-limits aggressively. |
+| `VITE_TIDE_MINT` | $TIDE SPL token mint address. Until set, the wallet panel shows `—` for $TIDE balance and the burn buttons stay hidden. When set, gear & map UIs render a `🔥 Burn N $TIDE` button beside the regular Buy/Unlock button. |
+| `VITE_TIDE_DECIMALS` | Decimals of the $TIDE mint (default 9, matching SOL). |
+| `VITE_CATCH_TREE` | (Phase 3) Bubblegum tree for catch cNFTs. |
+| `VITE_GEAR_COLLECTION` | (Phase 3) Verified collection for gear NFTs. |
 
 ## Architecture
 
 ```
-index.html            canvas + HUD/menu DOM + CDN import map
-styles.css            all UI styling
+index.html                 root HTML + DOM scaffold + boot loader + favicon
+vite.config.js             Vite + chunk splitting (three / solana / wallet)
+vercel.json                build & cache headers for Vercel
 src/
-  main.js             bootstrap, game loop, FSM wiring, input routing
-  core/               renderer/scene/lights, game clock, camera rig
-  world/              Water + Sky (official Three.js examples), per-location
-                      environments, pooled particles (splash/ripple/motes/birds)
-  gameplay/           casting + rod rig + line, bobber physics, bite system,
-                      reel-fight minigame
-  fish/               procedural fish mesh factory, spawn weighting
-  economy/            money, XP/levels, selling, gear purchases, unlocks
-  data/               config (all tuning constants), fish/gear/location tables
-  ui/                 HUD, menus, shop, journal, map, catch card (DOM-driven)
-  audio/              Web Audio procedural synth (ambience + all cues)
-  state/              central game state, explicit state machine, save/load
-  utils/              math/random/easing/format helpers, event bus
+  main.js                  bootstrap, game loop, state machine, input
+  core/                    renderer, scene, lights, game clock, camera rig
+  world/                   Water + Sky, per-location envs, pooled particles
+  gameplay/                casting, bobber physics, bite system, reel fight
+  fish/                    procedural fish meshes + spawn weighting
+  economy/                 money, XP, gear purchases, location unlocks
+  data/                    config + fish/gear/location tables
+  ui/                      HUD, screens, shop, map, journal, catch card,
+                           walletPanel
+  audio/                   Web Audio synth (ambience + cues)
+  state/                   gameState, save/load with wallet-bound slots
+  utils/                   math / format / event bus
+  web3/                    solana RPC client, wallet (Wallet Standard),
+                           token reads, on-chain $TIDE payment builder
 ```
 
-Game phases are explicit FSM states: `MENU, IDLE, CHARGING, FLYING, WAITING,
-BITE, REELING, CATCH, RETRIEVING, SHOP, JOURNAL, MAP` (pause is an overlay
-flag so resuming never re-enters a phase). All balance numbers live in
-`src/data/config.js` and the data tables in `src/data/`.
+Game phases (explicit FSM): `MENU, IDLE, CHARGING, FLYING, WAITING, BITE,
+REELING, CATCH, RETRIEVING, SHOP, JOURNAL, MAP`. Pause is an overlay flag.
 
-## Content
+### Save slots
 
-- **21 fish species** across Common / Uncommon / Rare / Epic / Legendary,
-  each with its own silhouette, colors, size/weight ranges, value, preferred
-  location, depth zone, time of day and fight profile.
-- **4 locations** — Calm Lake, River Bend, Coastal Pier, Deep Ocean — with
-  distinct water color, sky mood, fog, scenery, ambience and spawn tables.
-- **4 gear categories × 4 tiers** — rods (cast distance + fight control),
-  reels (reel speed), lines (snap resistance), bait (bite speed + rarity bias).
-- Day/night cycle with dawn/day/dusk/night fish behavior, drifting weather,
-  star fields, moonlit nights, bird flocks and fireflies.
-- Persistent journal with per-species catch counts and size records.
+When a wallet connects, the active save key switches from `tidal_save_v1` to
+`tidal_save_v1:<wallet_address>`. The anonymous local save is migrated into a
+new wallet's slot on first connection so signing in never feels like a wipe.
 
-## Performance notes
+### On-chain $TIDE payments (deflationary burn)
 
-- One reflection pass (Three.js `Water`) is the main GPU cost; the Low quality
-  setting halves the reflection texture, disables shadows and caps pixel ratio.
-- All particles are pooled; geometries/materials are shared where possible and
-  disposed on location switches.
+When `VITE_TIDE_MINT` is set and a wallet is connected, gear and location
+unlocks render a `🔥 Burn N $TIDE` button beside the regular Buy/Unlock
+button. The on-chain path:
 
-## Contributing & license
+1. Reads the player's on-chain $TIDE balance and verifies they have enough.
+2. Builds an SPL Token `Burn` instruction targeting the player's own ATA
+   (no treasury — burned $TIDE leaves circulation permanently).
+3. Attaches a memo identifying the purchase (`tidal:gear:rods:2`, `tidal:loc:river`).
+4. Asks the wallet to sign and send (preferring `signAndSendTransaction`).
+5. On confirmation, calls `economy.grantGearOnChain` / `grantLocationOnChain`
+   which grant the item **without** deducting the in-game $TIDE balance and
+   record the tx signature in `S.onchain.purchases` for audit.
 
-MIT — see [LICENSE](./LICENSE). Issues and pull requests are welcome: balance
-tweaks live in `src/data/config.js`, new species in `src/data/fishData.js`,
-and new fishing spots in `src/data/locationData.js` plus an environment
-builder in `src/world/environment.js`.
+The in-game $TIDE balance and the on-chain $TIDE balance are deliberately
+**independent** in Phase 2 — both can purchase the same gear/locations but
+they're two separate currencies until the Phase 3 bridge ships. Every
+on-chain purchase reduces total supply (deflationary).
+
+## Roadmap
+
+### Phase 1 — Foundation ✅
+- Vite build, mainnet RPC config, wallet connect, wallet-bound saves, $TIDE
+  branding, Vercel deploy.
+
+### Phase 2 — On-chain spend ✅ (this commit)
+- `🔥 Burn N $TIDE` for gear & locations (dormant until `VITE_TIDE_MINT` set).
+- SPL Token Burn instruction + memo + audit trail in save. Deflationary —
+  every purchase permanently reduces $TIDE supply.
+
+### Phase 3 — Token deployment & catch NFTs
+- Deploy the $TIDE SPL token (Token-2022 + metadata extension).
+- Bridge: claim button to mint in-game $TIDE → on-chain $TIDE.
+- Bubblegum tree for catch cNFTs. Rare / epic / legendary mints auto-claim.
+- Gear NFTs minted when player purchases tier-2+ gear.
+
+### Phase 4 — Multiplayer & marketplace
+- Tensor / Magic Eden links to list & buy gear and catch NFTs.
+- On-chain leaderboard (biggest catch, most species).
+- Optional jackpot pool — % of every sale funds a weekly biggest-catch prize.
+
+## Security notes
+
+- Phase 1 + 2 **only** read on-chain data and (when explicitly configured) sign
+  user-initiated payment transfers. There is no embedded signer, no autonomous
+  signing, and no token/NFT minting from client code yet.
+- Production deployments should use a private RPC. The public mainnet endpoint
+  enforces low rate limits and will throttle balance reads under any load.
+- Treasury authority should live behind a multisig (e.g. Squads) — never an
+  EOA whose key sits on a laptop.
+
+## License
+
+MIT — see [LICENSE](./LICENSE). Original tideline by [BridgeMind](https://github.com/bridge-mind).

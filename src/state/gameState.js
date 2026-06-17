@@ -73,8 +73,25 @@ export function createDefaultState() {
     },
     journal: {}, // speciesId -> { count, bestSize, bestWeight, first }
     inventory: [], // { speciesId, sizeCm, weightKg, value }
-    stats: { casts: 0, catches: 0, earned: 0, snaps: 0, bestSpecies: null, bestSize: 0 },
+    stats: { 
+      casts: 0, 
+      catches: 0, 
+      earned: 0, 
+      snaps: 0, 
+      bestSpecies: null, 
+      bestSize: 0,
+      perfectHooks: 0,
+    },
     settings: { volume: 0.8, muted: false, quality: "high" },
+    // Progression systems
+    progressionJournal: null,  // Initialized by initJournal()
+    dailyLogin: null,          // Initialized by initDailyLogin()
+    challenges: null,          // Initialized by initChallenges()
+    achievements: null,        // Initialized by initAchievements()
+    weather: null,             // Initialized by initWeather()
+    onchain: {
+      purchases: [],           // { kind, signature, burned, at }
+    },
   };
 }
 

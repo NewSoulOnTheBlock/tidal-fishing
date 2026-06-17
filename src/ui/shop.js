@@ -8,6 +8,8 @@ import * as economy from "../economy/economy.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
+import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
+import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -116,6 +118,34 @@ export class ShopUI {
           this.render();
         });
         action.appendChild(btn);
+        if (isOnChainPayEnabled() && levelOk) {
+          const chainBtn = document.createElement("button");
+          chainBtn.className = "btn btn-onchain";
+          chainBtn.innerHTML = `🔥 Burn ${item.price} $TIDE`;
+          chainBtn.title = `Burn ${item.price} on-chain $TIDE on Solana mainnet to unlock`;
+          chainBtn.addEventListener("click", async () => {
+            chainBtn.disabled = true;
+            chainBtn.textContent = "Burning…";
+            try {
+              const sig = await payTide(item.price, { memo: `tidal:gear:${catKey}:${idx}` });
+              economy.grantGearOnChain(catKey, idx, sig);
+              audio.play("buy");
+              events.emit("toast", {
+                msg: `${item.name} unlocked — ${item.price} $TIDE burned · ${shortAddress(sig, 6, 6)}`,
+                kind: "gold",
+                href: explorerTxUrl(sig),
+              });
+              events.emit("wallet:refresh");
+            } catch (e) {
+              console.error("[tidal] on-chain gear purchase failed", e);
+              audio.play("error");
+              events.emit("toast", { msg: e?.message ?? "On-chain burn failed", kind: "warn" });
+            } finally {
+              this.render();
+            }
+          });
+          action.appendChild(chainBtn);
+        }
         if (!levelOk) {
           const note = document.createElement("span");
           note.className = "lock-note";
