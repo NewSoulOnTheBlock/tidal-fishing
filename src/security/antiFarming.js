@@ -3,6 +3,11 @@
 
 import { S, events } from "../state/gameState.js";
 
+// Account suspension (automatic anti-farming ban) master switch. Disabled for
+// now — flip to true to re-enable auto-suspension after excessive warnings.
+// Warning tracking + soft rate limiting/breaks stay active regardless.
+const ACCOUNT_SUSPENSION_ENABLED = false;
+
 // Rate limiting config
 const RATE_LIMITS = {
   // Maximum catches per time period
@@ -207,8 +212,8 @@ export function recordCatchAntiBot(fish, perfectHook = false) {
   // Cleanup old catches (older than 24 hours)
   antiFarmingState.catches = antiFarmingState.catches.filter(t => now - t < 86400000);
   
-  // More aggressive ban threshold
-  if (antiFarmingState.warningCount >= 5) {  // Reduced from 10
+  // More aggressive ban threshold (gated by master switch — off for now)
+  if (ACCOUNT_SUSPENSION_ENABLED && antiFarmingState.warningCount >= 5) {  // Reduced from 10
     antiFarmingState.banned = true;
     events.emit("toast", {
       msg: "⚠️ Account suspended for suspicious activity",

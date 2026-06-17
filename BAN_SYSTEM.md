@@ -3,6 +3,13 @@
 ## Overview
 Tidal now has IP + wallet banning capabilities with server-side catch validation. **No offline fishing is possible** - all catches must be approved by the server.
 
+> **⚠️ Account suspension is currently DISABLED.** Wallet-ban enforcement (server)
+> and the automatic anti-farming auto-suspension (client) are both gated off.
+> - **Server:** set `ACCOUNT_SUSPENSION_ENABLED=true` on Render to re-enable wallet bans.
+> - **Client:** set `ACCOUNT_SUSPENSION_ENABLED = true` in `src/security/antiFarming.js`, then rebuild/redeploy.
+>
+> IP bans and rate limiting remain active regardless of this flag.
+
 ## How It Works
 
 ### Server-Side Validation

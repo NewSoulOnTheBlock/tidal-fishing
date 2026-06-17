@@ -28,6 +28,11 @@ const { Pool } = pg;
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Account suspension (wallet ban enforcement) master switch. Disabled for now —
+// set ACCOUNT_SUSPENSION_ENABLED=true on the host to re-enable wallet bans.
+// IP bans and rate limiting are unaffected by this flag.
+const ACCOUNT_SUSPENSION_ENABLED = process.env.ACCOUNT_SUSPENSION_ENABLED === 'true';
+
 // Render runs the app behind a single reverse proxy; trust it so req.ip and
 // X-Forwarded-For reflect the real client (needed for rate limiting + IP bans).
 app.set('trust proxy', 1);
@@ -378,8 +383,8 @@ async function checkBans(req, res, next) {
       });
     }
     
-    // Check wallet ban if provided
-    if (walletAddress) {
+    // Check wallet ban if provided (account suspension — gated by master switch)
+    if (ACCOUNT_SUSPENSION_ENABLED && walletAddress) {
       const walletBan = await pool.query(
         'SELECT reason FROM banned_wallets WHERE wallet_address = $1',
         [walletAddress]
@@ -570,9 +575,12 @@ app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
 
     // Reject banned wallets — checkBans only inspects req.body.walletAddress,
     // but withdrawals key off `recipient`, so check it explicitly here.
-    const bannedRow = await pool.query('SELECT reason FROM banned_wallets WHERE wallet_address = $1', [recipient]);
-    if (bannedRow.rows.length > 0) {
-      return res.status(403).json({ error: 'Account suspended', reason: bannedRow.rows[0].reason || 'This wallet has been banned' });
+    // Gated by the account-suspension master switch.
+    if (ACCOUNT_SUSPENSION_ENABLED) {
+      const bannedRow = await pool.query('SELECT reason FROM banned_wallets WHERE wallet_address = $1', [recipient]);
+      if (bannedRow.rows.length > 0) {
+        return res.status(403).json({ error: 'Account suspended', reason: bannedRow.rows[0].reason || 'This wallet has been banned' });
+      }
     }
 
     // --- Verify the wallet signature over the authorization message ---
