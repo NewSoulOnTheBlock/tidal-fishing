@@ -13,6 +13,7 @@ import { checkAchievements } from "../progression/achievements.js";
 import { updateTournamentScore } from "../progression/tournament.js";
 import { recordCatch as recordCatchDB } from "../web3/database.js";
 import { currentPublicKey } from "../web3/wallet.js";
+import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFarming.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -48,6 +49,10 @@ function emitMoney(delta) {
 export function addMoney(amount) {
   const add = Math.max(0, Math.floor(amount));
   if (add <= 0) return 0;
+  
+  // ANTI-FARMING: Record earnings
+  recordEarnings(add);
+  
   S.profile.money += add;
   S.stats.earned += add;
   emitMoney(add);
@@ -112,6 +117,24 @@ export function addXp(amount) {
  *  full value to the player on the spot.
  */
 export function registerCatch(fish) {
+  // ANTI-FARMING CHECK
+  const catchCheck = canCatch();
+  if (!catchCheck.allowed) {
+    console.warn("[economy] Catch blocked by anti-farming:", catchCheck.reason);
+    events.emit("toast", { msg: catchCheck.reason, kind: "warn" });
+    return {
+      xpGained: 0,
+      levels: [],
+      moneyGained: 0,
+      isNew: false,
+      isRecord: false,
+      blocked: true,
+    };
+  }
+  
+  // Record catch for anti-bot tracking
+  recordCatchAntiBot(fish, fish.isPerfect);
+  
   const isJackpot = !!fish.jackpot;
 
   if (isJackpot) {
