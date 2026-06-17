@@ -13,6 +13,7 @@ import {
 } from "../web3/token.js";
 import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT } from "../web3/solana.js";
 import { withdrawTide } from "../web3/withdraw.js";
+import { onWalletConnect, onWalletDisconnect } from "../web3/databaseIntegration.js";
 import { PublicKey } from "@solana/web3.js";
 import { S, events } from "../state/gameState.js";
 import * as economy from "../economy/economy.js";
@@ -46,6 +47,13 @@ export class WalletPanel {
       this.account = state.account ?? null;
       this.render();
       this.refreshBalances();
+      
+      // Trigger database sync on wallet connect/disconnect
+      if (state.account) {
+        onWalletConnect();
+      } else {
+        onWalletDisconnect();
+      }
     });
 
     events.on("wallet:refresh", () => this.refreshBalances());

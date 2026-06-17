@@ -34,6 +34,7 @@ import { WeatherUI } from "./ui/weatherUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { TournamentUI } from "./ui/tournamentUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
+import { recordCatchToDB } from "./web3/databaseIntegration.js";
 import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";

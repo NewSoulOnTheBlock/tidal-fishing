@@ -164,6 +164,21 @@ export function registerCatch(fish) {
     recordJournalCatch(S.progressionJournal, fish.speciesId, fish.sizeCm, fish.weightKg, fish.value);
   }
   
+  // Record catch in database (async, best-effort)
+  const publicKey = currentPublicKey();
+  if (publicKey) {
+    recordCatchDB({
+      walletAddress: publicKey.toString(),
+      speciesId: fish.speciesId,
+      location: S.world.location,
+      rarity: fish.rarity,
+      sizeCm: fish.sizeCm,
+      weightKg: fish.weightKg,
+      value: fish.value,
+      perfectHook: fish.isPerfect || false,
+    }).catch(err => console.error('[economy] Failed to record catch to DB:', err));
+  }
+  
   // Update daily challenges
   if (S.challenges) {
     const completed = updateChallengeProgress(S.challenges, {

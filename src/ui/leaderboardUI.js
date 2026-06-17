@@ -1,11 +1,15 @@
 // Leaderboard UI - Global rankings and recent catches
+// Now powered by PostgreSQL database!
 
 import { S } from "../state/gameState.js";
 import { formatMoney } from "../utils/utils.js";
 import { shortAddress } from "../web3/solana.js";
 import { FISH_BY_ID } from "../data/fishData.js";
 
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5173" : "";
+// Point to API server on Render (or localhost for dev)
+const API_BASE = window.location.hostname === "localhost" 
+  ? "http://localhost:3000" 
+  : "https://tidal-fishing.onrender.com";
 
 export class LeaderboardUI {
   constructor() {
@@ -68,36 +72,47 @@ export class LeaderboardUI {
 
     try {
       if (tab === "earnings") {
-        const response = await fetch(`${API_BASE}/api/leaderboard?type=earnings&limit=20`);
+        const response = await fetch(`${API_BASE}/api/leaderboard?limit=100`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        content.innerHTML = this.renderEarnings(data.leaderboard);
+        content.innerHTML = this.renderEarnings(data);
       } else if (tab === "recent") {
-        const response = await fetch(`${API_BASE}/api/leaderboard?type=recent&limit=50`);
-        const data = await response.json();
-        content.innerHTML = this.renderRecent(data.catches);
+        // Recent catches not implemented yet - show coming soon
+        content.innerHTML = '<div class="empty">Recent catches coming soon!</div>';
       } else if (tab === "species") {
-        content.innerHTML = this.renderSpeciesSelector();
+        // Species leaderboards not implemented yet
+        content.innerHTML = '<div class="empty">Species leaderboards coming soon!</div>';
       }
     } catch (error) {
-      content.innerHTML = `<div class="error">Failed to load leaderboard: ${error.message}</div>`;
+      console.error('[leaderboard] Failed to load:', error);
+      content.innerHTML = `
+        <div class="error">
+          <p>Failed to load leaderboard</p>
+          <p class="error-detail">${error.message}</p>
+          <button class="btn btn-retry" onclick="window.location.reload()">Retry</button>
+        </div>
+      `;
     }
   }
 
   renderEarnings(leaderboard) {
     if (!leaderboard || leaderboard.length === 0) {
-      return '<div class="empty">No entries yet. Be the first!</div>';
+      return '<div class="empty">No entries yet. Be the first to fish and claim your spot!</div>';
     }
 
     return `
       <div class="leaderboard-list">
         ${leaderboard.map((entry, i) => `
-          <div class="leaderboard-entry ${i < 3 ? `rank-${i + 1}` : ''}">
-            <div class="entry-rank">${i + 1}</div>
+          <div class="leaderboard-entry ${i < 3 ? `rank-${entry.rank}` : ''}">
+            <div class="entry-rank">${entry.rank}</div>
             <div class="entry-info">
-              <div class="entry-wallet">${shortAddress(entry.wallet)}</div>
-              <div class="entry-value">${formatMoney(entry.totalEarnings)} earned</div>
+              <div class="entry-wallet">${shortAddress(entry.wallet_address)}</div>
+              <div class="entry-stats">
+                <span class="entry-value">${formatMoney(entry.total_earned)} earned</span>
+                <span class="entry-meta"> • ${entry.total_catches} catches</span>
+              </div>
             </div>
-            ${i === 0 ? '<div class="trophy">🥇</div>' : i === 1 ? '<div class="trophy">🥈</div>' : i === 2 ? '<div class="trophy">🥉</div>' : ''}
+            ${entry.rank === 1 ? '<div class="trophy">🥇</div>' : entry.rank === 2 ? '<div class="trophy">🥈</div>' : entry.rank === 3 ? '<div class="trophy">🥉</div>' : ''}
           </div>
         `).join('')}
       </div>
