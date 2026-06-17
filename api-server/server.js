@@ -11,9 +11,32 @@ import {
   clusterApiUrl,
 } from '@solana/web3.js';
 import bs58 from 'bs58';
+import pg from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const { Pool } = pg;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Database connection
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Test database connection
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err);
+  } else {
+    console.log('✅ Database connected:', res.rows[0].now);
+  }
+});
 
 // Environment variables
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
@@ -250,10 +273,222 @@ app.post('/api/withdraw', async (req, res) => {
   }
 });
 
+// ============================================================================
+// DATABASE ENDPOINTS
+// ============================================================================
+
+// 1. Auth - Get or create player profile
+app.post('/api/player/auth', async (req, res) => {
+  const { walletAddress } = req.body;
+  
+  if (!walletAddress || walletAddress.length < 32) {
+    return res.status(400).json({ error: 'Invalid wallet address' });
+  }
+
+  try {
+    // Find existing player or create new
+    let result = await pool.query(
+      'SELECT * FROM players WHERE wallet_address = $1',
+      [walletAddress]
+    );
+
+    if (result.rows.length === 0) {
+      // Create new player
+      result = await pool.query(
+        `INSERT INTO players (wallet_address) 
+         VALUES ($1) 
+         RETURNING *`,
+        [walletAddress]
+      );
+      console.log('[auth] New player created:', walletAddress);
+    } else {
+      // Update last login
+      await pool.query(
+        'UPDATE players SET last_login = NOW() WHERE wallet_address = $1',
+        [walletAddress]
+      );
+      console.log('[auth] Player logged in:', walletAddress);
+    }
+
+    res.json({ player: result.rows[0] });
+  } catch (error) {
+    console.error('[auth] Error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// 2. Save player state
+app.post('/api/player/save', async (req, res) => {
+  const { walletAddress, state } = req.body;
+
+  if (!walletAddress || !state) {
+    return res.status(400).json({ error: 'Missing wallet address or state' });
+  }
+
+  try {
+    await pool.query(
+      `UPDATE players SET 
+        level = $2,
+        xp = $3,
+        money = $4,
+        total_catches = $5,
+        total_earned = $6,
+        perfect_hooks = $7,
+        snaps = $8,
+        unlocked_locations = $9,
+        equipped_rod = $10,
+        equipped_reel = $11,
+        equipped_line = $12,
+        equipped_bait = $13,
+        owned_gear = $14
+       WHERE wallet_address = $1`,
+      [
+        walletAddress,
+        state.level,
+        state.xp,
+        state.money,
+        state.totalCatches,
+        state.totalEarned,
+        state.perfectHooks || 0,
+        state.snaps || 0,
+        state.unlockedLocations,
+        state.equippedRod,
+        state.equippedReel,
+        state.equippedLine,
+        state.equippedBait,
+        JSON.stringify(state.ownedGear)
+      ]
+    );
+
+    console.log('[save] Player state saved:', walletAddress);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[save] Error:', error);
+    res.status(500).json({ error: 'Save failed' });
+  }
+});
+
+// 3. Record catch
+app.post('/api/player/catch', async (req, res) => {
+  const { walletAddress, catch: catchData } = req.body;
+
+  if (!walletAddress || !catchData) {
+    return res.status(400).json({ error: 'Missing wallet address or catch data' });
+  }
+
+  try {
+    const player = await pool.query(
+      'SELECT id FROM players WHERE wallet_address = $1',
+      [walletAddress]
+    );
+
+    if (player.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    // Insert catch
+    await pool.query(
+      `INSERT INTO catches (player_id, species_id, location, rarity, size_cm, weight_kg, value, perfect_hook)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        player.rows[0].id,
+        catchData.speciesId,
+        catchData.location,
+        catchData.rarity,
+        catchData.sizeCm,
+        catchData.weightKg,
+        catchData.value,
+        catchData.perfectHook || false
+      ]
+    );
+
+    // Update journal entry
+    await pool.query(
+      `INSERT INTO journal_entries (player_id, species_id, total_caught, biggest_size_cm, biggest_weight_kg)
+       VALUES ($1, $2, 1, $3, $4)
+       ON CONFLICT (player_id, species_id) 
+       DO UPDATE SET 
+         total_caught = journal_entries.total_caught + 1,
+         biggest_size_cm = GREATEST(journal_entries.biggest_size_cm, $3),
+         biggest_weight_kg = GREATEST(journal_entries.biggest_weight_kg, $4)`,
+      [player.rows[0].id, catchData.speciesId, catchData.sizeCm, catchData.weightKg]
+    );
+
+    console.log('[catch] Recorded:', catchData.speciesId, 'for', walletAddress);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[catch] Error:', error);
+    res.status(500).json({ error: 'Failed to record catch' });
+  }
+});
+
+// 4. Get leaderboard
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM leaderboard LIMIT 100');
+    res.json({ leaderboard: result.rows });
+  } catch (error) {
+    console.error('[leaderboard] Error:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+// 5. Get player stats
+app.get('/api/player/stats/:walletAddress', async (req, res) => {
+  try {
+    const player = await pool.query(
+      `SELECT p.*, 
+        COUNT(DISTINCT c.species_id) as unique_species,
+        COUNT(c.id) as total_catches_recorded
+       FROM players p
+       LEFT JOIN catches c ON p.id = c.player_id
+       WHERE p.wallet_address = $1
+       GROUP BY p.id`,
+      [req.params.walletAddress]
+    );
+
+    if (player.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    res.json({ stats: player.rows[0] });
+  } catch (error) {
+    console.error('[stats] Error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+// 6. Get player journal
+app.get('/api/player/journal/:walletAddress', async (req, res) => {
+  try {
+    const player = await pool.query(
+      'SELECT id FROM players WHERE wallet_address = $1',
+      [req.params.walletAddress]
+    );
+
+    if (player.rows.length === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    const journal = await pool.query(
+      `SELECT * FROM journal_entries 
+       WHERE player_id = $1 
+       ORDER BY first_caught_at DESC`,
+      [player.rows[0].id]
+    );
+
+    res.json({ journal: journal.rows });
+  } catch (error) {
+    console.error('[journal] Error:', error);
+    res.status(500).json({ error: 'Failed to fetch journal' });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`[server] Tidal API listening on port ${PORT}`);
   console.log(`[server] CORS origin: ${CORS_ORIGIN}`);
   console.log(`[server] Treasury: ${treasuryKeypair ? '✅ Loaded' : '❌ Not configured'}`);
   console.log(`[server] $TIDE Mint: ${TIDE_MINT_STR}`);
+  console.log(`[server] Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'}`);
 });

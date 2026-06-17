@@ -11,6 +11,8 @@ import { recordCatch as recordJournalCatch } from "../progression/journal.js";
 import { updateChallengeProgress } from "../progression/challenges.js";
 import { checkAchievements } from "../progression/achievements.js";
 import { updateTournamentScore } from "../progression/tournament.js";
+import { recordCatch as recordCatchDB } from "../web3/database.js";
+import { currentPublicKey } from "../web3/wallet.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
