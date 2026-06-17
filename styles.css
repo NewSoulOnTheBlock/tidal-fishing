@@ -1638,3 +1638,82 @@ kbd {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 }
+
+/* ====================================================================== */
+/* DUAL PAYMENT OPTIONS (SOL + $TIDE)                                    */
+/* ====================================================================== */
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.payment-options .btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  min-height: 60px;
+  transition: all 0.2s;
+}
+
+.payment-options .pay-label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.payment-options .pay-amount {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* SOL button styling */
+.btn-sol {
+  background: linear-gradient(135deg, #14F195, #9945FF);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-sol:hover {
+  background: linear-gradient(135deg, #1affaa, #aa55ff);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(153, 69, 255, 0.4);
+}
+
+/* $TIDE button styling */
+.btn-tide {
+  background: linear-gradient(135deg, #4A9EFF, #26DE81);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-tide:hover {
+  background: linear-gradient(135deg, #5aaeFF, #36ee91);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(38, 222, 129, 0.4);
+}
+
+/* Mobile responsive payment options */
+@media (max-width: 768px) {
+  .payment-options {
+    min-width: 150px;
+  }
+  
+  .payment-options .btn {
+    min-height: 50px;
+    padding: 8px 12px;
+  }
+  
+  .payment-options .pay-label {
+    font-size: 11px;
+  }
+  
+  .payment-options .pay-amount {
+    font-size: 14px;
+  }
+}

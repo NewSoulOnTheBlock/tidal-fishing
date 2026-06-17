@@ -1,5 +1,6 @@
 // Shop screen: four gear categories with tiered upgrades plus a Sell tab for
 // the catch bag. Renders from data; all transactions go through economy.js.
+// Now with DUAL PAYMENT OPTIONS: pay with $TIDE or SOL!
 
 import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
@@ -9,7 +10,9 @@ import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
 import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
+import { isSolPayEnabled, paySol, tideToSol, formatSol } from "../web3/solPayment.js";
 import { explorerTxUrl, shortAddress } from "../web3/solana.js";
+import { currentPublicKey } from "../web3/wallet.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -101,56 +104,70 @@ export class ShopUI {
           this.render();
         });
         action.appendChild(btn);
+      } else if (!levelOk) {
+        action.innerHTML = `<span class="locked-tag">Level ${item.level}</span>`;
       } else {
-        const btn = document.createElement("button");
-        btn.className = "btn btn-buy";
-        btn.textContent = `Buy ${formatMoney(item.price)}`;
-        btn.disabled = !levelOk || !afford;
-        btn.addEventListener("click", () => {
-          const res = economy.buyGear(catKey, idx);
-          if (res.ok) {
-            audio.play("buy");
-            events.emit("toast", { msg: `${item.name} purchased and equipped`, kind: "success" });
+        // Show dual payment buttons if wallet connected
+        const walletConnected = Boolean(currentPublicKey());
+        const solPayAvailable = isSolPayEnabled();
+        const tidePayAvailable = isOnChainPayEnabled();
+        
+        if (walletConnected && (solPayAvailable || tidePayAvailable)) {
+          // Create payment options container
+          const paymentOptions = document.createElement("div");
+          paymentOptions.className = "payment-options";
+          
+          // Off-chain $TIDE button (always available)
+          const offChainBtn = document.createElement("button");
+          offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
+          offChainBtn.innerHTML = `
+            <span class="pay-label">Pay with $TIDE</span>
+            <span class="pay-amount">${formatMoney(item.price)}</span>
+          `;
+          if (afford) {
+            offChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain'));
           } else {
-            audio.play("error");
-            events.emit("toast", { msg: res.reason, kind: "warn" });
+            offChainBtn.disabled = true;
+            offChainBtn.title = "Not enough $TIDE";
           }
-          this.render();
-        });
-        action.appendChild(btn);
-        if (isOnChainPayEnabled() && levelOk) {
-          const chainBtn = document.createElement("button");
-          chainBtn.className = "btn btn-onchain";
-          chainBtn.innerHTML = `🔥 Burn ${item.price} $TIDE`;
-          chainBtn.title = `Burn ${item.price} on-chain $TIDE on Solana mainnet to unlock`;
-          chainBtn.addEventListener("click", async () => {
-            chainBtn.disabled = true;
-            chainBtn.textContent = "Burning…";
-            try {
-              const sig = await payTide(item.price, { memo: `tidal:gear:${catKey}:${idx}` });
-              economy.grantGearOnChain(catKey, idx, sig);
-              audio.play("buy");
-              events.emit("toast", {
-                msg: `${item.name} unlocked — ${item.price} $TIDE burned · ${shortAddress(sig, 6, 6)}`,
-                kind: "gold",
-                href: explorerTxUrl(sig),
-              });
-              events.emit("wallet:refresh");
-            } catch (e) {
-              console.error("[tidal] on-chain gear purchase failed", e);
-              audio.play("error");
-              events.emit("toast", { msg: e?.message ?? "On-chain burn failed", kind: "warn" });
-            } finally {
-              this.render();
-            }
-          });
-          action.appendChild(chainBtn);
-        }
-        if (!levelOk) {
-          const note = document.createElement("span");
-          note.className = "lock-note";
-          note.textContent = `Requires level ${item.level}`;
-          action.appendChild(note);
+          paymentOptions.appendChild(offChainBtn);
+          
+          // SOL button
+          if (solPayAvailable) {
+            const solAmount = tideToSol(item.price);
+            const solBtn = document.createElement("button");
+            solBtn.className = "btn btn-sol";
+            solBtn.innerHTML = `
+              <span class="pay-label">Pay with SOL</span>
+              <span class="pay-amount">${formatSol(solAmount)}</span>
+            `;
+            solBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'sol', solAmount));
+            paymentOptions.appendChild(solBtn);
+          }
+          
+          // On-chain $TIDE button (if token deployed)
+          if (tidePayAvailable) {
+            const onChainBtn = document.createElement("button");
+            onChainBtn.className = "btn btn-tide";
+            onChainBtn.innerHTML = `
+              <span class="pay-label">Pay with $TIDE (on-chain)</span>
+              <span class="pay-amount">${formatMoney(item.price)}</span>
+            `;
+            onChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-onchain'));
+            paymentOptions.appendChild(onChainBtn);
+          }
+          
+          action.appendChild(paymentOptions);
+        } else {
+          // No wallet connected - standard buy button
+          const btn = document.createElement("button");
+          btn.className = `btn ${afford ? "" : "btn-disabled"}`;
+          btn.textContent = afford ? `Buy ${formatMoney(item.price)}` : "Not enough $TIDE";
+          btn.disabled = !afford;
+          if (afford) {
+            btn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain'));
+          }
+          action.appendChild(btn);
         }
       }
       this.contentEl.appendChild(row);
@@ -201,5 +218,74 @@ export class ShopUI {
     });
     footer.appendChild(sellAllBtn);
     this.contentEl.appendChild(footer);
+  }
+
+  /**
+   * Buy gear with selected payment method
+   * @param {string} catKey - Category key (rods, reels, etc)
+   * @param {number} idx - Item index
+   * @param {string} method - Payment method: 'tide-offchain', 'sol', or 'tide-onchain'
+   * @param {number} solAmount - SOL amount if method is 'sol'
+   */
+  async buyGear(catKey, idx, method, solAmount = 0) {
+    const item = GEAR[catKey][idx];
+    
+    if (method === 'tide-offchain') {
+      // Standard off-chain $TIDE purchase
+      const res = economy.buyGear(catKey, idx);
+      if (res.ok) {
+        audio.play("buy");
+        events.emit("toast", { msg: `${item.name} purchased with $TIDE`, kind: "success" });
+      } else {
+        audio.play("error");
+        events.emit("toast", { msg: res.reason, kind: "warn" });
+      }
+      this.render();
+      
+    } else if (method === 'sol') {
+      // SOL payment
+      try {
+        events.emit("toast", { msg: "Processing SOL payment...", kind: "info" });
+        const sig = await paySol(solAmount, { memo: `tidal:gear:${catKey}:${idx}` });
+        
+        // Grant gear after successful payment
+        economy.grantGearOnChain(catKey, idx, sig);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `${item.name} unlocked with ${formatSol(solAmount)} · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] SOL payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "SOL payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+      
+    } else if (method === 'tide-onchain') {
+      // On-chain $TIDE payment (treasury transfer)
+      try {
+        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        const sig = await payTide(item.price, { memo: `tidal:gear:${catKey}:${idx}` });
+        
+        economy.grantGearOnChain(catKey, idx, sig);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `${item.name} unlocked with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] on-chain $TIDE payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+    }
   }
 }
