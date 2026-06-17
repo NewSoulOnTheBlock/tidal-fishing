@@ -41,6 +41,7 @@ export class WalletPanel {
     this.modal = null;
     this.refreshTimer = null;
     this.account = null;
+    this.lastTideBalance = 0; // Track on-chain balance for hold requirement
 
     this.render();
     onChange((state) => {
@@ -67,7 +68,13 @@ export class WalletPanel {
       const addr = this.account.address;
       const earned = Math.floor(S.profile.money);
       const mintConfigured = !!TIDE_MINT;
-      const canWithdraw = mintConfigured && earned > 0 && !this.withdrawing;
+      
+      // NEW: Check on-chain $TIDE balance for 2.5M requirement
+      const tideBalance = this.lastTideBalance || 0;
+      const MIN_HOLD_REQUIREMENT = 2_500_000; // 2.5 million $TIDE
+      const meetsHoldRequirement = tideBalance >= MIN_HOLD_REQUIREMENT;
+      
+      const canWithdraw = mintConfigured && earned > 0 && !this.withdrawing && meetsHoldRequirement;
 
       let withdrawHtml = "";
       if (earned > 0 || mintConfigured) {
@@ -75,12 +82,16 @@ export class WalletPanel {
           ? "Withdraw soon™"
           : this.withdrawing
             ? "Withdrawing…"
-            : `Withdraw ${formatMoney(earned)}`;
+            : !meetsHoldRequirement
+              ? `Hold 2.5M $TIDE to Withdraw`
+              : `Withdraw ${formatMoney(earned)}`;
         const subnote = !mintConfigured
           ? `Withdrawals activate once $TIDE goes live`
-          : earned === 0
-            ? `Fish to earn $TIDE`
-            : `Pulls earned $TIDE from the Tidal treasury`;
+          : !meetsHoldRequirement
+            ? `You need ${formatTokens(MIN_HOLD_REQUIREMENT - tideBalance, 6)} more $TIDE to unlock withdrawals`
+            : earned === 0
+              ? `Fish to earn $TIDE`
+              : `Pulls earned $TIDE from the Tidal treasury`;
         withdrawHtml = `
           <div class="wallet-withdraw">
             <button class="btn btn-withdraw" data-withdraw ${canWithdraw ? "" : "disabled"} title="${subnote}">${label}</button>
@@ -219,6 +230,10 @@ export class WalletPanel {
     const tideEl = this.root.querySelector('[data-bal="tide"]');
     if (solEl) solEl.textContent = formatSol(sol);
     if (tideEl) tideEl.textContent = tide ? formatTokens(tide.raw, tide.decimals) : "—";
+    
+    // Store balance for hold requirement check
+    this.lastTideBalance = tide ? tide.raw : 0;
+    
     this.refreshTimer = setTimeout(() => this.refreshBalances(), REFRESH_INTERVAL_MS);
   }
 }

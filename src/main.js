@@ -27,7 +27,7 @@ import { MapUI } from "./ui/map.js";
 import { CatchCard } from "./ui/catchCard.js";
 import { WalletPanel } from "./ui/walletPanel.js";
 import { JournalUI as ProgressionJournalUI } from "./ui/journalUI.js";
-import { DailyLoginUI } from "./ui/dailyLoginUI.js";
+// import { DailyLoginUI } from "./ui/dailyLoginUI.js"; // DISABLED - daily rewards removed
 import { ChallengesUI } from "./ui/challengesUI.js";
 import { AchievementsUI } from "./ui/achievementsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
@@ -39,7 +39,7 @@ import { recordCatchToDB } from "./web3/databaseIntegration.js";
 import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
-import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js";
+// import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js"; // DISABLED - daily rewards removed
 import { initChallenges, rollDailyChallenges, updateChallengeProgress } from "./progression/challenges.js";
 import { initAchievements } from "./progression/achievements.js";
 import { initWeather } from "./progression/weather.js";
@@ -53,7 +53,7 @@ loadGame();
 
 // Initialize progression systems
 S.progressionJournal = initJournal(S);
-S.dailyLogin = initDailyLogin(S);
+// S.dailyLogin = initDailyLogin(S); // DISABLED - daily rewards removed
 S.challenges = initChallenges(S);
 S.achievements = initAchievements(S);
 S.weather = initWeather(S);
@@ -62,14 +62,14 @@ S.tournament = initTournament(S);
 // Roll daily challenges for today
 rollDailyChallenges(S.challenges);
 
-// Check for daily login (show notification if available)
-const dailyCheck = checkDailyLogin(S.dailyLogin);
-if (dailyCheck.canClaim) {
-  setTimeout(() => {
-    const dailyUI = new DailyLoginUI();
-    dailyUI.show();
-  }, 2000); // Show after 2 seconds
-}
+// Daily login check DISABLED - no more daily rewards
+// const dailyCheck = checkDailyLogin(S.dailyLogin);
+// if (dailyCheck.canClaim) {
+//   setTimeout(() => {
+//     const dailyUI = new DailyLoginUI();
+//     dailyUI.show();
+//   }, 2000);
+// }
 
 const container = document.getElementById("canvas-wrap");
 const core = createCore(container);
@@ -510,14 +510,9 @@ window.addEventListener("keydown", (e) => {
       }
       break;
     case "KeyL":
-      // Open daily login rewards OR leaderboard (shift+L for leaderboard)
+      // Open leaderboard
       if (!paused && isGameplayPhase(machine.current)) {
-        if (e.shiftKey) {
-          leaderboardUI.show();
-        } else {
-          const dailyUI = new DailyLoginUI();
-          dailyUI.show();
-        }
+        leaderboardUI.show();
       }
       break;
     case "KeyT":
