@@ -23,6 +23,7 @@
     "three": "0.170.0"
   },
   "devDependencies": {
+    "canvas": "^3.2.3",
     "vite": "^6.0.5"
   }
 }
