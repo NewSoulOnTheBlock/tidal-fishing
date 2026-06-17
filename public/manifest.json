@@ -10,6 +10,7 @@
   "background_color": "#06101a",
   "theme_color": "#5fd4ff",
   "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
