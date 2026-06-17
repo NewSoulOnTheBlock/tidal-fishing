@@ -54,15 +54,17 @@ export class ChatUI {
     this.fetchInitial();
     this.startPolling();
 
-    // Pause polling while the tab is hidden to avoid needless network churn,
-    // and tear everything down cleanly if the page is going away.
+    // Pause polling while the tab is hidden / the page is in the back-forward
+    // cache to avoid needless network churn; resume when it's shown again.
     this._onVisibility = () => {
       if (document.hidden) this.stopPolling();
       else this.startPolling();
     };
     document.addEventListener("visibilitychange", this._onVisibility);
-    this._onPageHide = () => this.unmount();
+    this._onPageHide = () => this.stopPolling();
+    this._onPageShow = () => { if (!document.hidden) this.startPolling(); };
     window.addEventListener("pagehide", this._onPageHide);
+    window.addEventListener("pageshow", this._onPageShow);
   }
 
   startPolling() {
@@ -81,6 +83,7 @@ export class ChatUI {
     this.stopPolling();
     if (this._onVisibility) document.removeEventListener("visibilitychange", this._onVisibility);
     if (this._onPageHide) window.removeEventListener("pagehide", this._onPageHide);
+    if (this._onPageShow) window.removeEventListener("pageshow", this._onPageShow);
     this.root?.remove();
     this.root = null;
   }
