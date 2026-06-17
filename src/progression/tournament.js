@@ -57,20 +57,24 @@ export const TOURNAMENT_TYPES = [
 ];
 
 export function getTournamentSchedule() {
-  // Tournaments run every 4 hours at :00
+  // Tournaments run every 30 minutes at :00 and :30
   const now = new Date();
-  const currentHour = now.getHours();
-  const nextTournamentHour = Math.ceil((currentHour + 1) / 4) * 4;
+  const currentMinutes = now.getMinutes();
+  const currentSeconds = now.getSeconds();
   
+  // Calculate next 30-minute mark
+  let nextMinutes = currentMinutes < 30 ? 30 : 0;
   const nextStart = new Date(now);
-  nextStart.setHours(nextTournamentHour, 0, 0, 0);
+  nextStart.setMinutes(nextMinutes, 0, 0);
+  
+  // If we're past the next mark, add an hour
   if (nextStart <= now) {
-    nextStart.setDate(nextStart.getDate() + 1);
+    nextStart.setHours(nextStart.getHours() + 1);
   }
 
-  // Rotate tournament types by day + hour
-  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-  const typeIndex = (dayOfYear + Math.floor(currentHour / 4)) % TOURNAMENT_TYPES.length;
+  // Rotate tournament types every 30 minutes
+  const thirtyMinutesSinceEpoch = Math.floor(now.getTime() / (30 * 60 * 1000));
+  const typeIndex = thirtyMinutesSinceEpoch % TOURNAMENT_TYPES.length;
   
   return {
     nextTournament: TOURNAMENT_TYPES[typeIndex],
