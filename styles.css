@@ -1015,9 +1015,11 @@ kbd {
   min-width: 220px;
 }
 
-/* Push the gameplay HUD top-right column down so the wallet panel above it
-   stays clear of the clock + map/shop/journal/pause buttons. */
-.hud-topright { top: 130px !important; }
+/* Push the gameplay HUD top-right column below the wallet panel above it so the
+   (variable-height) panel never covers the clock + location card. The offset is
+   kept in sync with the panel's real height by walletPanel.js via
+   --hud-topright-top; 130px is the pre-script fallback. */
+.hud-topright { top: var(--hud-topright-top, 130px) !important; }
 .hud-card.wallet-card { margin-bottom: 0; }
 
 .wallet-card {

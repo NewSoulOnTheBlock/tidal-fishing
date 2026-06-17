@@ -42,6 +42,7 @@ export class WalletPanel {
     this.refreshTimer = null;
     this.account = null;
     this.lastTideBalance = 0; // Track on-chain balance for hold requirement
+    this._lastHudTop = 0;     // cached --hud-topright-top to avoid redundant writes
 
     this.render();
     onChange((state) => {
@@ -61,6 +62,9 @@ export class WalletPanel {
     // Re-render when the player's earned $TIDE changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
+    // Re-sync the HUD offset when the viewport changes (breakpoints alter the
+    // panel's height/position).
+    window.addEventListener("resize", () => this.syncHudOffset());
   }
 
   render() {
@@ -127,6 +131,29 @@ export class WalletPanel {
       `;
       this.root.querySelector(".wallet-connect").addEventListener("click", () => this.openModal());
     }
+    // Keep the gameplay HUD top-right column clear of this (variable-height)
+    // panel — it grows tall when connected (balances + withdraw button).
+    this.syncHudOffset();
+  }
+
+  /**
+   * Publish the wallet panel's real bottom edge as the --hud-topright-top CSS
+   * variable so the gameplay HUD column (clock + location + buttons) flows just
+   * beneath it instead of being covered. Measured after layout (rAF) so the
+   * just-rendered height is accurate.
+   */
+  syncHudOffset() {
+    const apply = () => {
+      if (!this.root) return;
+      const rect = this.root.getBoundingClientRect();
+      if (!rect.height) return;
+      const top = Math.max(60, Math.round(rect.bottom + 14));
+      if (top === this._lastHudTop) return;
+      this._lastHudTop = top;
+      document.documentElement.style.setProperty("--hud-topright-top", `${top}px`);
+    };
+    apply();
+    requestAnimationFrame(apply);
   }
 
   async doWithdraw(amount) {
