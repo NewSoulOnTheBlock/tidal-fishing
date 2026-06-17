@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
 const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || '7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump';
 const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || '';
-const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 9);
+const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'https://tidalfishing.fun';
 
