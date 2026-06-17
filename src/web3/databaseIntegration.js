@@ -167,7 +167,7 @@ export async function recordCatchToDB(fish, isPerfect = false) {
     const success = await recordCatch({
       walletAddress,
       speciesId: fish.speciesId,
-      location: S.world.location,
+      location: S.world.current,
       rarity: fish.rarity,
       sizeCm: fish.sizeCm,
       weightKg: fish.weightKg,

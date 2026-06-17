@@ -218,7 +218,7 @@ export async function registerCatch(fish) {
     recordCatchDB({
       walletAddress: publicKey.toString(),
       speciesId: fish.speciesId,
-      location: S.world.location,
+      location: S.world.current,
       rarity: fish.rarity,
       sizeCm: fish.sizeCm,
       weightKg: fish.weightKg,
@@ -232,7 +232,7 @@ export async function registerCatch(fish) {
     const completed = updateChallengeProgress(S.challenges, {
       type: 'catch',
       species: fish.speciesId,
-      location: S.world.location,
+      location: S.world.current,
       rarity: fish.rarity,
       value: fish.value,
     });
