@@ -1,0 +1,17 @@
+{
+  "name": "tidal-api-server",
+  "version": "1.0.0",
+  "description": "Tidal API server for Solana withdrawals",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.5",
+    "bs58": "^6.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
