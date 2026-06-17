@@ -18,6 +18,11 @@ export class LeaderboardUI {
   }
 
   async show() {
+    // Guard against stacking: remove any existing leaderboard overlay(s) first.
+    // Opening the leaderboard doesn't change the game phase, so a second open
+    // would otherwise leave an un-closable panel layered on top.
+    document.querySelectorAll('#leaderboard-panel').forEach(el => el.remove());
+
     this.panel = document.createElement("div");
     this.panel.id = "leaderboard-panel";
     this.panel.className = "modal-overlay";
@@ -49,9 +54,27 @@ export class LeaderboardUI {
   bindEvents() {
     const closeBtn = this.panel.querySelector('.btn-close');
     closeBtn.addEventListener('click', () => this.hide());
-    
+
+    // Close on Escape. Capture phase + stopPropagation so the game's global
+    // keydown handler doesn't also fire (which would pop the pause menu).
+    this._escHandler = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        this.hide();
+      }
+    };
+    document.addEventListener('keydown', this._escHandler, true);
+
     this.panel.addEventListener('click', (e) => {
-      if (e.target === this.panel) this.hide();
+      if (e.target === this.panel) { this.hide(); return; }
+
+      // Clicking a podium medal opens a pre-filled X/Twitter share.
+      const medal = e.target.closest('.trophy[data-share]');
+      if (medal) {
+        e.stopPropagation();
+        window.open(medal.dataset.share, '_blank', 'noopener,noreferrer');
+        return;
+      }
 
       const tabBtn = e.target.closest('.tab-btn');
       if (tabBtn) {
@@ -122,11 +145,37 @@ export class LeaderboardUI {
                 <span class="entry-meta"> • ${entry.total_catches} catches</span>
               </div>
             </div>
-            ${entry.rank === 1 ? '<div class="trophy">🥇</div>' : entry.rank === 2 ? '<div class="trophy">🥈</div>' : entry.rank === 3 ? '<div class="trophy">🥉</div>' : ''}
+            ${this.medal(entry)}
           </div>
         `).join('')}
       </div>
     `;
+  }
+
+  // X/Twitter share link builder.
+  tweetUrl(text) {
+    const params = new URLSearchParams({ text, url: 'https://tidalfishing.fun' });
+    return `https://twitter.com/intent/tweet?${params.toString()}`;
+  }
+
+  // Clickable podium medal (top 3) for the earnings leaderboard.
+  medal(entry) {
+    if (!entry || entry.rank > 3) return '';
+    const icon = ['🥇', '🥈', '🥉'][entry.rank - 1];
+    const place = ['1st', '2nd', '3rd'][entry.rank - 1];
+    const who = entry.username ? entry.username : shortAddress(entry.wallet_address);
+    const text = `${icon} ${who} is ${place} on the Tidal Fishing leaderboard with ${formatMoney(Number(entry.total_earned))} earned! 🎣 Can you out-fish them?`;
+    return `<div class="trophy" data-share="${this.esc(this.tweetUrl(text))}" title="Share on X" role="button">${icon}</div>`;
+  }
+
+  // Clickable podium medal (top 3) for a species' biggest catches.
+  speciesMedal(c, i, speciesName) {
+    if (i > 2) return '';
+    const icon = ['🥇', '🥈', '🥉'][i];
+    const place = ['1st', '2nd', '3rd'][i];
+    const who = c.username ? c.username : shortAddress(c.wallet_address);
+    const text = `${icon} ${who} holds the ${place}-biggest ${speciesName} on Tidal Fishing — ${Number(c.size_cm).toFixed(1)}cm! 🎣 Think you can beat it?`;
+    return `<div class="trophy" data-share="${this.esc(this.tweetUrl(text))}" title="Share on X" role="button">${icon}</div>`;
   }
 
   renderRecent(catches) {
@@ -187,7 +236,7 @@ export class LeaderboardUI {
         <div class="species-leaderboard">
           <button class="btn-back">← Back to Species</button>
           <h3>${this.esc(species?.name || speciesId)} - Biggest Catches</h3>
-          ${this.renderSpeciesCatches(data.catches)}
+          ${this.renderSpeciesCatches(data.catches, species?.name || speciesId)}
         </div>
       `;
 
@@ -199,7 +248,7 @@ export class LeaderboardUI {
     }
   }
 
-  renderSpeciesCatches(catches) {
+  renderSpeciesCatches(catches, speciesName) {
     if (!catches || catches.length === 0) {
       return '<div class="empty">No catches recorded for this species yet</div>';
     }
@@ -215,7 +264,7 @@ export class LeaderboardUI {
                 <div class="entry-wallet">${who}</div>
                 <div class="entry-value">${Number(c.size_cm).toFixed(1)}cm • ${Number(c.weight_kg).toFixed(2)}kg • ${formatMoney(Number(c.value))}</div>
               </div>
-              ${i < 3 ? `<div class="trophy">${['🥇', '🥈', '🥉'][i]}</div>` : ''}
+              ${this.speciesMedal(c, i, speciesName)}
             </div>
           `;
         }).join('')}
@@ -243,10 +292,12 @@ export class LeaderboardUI {
   }
 
   hide() {
-    if (this.panel) {
-      this.panel.remove();
-      this.panel = null;
+    if (this._escHandler) {
+      document.removeEventListener('keydown', this._escHandler, true);
+      this._escHandler = null;
     }
+    document.querySelectorAll('#leaderboard-panel').forEach(el => el.remove());
+    this.panel = null;
   }
 }
 

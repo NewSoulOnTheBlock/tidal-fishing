@@ -538,9 +538,10 @@ window.addEventListener("keydown", (e) => {
       }
       break;
     case "KeyL":
-      // Open leaderboard
+      // Toggle leaderboard
       if (!paused && isGameplayPhase(machine.current)) {
-        leaderboardUI.show();
+        if (leaderboardUI.panel) leaderboardUI.hide();
+        else leaderboardUI.show();
       }
       break;
     case "KeyT":
