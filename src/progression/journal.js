@@ -74,35 +74,14 @@ export function getCompletionRewards(journal) {
   const stats = getJournalStats(journal);
   const rewards = [];
 
-  // Milestone rewards
-  if (stats.uniqueSpecies >= 5 && !journal._reward_5species) {
-    rewards.push({ id: '5species', type: 'money', amount: 500, label: 'Caught 5 species!' });
-  }
-  if (stats.uniqueSpecies >= 10 && !journal._reward_10species) {
-    rewards.push({ id: '10species', type: 'money', amount: 2000, label: 'Caught 10 species!' });
-  }
-  if (stats.uniqueSpecies >= 15 && !journal._reward_15species) {
-    rewards.push({ id: '15species', type: 'money', amount: 5000, label: 'Caught 15 species!' });
-  }
-  if (stats.uniqueSpecies >= 22 && !journal._reward_all) {
-    rewards.push({ id: 'all', type: 'money', amount: 50000, label: 'Caught every species!' });
-  }
+  // NO REWARDS - fish catches are the only income source
+  // Milestone tracking removed to prevent exploits
+  // if (stats.uniqueSpecies >= 5 && !journal._reward_5species) {
+  //   rewards.push({ id: '5species', type: 'money', amount: 0, label: 'Caught 5 species!' });
+  // }
+  // ... etc
 
-  // Location completion rewards
-  Object.entries(stats.byLocation).forEach(([loc, data]) => {
-    const rewardId = `complete_${loc}`;
-    if (data.caught === data.total && !journal[`_reward_${rewardId}`]) {
-      const amounts = { lake: 1000, river: 3000, pier: 8000, ocean: 25000 };
-      rewards.push({ 
-        id: rewardId, 
-        type: 'money', 
-        amount: amounts[loc] || 1000, 
-        label: `Completed ${loc} collection!` 
-      });
-    }
-  });
-
-  return rewards;
+  return rewards; // always empty
 }
 
 export function claimReward(journal, rewardId) {

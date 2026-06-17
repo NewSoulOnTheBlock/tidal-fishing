@@ -1,16 +1,16 @@
-// Daily Challenges - randomized daily goals with bonus rewards
+// Daily Challenges - randomized daily goals (NO REWARDS - fish catches are the only income source)
 
 import { FISH_SPECIES, RARITIES } from "../data/fishData.js";
 import { LOCATIONS } from "../data/locationData.js";
 
-// Challenge templates with dynamic generation
+// Challenge templates with dynamic generation - ALL REWARDS SET TO 0
 const CHALLENGE_TEMPLATES = [
-  { id: 'catch_count', label: 'Catch {n} fish', check: (prog, n) => prog >= n, targets: [5, 10, 15, 20], rewards: [300, 800, 1500, 2500] },
-  { id: 'catch_location', label: 'Catch {n} fish in {location}', check: (prog, n) => prog >= n, targets: [3, 5, 8], rewards: [500, 1200, 2000] },
-  { id: 'catch_rarity', label: 'Catch {n} {rarity} fish', check: (prog, n) => prog >= n, targets: [2, 3, 5], rewards: [600, 1500, 3000] },
-  { id: 'catch_species', label: 'Catch a {species}', check: (prog) => prog >= 1, targets: [1], rewards: [800] },
-  { id: 'catch_value', label: 'Earn {n} $TIDE from catches', check: (prog, n) => prog >= n, targets: [1000, 5000, 10000], rewards: [500, 2000, 5000] },
-  { id: 'perfect_hooks', label: 'Land {n} perfect hooks', check: (prog, n) => prog >= n, targets: [3, 5, 10], rewards: [400, 1000, 2500] },
+  { id: 'catch_count', label: 'Catch {n} fish', check: (prog, n) => prog >= n, targets: [5, 10, 15, 20], rewards: [0, 0, 0, 0] },
+  { id: 'catch_location', label: 'Catch {n} fish in {location}', check: (prog, n) => prog >= n, targets: [3, 5, 8], rewards: [0, 0, 0] },
+  { id: 'catch_rarity', label: 'Catch {n} {rarity} fish', check: (prog, n) => prog >= n, targets: [2, 3, 5], rewards: [0, 0, 0] },
+  { id: 'catch_species', label: 'Catch a {species}', check: (prog) => prog >= 1, targets: [1], rewards: [0] },
+  { id: 'catch_value', label: 'Earn {n} $TIDE from catches', check: (prog, n) => prog >= n, targets: [1000, 5000, 10000], rewards: [0, 0, 0] },
+  { id: 'perfect_hooks', label: 'Land {n} perfect hooks', check: (prog, n) => prog >= n, targets: [3, 5, 10], rewards: [0, 0, 0] },
 ];
 
 export function initChallenges(save) {
