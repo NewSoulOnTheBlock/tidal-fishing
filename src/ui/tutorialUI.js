@@ -6,34 +6,41 @@
 import { S, events } from "../state/gameState.js";
 import { saveGame } from "../state/saveLoad.js";
 
+// Inline Tabler Icons (MIT licensed, https://tabler.io/icons), rendered as SVG
+// so each slide gets a crisp, unique line icon that inherits the cyan accent via
+// `currentColor` and works offline in the installed PWA.
+const ICON = (paths) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" ` +
+  `stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
 const SLIDES = [
   {
-    icon: "🎣",
+    icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-4l3 3" /><path d="M14 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M16 5v-2" />'),
     title: "Cast your line",
     body: "Aim with your mouse. <b>Hold Click</b> (or <b>Space</b>) to charge the power meter, then release to cast. Cast farther to reach deeper water and bigger fish.",
   },
   {
-    icon: "🎯",
+    icon: ICON('<path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 7a5 5 0 1 0 5 5" /><path d="M13 3.055a9 9 0 1 0 7.941 7.945" /><path d="M15 6v3h3l3 -3h-3v-3l-3 3" /><path d="M15 9l-3 3" />'),
     title: "Tempt &amp; hook the bite",
     body: "While you wait, <b>tap</b> to jig your lure — it hurries the bite and nudges your odds toward rarer fish. When one strikes, a ring closes over your bobber: <b>click while it's green</b> for a <b>Perfect Hook</b>.",
   },
   {
-    icon: "💪",
+    icon: ICON('<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M13.41 10.59l2.59 -2.59" /><path d="M7 12a5 5 0 0 1 5 -5" />'),
     title: "Reel it in",
     body: "<b>Hold</b> to reel. Keep <b>tension in the green zone</b> to haul the fastest — but reel too hard and the line spikes toward a snap. Let go to rest and recover.",
   },
   {
-    icon: "🌊",
+    icon: ICON('<path d="M3 7c3 -2 6 -2 9 0s6 2 9 0" /><path d="M3 17c3 -2 6 -2 9 0s6 2 9 0" /><path d="M3 12c3 -2 6 -2 9 0s6 2 9 0" />'),
     title: "Ride the surges",
     body: "Fish fight back with sudden surges. Watch for the warning flash, then <b>ease off</b> — or tap <b>Give Line</b> (press <b>D</b>) to <b>dodge</b> and soften it.",
   },
   {
-    icon: "✋",
+    icon: ICON('<path d="M8 13v-7.5a1.5 1.5 0 0 1 3 0v6.5" /><path d="M11 5.5v-2a1.5 1.5 0 1 1 3 0v8.5" /><path d="M14 5.5a1.5 1.5 0 0 1 3 0v6.5" /><path d="M17 7.5a1.5 1.5 0 0 1 3 0v8.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" />'),
     title: "Save the line",
     body: "If tension maxes out, <b>let go instantly</b> to save your line — once per fight. Resting at the brink is safe; only <i>reeling</i> at full tension will snap it.",
   },
   {
-    icon: "🐟",
+    icon: ICON('<path d="M16.69 7.44a6.973 6.973 0 0 0 -1.69 4.56c0 1.747 .64 3.345 1.699 4.571" /><path d="M2 9.504c7.715 8.647 14.75 10.265 20 2.498c-5.25 -7.761 -12.285 -6.142 -20 2.504" /><path d="M18 11v.01" /><path d="M11.5 10.5c-.667 1 -.667 2 0 3" />'),
     title: "Spots, $TIDE &amp; beyond",
     body: "Spot drifting <b>ripple rings</b> on the water? Cast into one for faster bites and rarer fish. Every catch earns <b>$TIDE</b> and XP — sell your haul, upgrade gear, unlock new waters, and climb the leaderboard. <b>Tight lines!</b>",
   },
@@ -126,7 +133,7 @@ export class TutorialUI {
     if (!this.panel) return;
     const s = SLIDES[this.index];
     const stage = this.panel.querySelector(".tutorial-stage");
-    this.panel.querySelector(".tutorial-icon").textContent = s.icon;
+    this.panel.querySelector(".tutorial-icon").innerHTML = s.icon;
     this.panel.querySelector(".tutorial-title").innerHTML = s.title;
     this.panel.querySelector(".tutorial-body").innerHTML = s.body;
     // retrigger the slide-in animation

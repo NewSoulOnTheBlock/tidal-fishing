@@ -1714,10 +1714,22 @@ body.weather-cloudy {
 }
 
 .tutorial-icon {
-  font-size: 3.4rem;
-  line-height: 1;
-  filter: drop-shadow(0 4px 14px rgba(95, 212, 255, 0.5));
+  width: 94px;
+  height: 94px;
+  margin: 4px auto 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--accent);
+  background: radial-gradient(circle at 50% 36%, rgba(95, 212, 255, 0.26), rgba(95, 212, 255, 0.05) 72%, transparent);
+  border: 1.5px solid rgba(95, 212, 255, 0.38);
+  box-shadow: 0 8px 24px rgba(95, 212, 255, 0.25), inset 0 0 20px rgba(95, 212, 255, 0.1);
   animation: onboardBob 3s ease-in-out infinite;
+}
+.tutorial-icon svg {
+  width: 50px;
+  height: 50px;
+  filter: drop-shadow(0 3px 8px rgba(95, 212, 255, 0.45));
 }
 
 .tutorial-title {
@@ -1796,7 +1808,8 @@ body.weather-cloudy {
 @media (max-width: 480px) {
   .tutorial-modal { padding: 26px 20px 20px; }
   .tutorial-title { font-size: 1.3rem; }
-  .tutorial-icon { font-size: 2.8rem; }
+  .tutorial-icon { width: 78px; height: 78px; }
+  .tutorial-icon svg { width: 42px; height: 42px; }
   .tutorial-stage { min-height: 240px; }
 }
 
