@@ -48,9 +48,14 @@ export class BiteSystem {
   hookAttempt() {
     if (this.state !== "window") return null;
     const fish = this.fish;
+    // Calculate if this was a perfect hook (within first 30% of window)
+    const totalWindow = fish.hookWindow;
+    const elapsedInWindow = fish.hookWindow - this.windowT;
+    const isPerfect = (elapsedInWindow / totalWindow) <= 0.3;
+    
     this.state = "idle";
     this.fish = null;
-    events.emit("bite:hooked", { fish });
+    events.emit("bite:hooked", { fish, isPerfect });
     return fish;
   }
 

@@ -38,7 +38,7 @@ import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
 import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js";
-import { initChallenges, rollDailyChallenges } from "./progression/challenges.js";
+import { initChallenges, rollDailyChallenges, updateChallengeProgress } from "./progression/challenges.js";
 import { initAchievements } from "./progression/achievements.js";
 import { initWeather } from "./progression/weather.js";
 import { initTournament } from "./progression/tournament.js";
@@ -341,8 +341,23 @@ events.on("bite:missed", () => {
   machine.set(Phase.WAITING);
 });
 
-events.on("bite:hooked", ({ fish }) => {
+events.on("bite:hooked", ({ fish, isPerfect }) => {
   lastBobberPos.copy(bobber.pos);
+  
+  // Track perfect hooks
+  if (isPerfect) {
+    S.stats.perfectHooks = (S.stats.perfectHooks || 0) + 1;
+    
+    // Update challenges with perfect hook event
+    if (S.challenges) {
+      const completed = updateChallengeProgress(S.challenges, {
+        type: 'hook',
+        perfectHook: true,
+      });
+      if (completed) events.emit("challenge:complete");
+    }
+  }
+  
   machine.set(Phase.REELING, { fish });
 });
 
