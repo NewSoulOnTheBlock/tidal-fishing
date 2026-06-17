@@ -1,4 +1,4 @@
-// Global "Troll Box" — a shared, global chat for everyone currently playing.
+// Global "Fishermans Hole" — a shared, global chat for everyone currently playing.
 // Backed by the Render API (/api/chat). Real-time-ish via lightweight polling.
 // Banned wallets are blocked server-side; posting requires a chosen angler name.
 
@@ -33,7 +33,7 @@ export class ChatUI {
     this.root.className = "trollbox";
     this.root.innerHTML = `
       <div class="trollbox-header">
-        <span class="trollbox-title">🌊 Troll Box <span class="trollbox-sub">global chat</span></span>
+        <span class="trollbox-title">🎣 Fishermans Hole <span class="trollbox-sub">global chat</span></span>
         <button class="trollbox-toggle" title="Minimize">—</button>
       </div>
       <div class="trollbox-messages" id="trollbox-messages">
@@ -186,7 +186,7 @@ export class ChatUI {
           this.scrollToBottom();
         }
       } else if (res.status === 403) {
-        events.emit("toast", { msg: "🚫 You're banned from the Troll Box", kind: "warn" });
+        events.emit("toast", { msg: "🚫 You're banned from the Fishermans Hole", kind: "warn" });
       } else if (data.code === "RATE_LIMIT") {
         events.emit("toast", { msg: "💬 Easy there — slow down a sec", kind: "info" });
       } else if (data.code === "NAME_REQUIRED") {

@@ -122,7 +122,7 @@ const onboardingUI = new OnboardingUI();
 // First-time wallet sign-in: force the angler-name onboarding flow.
 events.on("onboarding:needed", () => onboardingUI.show());
 
-// Global Troll Box (global chat) — only on the browser-tab web version,
+// Global Fishermans Hole (global chat) — only on the browser-tab web version,
 // hidden in the installed/standalone PWA.
 function isInstalledPWA() {
   const mm = (q) => window.matchMedia && window.matchMedia(q).matches;
@@ -488,6 +488,12 @@ window.addEventListener("contextmenu", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  // While the user is typing in a text field (Fishermans Hole chat, onboarding
+  // name, profile editor), let the browser handle the key normally — don't
+  // preventDefault the spacebar or fire any game/casting shortcuts.
+  const t = e.target;
+  if (t && (t.isContentEditable || t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT")) return;
+
   if (e.code === "Space") e.preventDefault();
   if (e.repeat) return;
 
