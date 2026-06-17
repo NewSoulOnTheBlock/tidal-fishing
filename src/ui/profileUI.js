@@ -16,36 +16,47 @@ export class ProfileUI {
   }
 
   async show() {
+    console.log("[ProfileUI] show() called");
     const publicKey = currentPublicKey();
+    console.log("[ProfileUI] publicKey:", publicKey);
+    
     if (!publicKey) {
+      console.log("[ProfileUI] No wallet connected");
       events.emit("toast", { 
-        message: "Connect your wallet to view your profile", 
-        type: "warn" 
+        msg: "Connect your wallet to view your profile", 
+        kind: "warn" 
       });
       return;
     }
 
     const walletAddress = publicKey.toString();
+    console.log("[ProfileUI] Loading profile for:", walletAddress);
     
     // Load profile from database
     this.currentProfile = await getPlayerProfile(walletAddress);
+    console.log("[ProfileUI] Profile loaded:", this.currentProfile);
     
     if (!this.currentProfile) {
+      console.log("[ProfileUI] Failed to load profile");
       events.emit("toast", { 
-        message: "Failed to load profile", 
-        type: "error" 
+        msg: "Failed to load profile", 
+        kind: "error" 
       });
       return;
     }
 
+    console.log("[ProfileUI] Creating panel...");
     this.panel = document.createElement("div");
     this.panel.id = "profile-panel";
     this.panel.className = "modal-overlay";
     
     this.panel.innerHTML = this.renderProfile();
     
+    console.log("[ProfileUI] Appending to body...");
     document.body.appendChild(this.panel);
+    console.log("[ProfileUI] Panel appended, binding events...");
     this.bindEvents();
+    console.log("[ProfileUI] Done!");
   }
 
   renderProfile() {
@@ -194,8 +205,8 @@ export class ProfileUI {
     
     if (newUsername.length > 50) {
       events.emit("toast", { 
-        message: "Username must be 50 characters or less", 
-        type: "error" 
+        msg: "Username must be 50 characters or less", 
+        kind: "error" 
       });
       return;
     }
@@ -205,8 +216,8 @@ export class ProfileUI {
 
     try {
       events.emit("toast", { 
-        message: "Updating username...", 
-        type: "info" 
+        msg: "Updating username...", 
+        kind: "info" 
       });
 
       const updated = await updateProfile(publicKey.toString(), { username: newUsername });
@@ -214,15 +225,15 @@ export class ProfileUI {
       if (updated) {
         this.currentProfile.player.username = newUsername;
         events.emit("toast", { 
-          message: "✅ Username updated!", 
-          type: "success" 
+          msg: "✅ Username updated!", 
+          kind: "success" 
         });
         this.refresh();
       }
     } catch (error) {
       events.emit("toast", { 
-        message: "Failed to update username", 
-        type: "error" 
+        msg: "Failed to update username", 
+        kind: "error" 
       });
     }
   }
@@ -235,8 +246,8 @@ export class ProfileUI {
     
     if (newBio.length > 200) {
       events.emit("toast", { 
-        message: "Bio must be 200 characters or less", 
-        type: "error" 
+        msg: "Bio must be 200 characters or less", 
+        kind: "error" 
       });
       return;
     }
@@ -246,8 +257,8 @@ export class ProfileUI {
 
     try {
       events.emit("toast", { 
-        message: "Updating bio...", 
-        type: "info" 
+        msg: "Updating bio...", 
+        kind: "info" 
       });
 
       const updated = await updateProfile(publicKey.toString(), { bio: newBio });
@@ -255,15 +266,15 @@ export class ProfileUI {
       if (updated) {
         this.currentProfile.player.bio = newBio;
         events.emit("toast", { 
-          message: "✅ Bio updated!", 
-          type: "success" 
+          msg: "✅ Bio updated!", 
+          kind: "success" 
         });
         this.refresh();
       }
     } catch (error) {
       events.emit("toast", { 
-        message: "Failed to update bio", 
-        type: "error" 
+        msg: "Failed to update bio", 
+        kind: "error" 
       });
     }
   }
@@ -309,8 +320,8 @@ export class ProfileUI {
 
     try {
       events.emit("toast", { 
-        message: "Updating avatar...", 
-        type: "info" 
+        msg: "Updating avatar...", 
+        kind: "info" 
       });
 
       const updated = await updateProfile(publicKey.toString(), { profilePicture: avatarId });
@@ -318,15 +329,15 @@ export class ProfileUI {
       if (updated) {
         this.currentProfile.player.profile_picture = avatarId;
         events.emit("toast", { 
-          message: "✅ Avatar updated!", 
-          type: "success" 
+          msg: "✅ Avatar updated!", 
+          kind: "success" 
         });
         this.refresh();
       }
     } catch (error) {
       events.emit("toast", { 
-        message: "Failed to update avatar", 
-        type: "error" 
+        msg: "Failed to update avatar", 
+        kind: "error" 
       });
     }
   }
