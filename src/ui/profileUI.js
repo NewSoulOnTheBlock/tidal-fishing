@@ -177,6 +177,7 @@ export class ProfileUI {
   }
 
   bindEvents() {
+    console.log("[ProfileUI] bindEvents() called");
     const closeBtn = this.panel.querySelector('.btn-close');
     closeBtn.addEventListener('click', () => this.hide());
     
@@ -186,24 +187,56 @@ export class ProfileUI {
 
     // Edit username
     const editUsernameBtn = this.panel.querySelector('.btn-edit-username');
-    editUsernameBtn?.addEventListener('click', () => this.editUsername());
+    console.log("[ProfileUI] Edit username button:", editUsernameBtn);
+    if (editUsernameBtn) {
+      editUsernameBtn.addEventListener('click', (e) => {
+        console.log("[ProfileUI] Username edit button clicked!");
+        e.preventDefault();
+        e.stopPropagation();
+        this.editUsername();
+      });
+    }
 
     // Edit bio
     const editBioBtn = this.panel.querySelector('.btn-edit-bio');
-    editBioBtn?.addEventListener('click', () => this.editBio());
+    console.log("[ProfileUI] Edit bio button:", editBioBtn);
+    if (editBioBtn) {
+      editBioBtn.addEventListener('click', (e) => {
+        console.log("[ProfileUI] Bio edit button clicked!");
+        e.preventDefault();
+        e.stopPropagation();
+        this.editBio();
+      });
+    }
 
     // Change avatar
     const changeAvatarBtn = this.panel.querySelector('.btn-change-avatar');
-    changeAvatarBtn?.addEventListener('click', () => this.selectAvatar());
+    console.log("[ProfileUI] Change avatar button:", changeAvatarBtn);
+    if (changeAvatarBtn) {
+      changeAvatarBtn.addEventListener('click', (e) => {
+        console.log("[ProfileUI] Change avatar button clicked!");
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectAvatar();
+      });
+    }
   }
 
   async editUsername() {
+    console.log("[ProfileUI] editUsername() called");
     const currentUsername = this.currentProfile.player.username || '';
-    const newUsername = prompt('Enter your new username (max 50 characters):', currentUsername);
+    console.log("[ProfileUI] Current username:", currentUsername);
     
-    if (newUsername === null || newUsername === currentUsername) return;
+    const newUsername = prompt('Enter your new username (max 50 characters):', currentUsername);
+    console.log("[ProfileUI] New username from prompt:", newUsername);
+    
+    if (newUsername === null || newUsername === currentUsername) {
+      console.log("[ProfileUI] Username unchanged, returning");
+      return;
+    }
     
     if (newUsername.length > 50) {
+      console.log("[ProfileUI] Username too long");
       events.emit("toast", { 
         msg: "Username must be 50 characters or less", 
         kind: "error" 
@@ -212,15 +245,20 @@ export class ProfileUI {
     }
 
     const publicKey = currentPublicKey();
-    if (!publicKey) return;
+    if (!publicKey) {
+      console.log("[ProfileUI] No public key");
+      return;
+    }
 
     try {
+      console.log("[ProfileUI] Updating username via API...");
       events.emit("toast", { 
         msg: "Updating username...", 
         kind: "info" 
       });
 
       const updated = await updateProfile(publicKey.toString(), { username: newUsername });
+      console.log("[ProfileUI] Update result:", updated);
       
       if (updated) {
         this.currentProfile.player.username = newUsername;
@@ -231,6 +269,7 @@ export class ProfileUI {
         this.refresh();
       }
     } catch (error) {
+      console.error("[ProfileUI] Update error:", error);
       events.emit("toast", { 
         msg: "Failed to update username", 
         kind: "error" 
