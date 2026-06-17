@@ -112,6 +112,7 @@ const progressionJournalUI = new ProgressionJournalUI();
 const achievementsUI = new AchievementsUI();
 const challengesUI = new ChallengesUI();
 const weatherUI = new WeatherUI(scene);
+const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
 const tournamentUI = new TournamentUI();
 
