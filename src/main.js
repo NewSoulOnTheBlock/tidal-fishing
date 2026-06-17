@@ -580,6 +580,13 @@ function handleEscape() {
 document.getElementById("btn-map").addEventListener("click", () => toggleScreen(Phase.MAP));
 document.getElementById("btn-shop").addEventListener("click", () => toggleScreen(Phase.SHOP));
 document.getElementById("btn-journal").addEventListener("click", () => toggleScreen(Phase.JOURNAL));
+document.getElementById("btn-profile").addEventListener("click", () => {
+  if (!paused && isGameplayPhase(machine.current)) {
+    audio.init();
+    audio.play("click");
+    profileUI.show();
+  }
+});
 document.getElementById("btn-pause").addEventListener("click", () => {
   audio.play("click");
   setPaused(true);

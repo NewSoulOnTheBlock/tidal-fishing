@@ -46,7 +46,7 @@ export class HUD {
     this.bite = $("bite-indicator");
     this.toasts = $("toasts");
     this.vignette = $("vignette");
-    this.buttons = [$("btn-map"), $("btn-shop"), $("btn-journal")];
+    this.buttons = [$("btn-map"), $("btn-shop"), $("btn-journal"), $("btn-profile")];
 
     this.bindEvents();
   }
