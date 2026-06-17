@@ -201,11 +201,11 @@ export class WalletPanel {
       : isMobile
         ? `<p class="wallet-empty wallet-mobile-hint">
             <strong>No wallets detected!</strong><br><br>
-            To use your Solana wallet on mobile, please open <strong>tidalfishing.fun</strong> in your wallet's built-in browser:<br><br>
+            On <strong>Android</strong>, tap Connect again — your installed wallet appears as a <strong>Mobile Wallet Adapter</strong> option.<br><br>
+            On <strong>iOS</strong>, open <strong>tidalfishing.fun</strong> in your wallet's built-in browser:<br><br>
             📱 <strong>Phantom:</strong> Tap Browser → enter URL<br>
-            📱 <strong>Backpack:</strong> Tap Browser → enter URL<br>
             📱 <strong>Solflare:</strong> Tap DApp Browser → enter URL<br>
-            📱 <strong>Jupiter:</strong> Open in-app browser<br><br>
+            📱 <strong>Backpack:</strong> Tap Browser → enter URL<br><br>
             Or install a mobile wallet app first!
           </p>`
         : `<p class="wallet-empty">No Solana wallets detected. Install <a href="https://phantom.app" target="_blank" rel="noopener">Phantom</a>, <a href="https://solflare.com" target="_blank" rel="noopener">Solflare</a> or <a href="https://backpack.app" target="_blank" rel="noopener">Backpack</a> and reload.</p>`;

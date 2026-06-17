@@ -36,6 +36,7 @@ import { OnboardingUI } from "./ui/onboardingUI.js";
 import { ChatUI } from "./ui/chatUI.js";
 import { SocialUI } from "./ui/socialUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
+import { initMobileWalletAdapter } from "./web3/mwa.js";
 import { shortAddress } from "./web3/solana.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
@@ -48,6 +49,11 @@ import { initWeather } from "./progression/weather.js";
 // ---------------------------------------------------------------------------
 
 loadGame();
+
+// Register Solana Mobile Wallet Adapter so installed mobile wallets appear in
+// the connect modal automatically (no-op on desktop unless VITE_MWA_REMOTE_HOST
+// is set; see src/web3/mwa.js).
+initMobileWalletAdapter();
 
 // Initialize progression systems
 S.progressionJournal = initJournal(S);
@@ -131,6 +137,13 @@ if (!isInstalledPWA()) {
 // banner. Mounted always — it's a passive, lightweight overlay.
 const socialUI = new SocialUI();
 socialUI.mount();
+
+// Title-screen market-cap pill + $TIDE contract-address footer. Lazy-loaded so
+// this non-critical widget stays out of the main entry chunk (keeps the wallet
+// adapter graph from being pulled in eagerly).
+import("./ui/marketCapUI.js")
+  .then(({ MarketCapUI }) => new MarketCapUI().init())
+  .catch((e) => console.warn("[marketcap] UI failed to load:", e));
 
 // Initialize weather + achievements widgets
 weatherUI.init();

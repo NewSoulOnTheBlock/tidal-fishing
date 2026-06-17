@@ -19,6 +19,7 @@ export default defineConfig({
             '@wallet-standard/features',
             '@solana/wallet-standard-features',
             '@solana/wallet-standard-util',
+            '@solana-mobile/wallet-standard-mobile',
           ],
         },
       },

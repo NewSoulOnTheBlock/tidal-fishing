@@ -765,6 +765,65 @@ kbd {
 .menu-save-info { margin-top: 18px; font-size: 0.8rem; color: var(--dim); }
 .menu-credits { margin-top: 26px; font-size: 0.72rem; color: rgba(157, 177, 192, 0.55); }
 
+/* Title-screen $TIDE market-cap pill */
+.menu-mcap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 24px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--glass-soft);
+  border: 1px solid var(--stroke);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.menu-mcap:hover { border-color: var(--accent); transform: translateY(-1px); }
+.mcap-label { color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.64rem; }
+.mcap-value { font-weight: 800; color: var(--gold); font-size: 0.98rem; }
+.mcap-price { color: var(--dim); font-size: 0.74rem; display: inline-flex; align-items: center; gap: 6px; }
+.mcap-change { font-weight: 700; }
+.mcap-up { color: var(--ok); }
+.mcap-down { color: var(--danger); }
+
+/* $TIDE contract-address footer */
+.menu-footer {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--stroke);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+.ca-row { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.ca-tag { color: var(--dim); font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.ca-address {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--accent);
+  background: rgba(95, 212, 255, 0.08);
+  border: 1px solid var(--stroke);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.ca-copy {
+  background: rgba(95, 212, 255, 0.12);
+  color: var(--accent);
+  border: 1px solid var(--stroke);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.ca-copy:hover { background: rgba(95, 212, 255, 0.22); }
+.ca-links { display: inline-flex; gap: 16px; }
+.ca-link { color: var(--dim); font-size: 0.72rem; text-decoration: none; }
+.ca-link:hover { color: var(--accent); }
+
 .panel {
   background: var(--glass);
   border: 1px solid var(--stroke);

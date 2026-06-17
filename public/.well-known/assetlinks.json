@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "fun.tidalfishing.twa",
+      "sha256_cert_fingerprints": [
+        "57:93:8E:FD:F7:98:C6:14:08:B4:3A:F3:A2:93:AC:4B:CB:C2:18:57:47:B2:06:21:4E:38:73:50:6B:F7:2E:E8"
+      ]
+    }
+  }
+]
