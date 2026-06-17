@@ -2136,8 +2136,8 @@ body.weather-cloudy {
 /* ==================== Troll Box (global chat) ==================== */
 .trollbox {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
+  left: 16px;
+  bottom: 86px;
   width: 320px;
   max-width: calc(100vw - 24px);
   max-height: 440px;
