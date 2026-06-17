@@ -1,6 +1,8 @@
 // Service Worker for Tidal PWA
-const CACHE_NAME = 'tidal-v1';
-const RUNTIME_CACHE = 'tidal-runtime';
+// Bump VERSION on every deploy that must invalidate the PWA cache.
+const VERSION = 'v2';
+const CACHE_NAME = `tidal-${VERSION}`;
+const RUNTIME_CACHE = `tidal-runtime-${VERSION}`;
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
@@ -72,7 +74,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first strategy for assets
+  // Network-first for navigations / HTML documents so a fresh deploy is picked
+  // up immediately. index.html references hash-named JS/CSS bundles, so serving
+  // a stale HTML shell would pin the entire app to an old build.
+  const accept = request.headers.get('accept') || '';
+  if (request.mode === 'navigate' || accept.includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((r) => r || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // Cache-first strategy for hash-named, immutable build assets
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {

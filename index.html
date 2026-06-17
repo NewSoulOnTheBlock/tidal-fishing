@@ -235,6 +235,15 @@
 <script>
   // Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
+    // When a new service worker takes control after a deploy, reload once so
+    // the freshly fetched HTML + JS bundle replace any stale cached code.
+    let swRefreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (swRefreshing) return;
+      swRefreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
