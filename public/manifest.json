@@ -1,4 +1,6 @@
 {
+  "dir": "ltr",
+  "lang": "en-US",
   "name": "Tidal - Web3 Fishing Game",
   "short_name": "Tidal",
   "id": "/",
@@ -11,6 +13,9 @@
   "theme_color": "#5fd4ff",
   "categories": ["games", "entertainment"],
   "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
   "icons": [
     {
       "src": "/icon-192.png",
@@ -46,5 +51,55 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot-1.png",
+      "sizes": "2533x1258",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Tidal title screen — live weather, tournaments, and the global Fishermans Hole chat"
+    },
+    {
+      "src": "/screenshots/screenshot-2.png",
+      "sizes": "1283x916",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Casting a line into the mid waters"
+    },
+    {
+      "src": "/screenshots/screenshot-3.png",
+      "sizes": "949x883",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Reeling in a hooked fish with the tension minigame"
+    }
+  ],
+  "widgets": [
+    {
+      "name": "Tidal Leaderboard",
+      "short_name": "Tidal",
+      "description": "See who is leading the Tidal Fishing leaderboard, total $TIDE earned, and how many anglers are playing.",
+      "tag": "tidal-leaderboard",
+      "ms_ac_template": "/widgets/tidal-widget.json",
+      "data": "https://tidal-fishing.onrender.com/api/widget",
+      "type": "application/json",
+      "update": 3600,
+      "screenshots": [
+        {
+          "src": "/widgets/widget-preview.png",
+          "sizes": "600x400",
+          "label": "Tidal leaderboard widget",
+          "platform": "windows"
+        }
+      ],
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
 }

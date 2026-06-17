@@ -693,6 +693,30 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
+// 4a-bis. PWA Windows widget data feed — supplies the Adaptive Card bindings
+// for the manifest `widgets` entry. CORS is made permissive here because the
+// Windows Widgets Board fetches this from outside the app's web origin.
+app.get('/api/widget', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.set('Cache-Control', 'no-store');
+  const shorten = (w) => (w && w.length > 10) ? `${w.slice(0, 4)}…${w.slice(-4)}` : (w || '—');
+  try {
+    const top = await pool.query('SELECT wallet_address, username, total_earned FROM leaderboard LIMIT 1');
+    const cnt = await pool.query('SELECT COUNT(*)::int AS n FROM players');
+    const t = top.rows[0];
+    res.json({
+      leader: t ? (t.username || shorten(t.wallet_address)) : 'Be the first!',
+      earned: t ? Math.round(Number(t.total_earned)).toLocaleString('en-US') : '0',
+      players: cnt.rows[0]?.n ?? 0,
+      tagline: 'Cast a line, earn $TIDE, climb the leaderboard.',
+    });
+  } catch (error) {
+    console.error('[widget] Error:', error);
+    res.json({ leader: 'Tidal anglers', earned: '0', players: 0, tagline: 'Cast a line and earn $TIDE.' });
+  }
+});
+
 // 4b. Global troll box — fetch recent chat messages.
 // ?since=<id> returns only newer messages (for incremental polling);
 // otherwise returns the latest `limit` messages (oldest-first for appending).

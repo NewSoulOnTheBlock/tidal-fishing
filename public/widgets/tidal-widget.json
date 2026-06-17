@@ -1,0 +1,38 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.5",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "🎣 Tidal Fishing",
+      "size": "Large",
+      "weight": "Bolder",
+      "color": "Accent",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "${tagline}",
+      "wrap": true,
+      "isSubtle": true,
+      "spacing": "Small"
+    },
+    {
+      "type": "FactSet",
+      "spacing": "Medium",
+      "facts": [
+        { "title": "👑 Leader", "value": "${leader}" },
+        { "title": "💰 Earned", "value": "${earned} $TIDE" },
+        { "title": "🐟 Anglers", "value": "${players}" }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.OpenUrl",
+      "title": "Play Tidal 🎣",
+      "url": "https://tidalfishing.fun"
+    }
+  ]
+}
