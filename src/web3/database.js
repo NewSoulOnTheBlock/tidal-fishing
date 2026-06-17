@@ -32,36 +32,50 @@ export async function authenticatePlayer(walletAddress) {
  * @param {string} walletAddress 
  * @param {Object} state - Player state object
  */
-export async function savePlayerState(walletAddress, state) {
+export async function savePlayerState(playerState = {}) {
+  const {
+    walletAddress,
+    level,
+    xp,
+    money,
+    totalCatches,
+    totalEarned,
+    perfectHooks = 0,
+    snaps = 0,
+    unlockedLocations,
+    equippedGear = {},
+    ownedGear,
+  } = playerState;
+
   try {
     const res = await fetch(`${API_URL}/api/player/save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        walletAddress, 
+      body: JSON.stringify({
+        walletAddress,
         state: {
-          level: state.level,
-          xp: state.xp,
-          money: state.money,
-          totalCatches: state.totalCatches,
-          totalEarned: state.totalEarned,
-          perfectHooks: state.perfectHooks || 0,
-          snaps: state.snaps || 0,
-          unlockedLocations: state.unlockedLocations,
-          equippedRod: state.equippedRod,
-          equippedReel: state.equippedReel,
-          equippedLine: state.equippedLine,
-          equippedBait: state.equippedBait,
-          ownedGear: state.ownedGear,
+          level,
+          xp,
+          money,
+          totalCatches,
+          totalEarned,
+          perfectHooks,
+          snaps,
+          unlockedLocations,
+          equippedRod: equippedGear.rods,
+          equippedReel: equippedGear.reels,
+          equippedLine: equippedGear.lines,
+          equippedBait: equippedGear.baits,
+          ownedGear,
         }
       }),
     });
-    
+
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Save failed');
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Save failed (HTTP ${res.status})`);
     }
-    
+
     return await res.json();
   } catch (error) {
     console.error('[database] Save error:', error);
@@ -75,30 +89,41 @@ export async function savePlayerState(walletAddress, state) {
  * @param {string} walletAddress 
  * @param {Object} catchData - Catch details
  */
-export async function recordCatch(walletAddress, catchData) {
+export async function recordCatch(catchInfo = {}) {
+  const {
+    walletAddress,
+    speciesId,
+    location,
+    rarity,
+    sizeCm,
+    weightKg,
+    value,
+    perfectHook = false,
+  } = catchInfo;
+
   try {
     const res = await fetch(`${API_URL}/api/player/catch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        walletAddress, 
+      body: JSON.stringify({
+        walletAddress,
         catch: {
-          speciesId: catchData.speciesId,
-          location: catchData.location,
-          rarity: catchData.rarity,
-          sizeCm: catchData.sizeCm,
-          weightKg: catchData.weightKg,
-          value: catchData.value,
-          perfectHook: catchData.perfectHook || false,
+          speciesId,
+          location,
+          rarity,
+          sizeCm,
+          weightKg,
+          value,
+          perfectHook,
         }
       }),
     });
-    
+
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || 'Failed to record catch');
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.error || `Failed to record catch (HTTP ${res.status})`);
     }
-    
+
     return await res.json();
   } catch (error) {
     console.error('[database] Record catch error:', error);

@@ -75,7 +75,13 @@ export class LeaderboardUI {
         const response = await fetch(`${API_BASE}/api/leaderboard?limit=100`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        content.innerHTML = this.renderEarnings(data);
+        // Server returns { leaderboard: [...] } already ordered by earnings.
+        // Rank isn't in the payload, so derive it from position.
+        const entries = (data.leaderboard || []).map((entry, i) => ({
+          ...entry,
+          rank: i + 1,
+        }));
+        content.innerHTML = this.renderEarnings(entries);
       } else if (tab === "recent") {
         // Recent catches not implemented yet - show coming soon
         content.innerHTML = '<div class="empty">Recent catches coming soon!</div>';

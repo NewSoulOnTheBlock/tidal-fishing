@@ -135,8 +135,10 @@ export async function syncPlayerState() {
       loginStreak: S.dailyLogin?.streak || 0,
     });
 
-    if (success) {
+    if (success?.success) {
       console.log("[db] ✅ Player state synced successfully");
+    } else {
+      console.warn("[db] ⚠️ Player state sync failed:", success?.error);
     }
   } catch (error) {
     console.error("[db] Failed to sync player state:", error);
