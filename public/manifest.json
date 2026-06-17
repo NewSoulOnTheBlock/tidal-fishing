@@ -1,6 +1,7 @@
 {
   "name": "Tidal - Web3 Fishing Game",
   "short_name": "Tidal",
+  "id": "/",
   "description": "A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and compete in tournaments.",
   "start_url": "/",
   "display": "standalone",
