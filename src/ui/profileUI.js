@@ -54,22 +54,14 @@ export class ProfileUI {
     // Local state is the source of truth (instant, offline-safe).
     this.currentProfile = this.buildLocalProfile(walletAddress);
 
-    // Best-effort: merge any server-side values on top (achievements, stats).
+    // Best-effort: reconcile with the server. Lifetime counters only ever
+    // grow, so take the higher of local/server — this keeps stats accurate
+    // across devices and never regresses the profile to a stale server
+    // snapshot (e.g. an older row that predates the latest catches).
     try {
       const remote = await getPlayerProfile(walletAddress);
       if (remote?.player) {
-        // Prefer locally-edited identity fields; fill the rest from server.
-        this.currentProfile = {
-          player: {
-            ...remote.player,
-            username: S.profile.username || remote.player.username || "",
-            bio: S.profile.bio || remote.player.bio || "",
-            profile_picture: S.profile.avatar || remote.player.profile_picture || "default",
-          },
-          achievements: remote.achievements?.length
-            ? remote.achievements
-            : this.currentProfile.achievements,
-        };
+        this.currentProfile = this.mergeProfiles(this.currentProfile, remote, walletAddress);
       }
     } catch (e) {
       console.warn("[ProfileUI] Using local profile (server unavailable):", e?.message);
@@ -81,6 +73,45 @@ export class ProfileUI {
     this.panel.innerHTML = this.renderProfile();
     document.body.appendChild(this.panel);
     this.bindEvents();
+  }
+
+  /** Reconcile the local and server profiles into the most accurate view.
+   *  Cumulative lifetime stats are monotonic, so the true value is the larger
+   *  of the two sources; identity fields prefer local edits; the login streak
+   *  can reset so the live local value wins. */
+  mergeProfiles(local, remote, walletAddress) {
+    const lp = local.player;
+    const rp = remote.player || {};
+    const num = (v) => Number(v) || 0;
+    const maxNum = (a, b) => Math.max(num(a), num(b));
+
+    const achievementIds = new Set([
+      ...local.achievements.map((a) => a.achievement_id),
+      ...(remote.achievements || []).map((a) => a.achievement_id),
+    ]);
+
+    return {
+      player: {
+        ...lp,
+        wallet_address: walletAddress,
+        // Identity: local edits win, then server, then local fallback.
+        username: S.profile.username || rp.username || lp.username || "",
+        bio: S.profile.bio || rp.bio || lp.bio || "",
+        profile_picture:
+          S.profile.avatar || rp.profile_picture || lp.profile_picture || "default",
+        // Lifetime performance (monotonic) — show the higher of the two.
+        level: Math.max(num(lp.level) || 1, num(rp.level) || 1),
+        xp: maxNum(lp.xp, rp.xp),
+        total_catches: maxNum(lp.total_catches, rp.total_catches),
+        total_earned: maxNum(lp.total_earned, rp.total_earned),
+        perfect_hooks: maxNum(lp.perfect_hooks, rp.perfect_hooks),
+        // Login streak can reset/decrease, so trust the live local value.
+        login_streak: num(lp.login_streak),
+        // Account age is authoritative on the server.
+        created_at: rp.created_at || lp.created_at,
+      },
+      achievements: [...achievementIds].map((id) => ({ achievement_id: id })),
+    };
   }
 
   renderProfile() {

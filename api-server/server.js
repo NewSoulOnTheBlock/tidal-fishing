@@ -542,12 +542,12 @@ app.post('/api/player/save', async (req, res) => {
   try {
     await pool.query(
       `UPDATE players SET 
-        level = $2,
-        xp = $3,
+        level = GREATEST(players.level, $2),
+        xp = GREATEST(players.xp, $3),
         money = $4,
-        total_catches = $5,
-        total_earned = $6,
-        perfect_hooks = $7,
+        total_catches = GREATEST(players.total_catches, $5),
+        total_earned = GREATEST(players.total_earned, $6),
+        perfect_hooks = GREATEST(players.perfect_hooks, $7),
         snaps = $8,
         unlocked_locations = $9,
         equipped_rod = $10,
