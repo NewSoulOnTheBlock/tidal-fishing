@@ -186,34 +186,155 @@ export async function recordCatchClip(speciesId, info = {}) {
 }
 
 /**
- * Share a recorded clip. Uses the Web Share API (the only way to attach media to
- * a post from the browser) when available; otherwise downloads the clip and
- * opens the X composer so the user can attach the just-saved file.
+ * Share a recorded clip. On mobile we attach the actual video FILE to the post
+ * via the Web Share API (the only way the browser can hand media to X). On
+ * desktop — where web intents can't carry media and the OS share sheet rarely
+ * lists X — we save the clip and redirect into the X composer so the user drops
+ * the saved video onto their post.
+ *
+ * `xWin` is a tab opened during the click gesture (see openPendingShareWindow);
+ * redirecting it dodges the popup blocker that would otherwise kill a
+ * window.open fired ~3.5s later, after the recording await.
  *
  * @returns {Promise<"shared"|"downloaded"|"cancelled">}
  */
-export async function shareClip({ blob, ext, type, name }) {
+export async function shareClip({ blob, ext, type, name, preferNativeShare, xWin = null }) {
   const file = new File([blob], `tidal-catch-${Date.now()}.${ext}`, { type });
-  const text = `I just caught a ${name} on Tidal! 🎣 #Tidal #Solana`;
+  const text = catchTweetText(name);
 
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+  // Best path (mobile / PWA): attach the real video file to the post.
+  if (preferNativeShare && navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], text });
+      closeWindow(xWin);
       return "shared";
     } catch (err) {
-      if (err && err.name === "AbortError") return "cancelled";
-      // fall through to download on any other share failure
+      if (err && err.name === "AbortError") {
+        closeWindow(xWin);
+        return "cancelled";
+      }
+      // any other failure → fall through to download + X composer
     }
   }
 
+  // Desktop / unsupported: save the clip, then redirect into the X composer.
+  downloadBlob(blob, file.name);
+  redirectToX(text, xWin);
+  return "downloaded";
+}
+
+/** Standard tweet copy for a catch, with the play link in the body. */
+export function catchTweetText(name) {
+  const origin =
+    (typeof window !== "undefined" && window.location && window.location.origin) ||
+    "https://tidalfishing.fun";
+  return `I just caught a ${name} on Tidal! 🎣 #Tidal #Solana\n\nPlay at ${origin}`;
+}
+
+/** Build the X/Twitter web-intent URL for the given text. */
+export function xIntentUrl(text) {
+  return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * True when we should hand the video file to the OS/app share sheet instead of
+ * the web intent — i.e. on a real mobile device that supports file sharing.
+ * Desktop browsers (even those that support navigator.share) are excluded so the
+ * share always lands in the X composer there.
+ */
+export function prefersNativeShare() {
+  return isMobileLike() && canShareVideoFiles();
+}
+
+function isMobileLike() {
+  try {
+    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+      return navigator.userAgentData.mobile;
+    }
+  } catch {
+    /* userAgentData not available */
+  }
+  return /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent || "");
+}
+
+function canShareVideoFiles() {
+  try {
+    const probe = new File([new Uint8Array(1)], "p.mp4", { type: "video/mp4" });
+    return !!(navigator.canShare && navigator.canShare({ files: [probe] }));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Open a placeholder tab DURING the click gesture so the eventual redirect to
+ * the X composer (after the recording await) isn't blocked as an unsolicited
+ * popup. Returns the window handle, or null if the browser blocked it.
+ */
+export function openPendingShareWindow() {
+  let w = null;
+  try {
+    w = window.open("about:blank", "_blank", "width=600,height=540");
+  } catch {
+    w = null;
+  }
+  if (w) {
+    try {
+      w.document.write(
+        `<!doctype html><meta charset="utf-8"><title>Sharing your catch…</title>` +
+          `<body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;` +
+          `background:#06101a;color:#cfe6ff;font:600 18px system-ui,sans-serif">` +
+          `🎣 Preparing your post… one moment</body>`
+      );
+    } catch {
+      /* cross-origin write guard — ignore, we still navigate it later */
+    }
+  }
+  return w;
+}
+
+/**
+ * Send the user to the X composer. Prefers a tab pre-opened during the click
+ * gesture; otherwise tries a fresh popup, then a same-tab navigation as a last
+ * resort (game state is persisted in localStorage).
+ */
+export function redirectToX(text, preopened) {
+  const url = xIntentUrl(text);
+  if (preopened && !preopened.closed) {
+    try {
+      preopened.location.href = url;
+      return true;
+    } catch {
+      /* window closed or blocked — fall through */
+    }
+  }
+  const w = window.open(url, "_blank", "noopener,width=600,height=540");
+  if (w) return true;
+  try {
+    window.location.href = url;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = file.name;
+  a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
 
-  const tweet = encodeURIComponent(`${text}\n\nPlay at ${window.location.origin}`);
-  window.open(`https://twitter.com/intent/tweet?text=${tweet}`, "_blank", "width=550,height=460");
-  return "downloaded";
+function closeWindow(w) {
+  if (w && !w.closed) {
+    try {
+      w.close();
+    } catch {
+      /* ignore */
+    }
+  }
 }

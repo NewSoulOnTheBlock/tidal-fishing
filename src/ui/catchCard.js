@@ -6,7 +6,14 @@ import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight, randRange } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
 import { createFishPreview } from "./fishPreview.js";
-import { recordCatchClip, shareClip } from "./catchShare.js";
+import {
+  recordCatchClip,
+  shareClip,
+  prefersNativeShare,
+  openPendingShareWindow,
+  redirectToX,
+  catchTweetText,
+} from "./catchShare.js";
 import { events } from "../state/gameState.js";
 import html2canvas from "html2canvas";
 
@@ -148,6 +155,13 @@ export class CatchCard {
     const setBtn = (txt, disabled) => {
       if (btnEl && btnEl.isConnected) { btnEl.textContent = txt; btnEl.disabled = disabled; }
     };
+
+    // Decide the path NOW, while we're still inside the click gesture. On
+    // desktop we pre-open the X tab so the redirect that fires ~3.5s later
+    // (after the clip records) isn't killed by the popup blocker.
+    const native = prefersNativeShare();
+    const xWin = native ? null : openPendingShareWindow();
+
     setBtn("🎥 Recording…", true);
     try {
       const clip = await recordCatchClip(info.speciesId, {
@@ -159,26 +173,30 @@ export class CatchCard {
       });
       if (clip) {
         setBtn("📤 Sharing…", true);
-        const res = await shareClip({ ...clip, name: info.name });
+        const res = await shareClip({ ...clip, name: info.name, preferNativeShare: native, xWin });
         if (res === "downloaded") {
-          events.emit("toast", { msg: "🎥 Catch clip saved — attach it to your post!", kind: "info" });
+          events.emit("toast", { msg: "🎥 Clip saved — drag it onto your post on X!", kind: "info" });
         }
         return;
       }
       // No MediaRecorder/WebGL — fall back to a static card image (still shows the fish).
       const card = this.overlay?.querySelector(".catch-card");
-      if (card) await this.shareCardImage(card, info.name);
+      if (card) await this.shareCardImage(card, info.name, xWin);
+      else redirectToX(catchTweetText(info.name), xWin);
     } catch (err) {
       console.error("[CatchCard] share failed:", err);
       const card = this.overlay?.querySelector(".catch-card");
-      if (card) await this.shareCardImage(card, info.name).catch(() => {});
-      else events.emit("toast", { msg: "Couldn't create a share clip", kind: "warn" });
+      if (card) await this.shareCardImage(card, info.name, xWin).catch(() => {});
+      else {
+        redirectToX(catchTweetText(info.name), xWin);
+        events.emit("toast", { msg: "Couldn't create a share clip", kind: "warn" });
+      }
     } finally {
       setBtn(original || "🎥 Share", false);
     }
   }
 
-  async shareCardImage(cardEl, fishName) {
+  async shareCardImage(cardEl, fishName, xWin = null) {
     try {
       // Hide confetti and share button temporarily
       const confettiBits = cardEl.querySelectorAll('.confetti-bit');
@@ -204,8 +222,8 @@ export class CatchCard {
       canvas.toBlob(async (blob) => {
         const file = new File([blob], `tidal-catch-${Date.now()}.png`, { type: 'image/png' });
 
-        // Try native share API first
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        // Mobile: attach the image to the post via the native share sheet.
+        if (prefersNativeShare() && navigator.canShare?.({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
@@ -213,13 +231,15 @@ export class CatchCard {
               text: `Check out my catch on Tidal! 🎣 #Tidal #Solana`,
               url: window.location.origin,
             });
+            if (xWin && !xWin.closed) xWin.close();
             return;
           } catch (err) {
-            if (err.name !== 'AbortError') console.error('Share failed:', err);
+            if (err.name === 'AbortError') { if (xWin && !xWin.closed) xWin.close(); return; }
+            console.error('Share failed:', err);
           }
         }
 
-        // Fallback: Download the image
+        // Desktop fallback: save the image, then redirect into the X composer.
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -227,20 +247,14 @@ export class CatchCard {
         a.click();
         URL.revokeObjectURL(url);
 
-        // Show Twitter share link
-        this.showTwitterShare(fishName);
+        redirectToX(catchTweetText(fishName), xWin);
+        events.emit("toast", { msg: "🖼️ Catch image saved — drag it onto your post on X!", kind: "info" });
       });
     } catch (error) {
       console.error('Screenshot failed:', error);
-      // Skip screenshot, go straight to Twitter share
-      this.showTwitterShare(fishName);
+      // Skip screenshot, go straight to the X composer.
+      redirectToX(catchTweetText(fishName), xWin);
     }
-  }
-
-  showTwitterShare(fishName) {
-    const tweetText = encodeURIComponent(`I just caught a ${fishName} on Tidal! 🎣\n\nPlay at ${window.location.origin} #Tidal #Solana`);
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
-    window.open(twitterUrl, '_blank', 'width=550,height=420');
   }
 
   dismiss() {
