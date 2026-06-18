@@ -1010,7 +1010,14 @@ kbd {
   background: rgba(255, 255, 255, 0.04); border: 1px solid var(--stroke);
   border-radius: 10px; padding: 10px 14px; margin-bottom: 7px; font-size: 0.9rem;
 }
-.sell-row .fish-mini { width: 44px; height: 34px; flex-shrink: 0; }
+.sell-row .fish-mini {
+  width: 66px; height: 50px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.sell-row .fish-mini .fish-svg,
+.sell-row .fish-mini .fish-img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;
+}
 .sell-name { flex: 1; font-weight: 600; }
 .sell-meta { color: var(--dim); font-size: 0.8rem; }
 .sell-value { color: var(--gold); font-weight: 700; min-width: 64px; text-align: right; }
