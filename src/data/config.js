@@ -88,6 +88,14 @@ export const CONFIG = {
       matchProgress: 1.6, // bonus catch %/s while correctly leaning into a run
       swing: 1.5, // rad/s the fight point sweeps toward the run side (visual)
     },
+    // desktop fight feel: drag the mouse left/right to lean the rod against a run
+    // (instead of tapping the ◄ ► buttons). The drag builds a signal that decays
+    // back to centre when you stop moving, so you have to actively work the rod.
+    mouseSteer: {
+      gain: 1 / 105, // pixels of horizontal mouse motion → steer signal
+      decay: 7.0, // signal self-centres at this rate/s when the mouse is still
+      deadzone: 0.42, // |signal| must exceed this to commit a lean
+    },
     // final landing: when the catch bar fills, the fish wallows at the surface
     // and you must PULL BACK (Up / "HEAVE!") to lift it out of the water.
     heaveAutoTime: 7, // safety: auto-lift if the player never heaves (no soft-lock)

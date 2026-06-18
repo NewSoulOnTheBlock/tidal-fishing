@@ -29,6 +29,7 @@ class AudioManager {
     ];
     this.currentTrackIndex = 0;
     this.isPlaylistInitialized = false;
+    this.sampleCache = new Map(); // url -> Promise<AudioBuffer|null> for one-shot file SFX
   }
 
   /** Must be called from a user gesture. Safe to call repeatedly. */
@@ -353,6 +354,50 @@ class AudioManager {
       default:
         break;
     }
+  }
+
+  // ----- file-based one-shot samples ---------------------------------------
+
+  /** Fetch + decode an audio file once, caching the decoded buffer. */
+  loadSample(url) {
+    if (!this.ctx || !url) return Promise.resolve(null);
+    let entry = this.sampleCache.get(url);
+    if (entry) return entry;
+    entry = fetch(url)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.arrayBuffer();
+      })
+      .then((buf) => this.ctx.decodeAudioData(buf))
+      .catch((err) => {
+        console.warn(`[audio] failed to load sample ${url}:`, err);
+        this.sampleCache.delete(url); // allow a later retry
+        return null;
+      });
+    this.sampleCache.set(url, entry);
+    return entry;
+  }
+
+  /** Play a one-shot audio file through the master bus (respects mute/volume). */
+  playSample(url, opts = {}) {
+    if (!this.ctx || !url) return;
+    const volume = clamp(opts.volume ?? 1, 0, 1);
+    this.loadSample(url).then((buffer) => {
+      if (!buffer || !this.ctx) return;
+      try {
+        const src = this.ctx.createBufferSource();
+        src.buffer = buffer;
+        if (opts.rate) src.playbackRate.value = opts.rate;
+        const g = this.ctx.createGain();
+        g.gain.value = volume;
+        src.connect(g).connect(this.master);
+        const start = this.ctx.currentTime + (opts.t0 || 0);
+        src.start(start);
+        src.stop(start + buffer.duration + 0.05);
+      } catch {
+        /* ignore */
+      }
+    });
   }
 
   /** Ratchet clicks while reeling; called every frame with held state. */

@@ -348,6 +348,8 @@ machine.register(Phase.FLYING, {
     S.stats.casts += 1;
     audio.play("whoosh");
     anglerBody.playCast(); // animated characters throw on release (no-op otherwise)
+    // Character-specific cast voice/SFX (e.g. Naruto), if the body defines one.
+    if (anglerBody.config?.castSound) audio.playSample(anglerBody.config.castSound, { volume: 0.9 });
   },
 });
 
@@ -363,6 +365,9 @@ machine.register(Phase.REELING, {
     fight.setReeling(inputHeld);
     rig.setFocus(fight.fishPoint);
     audio.play("hook");
+    steerKey = 0;
+    mouseSteer = 0;
+    mouseSteerDir = 0;
   },
   exit() {
     rig.setFocus(null);
@@ -370,6 +375,8 @@ machine.register(Phase.REELING, {
     casting.setLineTension(0);
     hud.showReel(false);
     steerKey = 0;
+    mouseSteer = 0;
+    mouseSteerDir = 0;
     fight.setSteer(0);
   },
 });
@@ -553,6 +560,8 @@ let inputHeld = false;
 let waitingHoldT = 0;
 let spaceHeld = false;
 let steerKey = 0; // which arrow is currently held during a fight (-1 | 0 | +1)
+let mouseSteer = 0; // smoothed horizontal mouse drag during a fight (decays to 0)
+let mouseSteerDir = 0; // last lean we committed from the mouse (so we release cleanly)
 
 function pressDown() {
   if (paused) return;
@@ -611,6 +620,13 @@ window.addEventListener("pointerup", (e) => {
 
 window.addEventListener("pointermove", (e) => {
   casting.setPointerX(e.clientX / window.innerWidth);
+  // During a fight, dragging a real mouse left/right leans the rod against the
+  // fish's runs. Touch keeps the on-screen ◄ ► pads, so only mouse motion feeds
+  // this signal. It decays back to centre in the REELING tick.
+  if (!paused && e.pointerType === "mouse" && machine.is(Phase.REELING)) {
+    const s = mouseSteer + e.movementX * CONFIG.reel.mouseSteer.gain;
+    mouseSteer = s < -1.6 ? -1.6 : s > 1.6 ? 1.6 : s;
+  }
 });
 
 window.addEventListener("contextmenu", (e) => {
@@ -957,6 +973,24 @@ function tick() {
       case Phase.REELING:
         fight.update(dt);
         audio.reelTick(dt, fight.reeling, economy.getStats().reelSpeed);
+        // Resolve the rod lean: held arrow keys win; otherwise the mouse drag
+        // decays toward centre and commits a lean once it clears the deadzone.
+        {
+          const ms = CONFIG.reel.mouseSteer;
+          if (mouseSteer !== 0) {
+            mouseSteer *= Math.exp(-ms.decay * dt);
+            if (Math.abs(mouseSteer) < 0.02) mouseSteer = 0;
+          }
+          if (steerKey !== 0) {
+            mouseSteerDir = 0; // keyboard owns the lean while an arrow is held
+          } else {
+            const dir = Math.abs(mouseSteer) > ms.deadzone ? Math.sign(mouseSteer) : 0;
+            if (dir !== mouseSteerDir) {
+              fight.setSteer(dir);
+              mouseSteerDir = dir;
+            }
+          }
+        }
         if (fight.active && fight.phase === "fight") {
           casting.aimAtPoint(fight.fishPoint);
         }

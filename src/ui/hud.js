@@ -15,7 +15,7 @@ const PROMPTS = {
   [Phase.FLYING]: "Nice arc...",
   [Phase.WAITING]: "Wait for a bite — <b>tap</b> to jig the lure · <b>hold</b> Click (or <b>R</b>) to reel back",
   [Phase.BITE]: "HOOK IT! CLICK NOW!",
-  [Phase.REELING]: "<b>Hold</b> to reel · steer <b>◄ ►</b> (arrows) with the fish's runs · <b>pull back</b> (▲) to land it",
+  [Phase.REELING]: "<b>Hold</b> to reel · <b>move the mouse ◄ ►</b> to fight its runs · <b>pull back</b> (▲) to land it",
   [Phase.CATCH]: "",
   [Phase.RETRIEVING]: "Reeling the line back in...",
 };
