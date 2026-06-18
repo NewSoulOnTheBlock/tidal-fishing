@@ -1325,15 +1325,29 @@ app.post('/api/player/checkin', writeLimiter, requireSession, async (req, res) =
     if (lastNum === todayNum) {
       // Already checked in today — no bonus, streak unchanged.
     } else {
-      streak = (lastNum !== null && todayNum - lastNum === 1) ? streak + 1 : 1;
-      bonus = Math.min(STREAK_BONUS_MAX, STREAK_BONUS_BASE + STREAK_BONUS_STEP * Math.min(streak, 7));
-      await pool.query(
+      const newStreak = (lastNum !== null && todayNum - lastNum === 1) ? streak + 1 : 1;
+      const newBonus = Math.min(STREAK_BONUS_MAX, STREAK_BONUS_BASE + STREAK_BONUS_STEP * Math.min(newStreak, 7));
+      // Atomic + idempotent credit. The WHERE clause gates the reward on
+      // last_active_date not already being today, and the date is advanced in
+      // the SAME statement — so under concurrent/replayed requests only the
+      // first updates a row (the racers re-read the now-current row under
+      // READ COMMITTED and match zero rows). Previously this was a SELECT-then-
+      // UPDATE with no lock, letting a scripted client race many check-ins and
+      // stack total_earned (a withdrawable balance) past the once-per-day cap.
+      const upd = await pool.query(
         `UPDATE players
-         SET streak_count = $2, last_active_date = CURRENT_DATE,
-             streak_reward_date = CURRENT_DATE, total_earned = total_earned + $3
-         WHERE id = $1`,
-        [row.id, streak, bonus]
+            SET streak_count = $2,
+                last_active_date = (now() AT TIME ZONE 'utc')::date,
+                streak_reward_date = (now() AT TIME ZONE 'utc')::date,
+                total_earned = total_earned + $3
+          WHERE id = $1
+            AND last_active_date IS DISTINCT FROM (now() AT TIME ZONE 'utc')::date`,
+        [row.id, newStreak, newBonus]
       );
+      streak = newStreak;
+      // Only report (and only actually credited) the bonus if THIS request won
+      // the race; a duplicate that updated zero rows gets no bonus.
+      if (upd.rowCount === 1) bonus = newBonus;
     }
     res.json({ streak, bonus, hotSpot: dailyHotSpot(), hotSpotLabel: HOT_SPOT_LABEL[dailyHotSpot()], online: onlineCount() });
   } catch (error) {
