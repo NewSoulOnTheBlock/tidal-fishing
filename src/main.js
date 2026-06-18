@@ -14,6 +14,11 @@ import { WaterSurface } from "./world/water.js";
 import { SkySystem } from "./world/sky.js";
 import { EnvironmentManager } from "./world/environment.js";
 import { Effects } from "./world/effects.js";
+import { PostFX } from "./world/postfx.js";
+import { CloudLayer } from "./world/clouds.js";
+import { NightSky } from "./world/nightSky.js";
+import { WeatherFX } from "./world/weatherFX.js";
+import { DistantLife } from "./world/distantLife.js";
 import { CastingSystem } from "./gameplay/casting.js";
 import { Bobber } from "./gameplay/bobber.js";
 import { createAnglerBody } from "./gameplay/anglerBody.js";
@@ -35,6 +40,7 @@ import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
+import { UnderwaterFX } from "./ui/underwaterFX.js";
 import { TutorialUI } from "./ui/tutorialUI.js";
 import { ChatUI } from "./ui/chatUI.js";
 import { SocialUI } from "./ui/socialUI.js";
@@ -109,6 +115,20 @@ const water = new WaterSurface(scene, S.settings.quality);
 const sky = new SkySystem(scene, renderer, core.sunLight, core.hemiLight, core.ambient, water);
 const env = new EnvironmentManager(scene);
 const effects = new Effects(scene);
+const clouds = new CloudLayer(scene);
+const nightSky = new NightSky(scene);
+const _precipRipple = new THREE.Vector3();
+const weatherFX = new WeatherFX(scene, {
+  onRipple: (x, z) => {
+    _precipRipple.set(x, 0, z);
+    effects.ripple(_precipRipple, 1.1, 0.7);
+  },
+});
+const distantLife = new DistantLife(scene);
+const underwaterFX = new UnderwaterFX();
+const postfx = new PostFX(renderer, scene, camera, S.settings.quality);
+window.__postfx = postfx;
+window.addEventListener("resize", () => postfx.setSize(window.innerWidth, window.innerHeight));
 const casting = new CastingSystem(scene);
 const bobber = new Bobber(scene, effects);
 // Voxel angler body mounted on the casting rig (turns with aim). Async-loaded;
@@ -213,6 +233,7 @@ const screens = new Screens({
   onQualityChange: (q) => {
     core.setQuality(q);
     water.setQuality(q);
+    postfx.setQuality(q);
     saveGame();
   },
 });
@@ -224,6 +245,7 @@ function applySettings() {
   audio.setMuted(S.settings.muted);
   core.setQuality(S.settings.quality);
   water.setQuality(S.settings.quality);
+  postfx.setQuality(S.settings.quality);
 }
 
 function travelTo(locId, silent = false) {
@@ -238,6 +260,7 @@ function travelTo(locId, silent = false) {
   feedingSpots.setBounds(env.playerSpot, CONFIG.cast.minDist, CONFIG.cast.baseMaxDist * economy.getStats().castMult);
   water.setParams(loc.water);
   effects.setLocationAmbient(loc);
+  distantLife.setLocation(loc);
   audio.setAmbience(loc.ambience, gclock.segment);
   hud.updateLocation();
   events.emit("location", { id: loc.id });
@@ -414,6 +437,7 @@ events.on("bite:start", () => {
   rig.addShake(0.3);
   effects.splash(bobber.pos, 0.7);
   effects.ripple(bobber.pos, 2.2, 0.9);
+  underwaterFX.trigger();
   machine.set(Phase.BITE);
 });
 
@@ -724,6 +748,17 @@ window.addEventListener("pointerdown", () => audio.init(), { once: true });
 
 let weatherTimer = randRange(...CONFIG.weather.changeEvery);
 let cloudFactor = S.world.weather === "cloudy" ? 1 : 0;
+// Precipitation derived from the weather roll: overcast skies sometimes open up
+// into rain (or, less often, snow). Intensity tracks cloudFactor each frame.
+let precipMode = "none";
+
+function rollPrecip() {
+  if (S.world.weather !== "cloudy") return "none";
+  const r = Math.random();
+  if (r < 0.55) return "rain";
+  if (r < 0.72) return "snow";
+  return "none";
+}
 
 function updateWeather(dt) {
   weatherTimer -= dt;
@@ -732,11 +767,20 @@ function updateWeather(dt) {
     const next = Math.random() < CONFIG.weather.cloudyChance ? "cloudy" : "clear";
     if (next !== S.world.weather) {
       S.world.weather = next;
+      precipMode = rollPrecip();
       events.emit("weather", { weather: next });
     }
   }
   const target = S.world.weather === "cloudy" ? 1 : 0;
   cloudFactor = lerp(cloudFactor, target, 1 - Math.exp(-0.35 * dt));
+}
+
+// Low mist hugs the water at dawn and through the night, thicker in foggy spots.
+function mistAmount(segment) {
+  if (segment === "dawn") return 0.7;
+  if (segment === "night") return 0.4;
+  if (segment === "dusk") return 0.25;
+  return 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -747,6 +791,7 @@ const clock3 = new THREE.Clock();
 let autosaveT = 0;
 let lastMinute = -1;
 let lastSegment = "";
+let lastEnvSegment = "";
 const biteScreenPos = { x: 0, y: 0 };
 
 function tick() {
@@ -779,8 +824,19 @@ function tick() {
   }
 
   // world always breathes, even behind menus
-  water.update(dt);
   sky.update(gclock.hours, cloudFactor, currentLoc());
+  water.update(dt, { sunDir: sky.sunDir, dayFactor: sky.dayFactor, sunColor: sky.sunColor, cameraPos: camera.position });
+  // re-bake sky reflections when the time-of-day segment changes
+  if (gclock.segment !== lastEnvSegment) {
+    lastEnvSegment = gclock.segment;
+    try { sky.bakeEnv(); } catch (e) { console.error("[sky] env bake failed:", e); }
+  }
+  clouds.update(dt, { cloudFactor, dayFactor: sky.dayFactor, sunColor: sky.sunColor, cameraPos: camera.position });
+  nightSky.update(dt, sky.dayFactor, camera.position);
+  weatherFX.setMode(precipMode, cloudFactor);
+  weatherFX.setMist(mistAmount(gclock.segment));
+  weatherFX.update(dt, camera.position);
+  distantLife.update(dt, camera.position);
   effects.update(dt, camera, gclock.segment);
   if (!paused) feedingSpots.update(dt);
 
@@ -845,7 +901,20 @@ function tick() {
 
   rig.setAimYaw(casting.aimYaw);
   rig.update(dt);
-  renderer.render(scene, camera);
+  // Post-processed render with a hard fallback to direct rendering — a driver or
+  // GPU hiccup in the composer must never black-screen a live player.
+  if (postfx.enabled) {
+    try {
+      postfx.update(dt, sky.sunDir, sky.dayFactor, sky.sunColor);
+      postfx.render();
+    } catch (e) {
+      console.error("[postfx] disabled after error, falling back:", e);
+      postfx.enabled = false;
+      renderer.render(scene, camera);
+    }
+  } else {
+    renderer.render(scene, camera);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -897,5 +966,15 @@ requestAnimationFrame(() => {
 });
 
 // small debug handle (used by automated smoke tests; harmless in production)
-window.TIDAL = { S, machine, version: 1, walletPanel };
+window.TIDAL = {
+  S,
+  machine,
+  version: 1,
+  walletPanel,
+  // jump the time-of-day clock — handy for previewing dawn/day/dusk/night visuals
+  setHour(h) {
+    gclock.hours = ((h % 24) + 24) % 24;
+    S.world.hour = gclock.hours;
+  },
+};
 window.TIDELINE = window.TIDAL; // back-compat for any external smoke test scripts

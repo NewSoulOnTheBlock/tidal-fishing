@@ -36,6 +36,40 @@ export class SkySystem {
     this._sunWarm = new THREE.Color(0xffb46b);
     this._sunWhite = new THREE.Color(0xfff4e0);
     this._moonBlue = new THREE.Color(0x90b4e8);
+
+    // Environment map baked from the sky for image-based lighting / reflections
+    // on the voxel models, gear and water. Re-baked when the time segment
+    // changes (see bakeEnv) so reflections track dawn/day/dusk/night.
+    this._pmrem = null;
+    this._envScene = null;
+    this._envSky = null;
+    this._envRT = null;
+  }
+
+  /**
+   * Render the current sky into a prefiltered environment map and assign it to
+   * scene.environment so every PBR material picks up sky-coloured ambient light
+   * and subtle reflections. Cheap enough to call on each time-of-day segment.
+   */
+  bakeEnv() {
+    if (!this._pmrem) {
+      this._pmrem = new THREE.PMREMGenerator(this.renderer);
+      this._envScene = new THREE.Scene();
+      this._envSky = new Sky();
+      this._envSky.scale.setScalar(3000);
+      this._envScene.add(this._envSky);
+    }
+    const su = this._envSky.material.uniforms;
+    const cu = this.sky.material.uniforms;
+    su.sunPosition.value.copy(cu.sunPosition.value);
+    su.turbidity.value = cu.turbidity.value;
+    su.rayleigh.value = cu.rayleigh.value;
+    su.mieCoefficient.value = cu.mieCoefficient.value;
+    su.mieDirectionalG.value = cu.mieDirectionalG.value;
+
+    if (this._envRT) this._envRT.dispose();
+    this._envRT = this._pmrem.fromScene(this._envScene, 0, 1, 12000);
+    this.scene.environment = this._envRT.texture;
   }
 
   buildStars() {
