@@ -30,7 +30,7 @@ export const LOCATIONS = [
     ambience: { waves: 0.45, wind: 0.3, birds: true, crickets: true, gulls: false },
     biteMult: 1.05,
     fishTable: [
-      ["trout", 30], ["perch", 18], ["grayling", 16], ["catfish", 10],
+      ["trout", 30], ["creekfish_albino", 16], ["perch", 18], ["grayling", 16], ["catfish", 10],
       ["salmon", 9], ["eel", 6], ["sturgeon", 3], ["goldentrout", 2],
     ],
   },

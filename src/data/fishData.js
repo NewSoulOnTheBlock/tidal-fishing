@@ -173,6 +173,19 @@ export const FISH_SPECIES = [
     desc: "Quick, clean and beautiful. The river's calling card.",
   },
   {
+    id: "creekfish_albino", name: "Albino Creekfish", rarity: "uncommon",
+    locations: ["river"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk"],
+    sizeCm: [9, 26], weightMidKg: 0.28, baseValue: 64,
+    fight: { strength: 0.74, surgeEvery: [4.4, 7], heft: 0.7, stamina: 9 },
+    look: {
+      shape: "slim",
+      colorA: 0xf8eee9, colorB: 0xebdcd6, finColor: 0xc24842,
+      voxel: "creekfish_albino",      // hand-modeled .vox mesh (overrides procedural)
+      image: "/creekfish-albino.png", // voxel sprite (overrides procedural SVG)
+    },
+    desc: "A ghost-pale creek dweller with scales like frosted glass and a single ember-red eye. The albino morph is a lucky find.",
+  },
+  {
     id: "grayling", name: "Arctic Grayling", rarity: "uncommon",
     locations: ["river"], zones: ["shallow", "mid"], time: ["day"],
     sizeCm: [25, 45], weightMidKg: 0.9, baseValue: 104,

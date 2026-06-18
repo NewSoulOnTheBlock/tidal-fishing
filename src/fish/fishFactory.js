@@ -4,6 +4,7 @@
 
 import * as THREE from "three";
 import { clamp } from "../utils/utils.js";
+import { buildVoxelFish, hasVoxelModel } from "./voxelFish.js";
 
 const geoCache = {};
 const matCache = new Map();
@@ -60,6 +61,18 @@ const SHAPES = {
  */
 export function createFishMesh(species, sizeCm) {
   const { look } = species;
+
+  // Hand-modeled voxel species (e.g. the Albino Creekfish) build from a .vox
+  // model instead of the procedural primitives below.
+  if (look.voxel && hasVoxelModel(look.voxel)) {
+    const meters = clamp(sizeCm / 100, 0.16, 3.6);
+    const wrapper = new THREE.Group();
+    wrapper.add(buildVoxelFish(look.voxel));
+    wrapper.scale.setScalar(meters);
+    wrapper.userData.speciesId = species.id;
+    return wrapper;
+  }
+
   const shape = SHAPES[look.shape] || SHAPES.standard;
   const mats = speciesMaterials(species);
   const g = new THREE.Group();
