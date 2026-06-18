@@ -462,6 +462,56 @@ async function trackActivity(ip, wallet, action, metadata = {}) {
   }
 }
 
+// --- Catch hot-path protection -------------------------------------------
+// The catch flow (/api/catch/validate → /api/player/catch) is the most abused
+// surface: a bypassed client can hammer it to churn DB transactions and bloat
+// the audit table. A single catch now takes several seconds of gameplay, so
+// even an aggressive-but-honest client only touches these a handful of times a
+// minute. This dedicated limiter sheds a flood IN MEMORY (zero DB I/O) at a
+// tight per-IP ceiling, and an IP that keeps slamming it past every limit
+// auto-bans itself so "hitting it over and over" becomes self-defeating.
+const CATCH_RATE_MAX = Number(process.env.CATCH_RATE_MAX) || 40;
+const CATCH_AUTOBAN = process.env.CATCH_AUTOBAN !== '0';
+const CATCH_FLOOD_BAN = Number(process.env.CATCH_FLOOD_BAN) || 150;
+const _catchFlood = new Map(); // ip -> { n, since } rolling 60s reject counter
+
+async function noteCatchFlood(ip) {
+  if (!ip || ip === 'unknown') return;
+  const now = Date.now();
+  let e = _catchFlood.get(ip);
+  if (!e || now - e.since > 60_000) { e = { n: 0, since: now }; _catchFlood.set(ip, e); }
+  e.n++;
+  if (e.n === 1 || e.n % 25 === 0) {
+    console.warn(`[catch] FLOOD ip=${ip} rejected=${e.n} within 60s`);
+  }
+  // One-shot auto-ban once an IP blows past a clearly-bot threshold. The honest
+  // ceiling is CATCH_RATE_MAX/min, so reaching ~150 *rejections* in a minute
+  // means thousands of requests/min — no human or shared household does this.
+  if (CATCH_AUTOBAN && e.n === CATCH_FLOOD_BAN) {
+    try {
+      await pool.query(
+        'INSERT INTO banned_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = $2',
+        [ip, 'auto: catch endpoint flood']
+      );
+      console.warn(`[catch] AUTO-BANNED ip=${ip} (${e.n} rejects/min on catch endpoint)`);
+    } catch (err) {
+      console.error('[catch] auto-ban failed:', err.message);
+    }
+  }
+}
+
+const catchLimiter = rateLimit({
+  windowMs: 60_000,
+  max: CATCH_RATE_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => getClientIP(req),
+  handler: (req, res) => {
+    noteCatchFlood(getClientIP(req));
+    res.status(429).json({ error: 'Catching too fast — slow down.', allowed: false });
+  },
+});
+
 // Baseline per-IP rate limit + ban check on every API route. The limiter is
 // registered first so a flood is shed cheaply, before the ban-lookup DB query.
 app.use('/api', globalLimiter);
@@ -1040,7 +1090,7 @@ app.post('/api/player/save', writeLimiter, requireSession, async (req, res) => {
 // The client-reported value is clamped to the species ceiling, server-side
 // anti-farming caps are enforced, and total_earned/total_catches (the figures
 // the withdrawal ledger trusts) are incremented here and ONLY here.
-app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => {
+app.post('/api/player/catch', catchLimiter, requireSession, async (req, res) => {
   const { walletAddress, catch: catchData } = req.body;
 
   if (!walletAddress || !catchData) {
@@ -1578,6 +1628,8 @@ app.listen(PORT, () => {
 // (every catch-validate inserts a row). Keep ~2 days for rate-limit windows.
 const pruneTimer = setInterval(() => {
   pool.query(`DELETE FROM ip_activity WHERE timestamp < NOW() - INTERVAL '2 days'`).catch(() => {});
+  const cutoff = Date.now() - 300_000;
+  for (const [ip, e] of _catchFlood) if (e.since < cutoff) _catchFlood.delete(ip);
 }, 3_600_000);
 pruneTimer.unref?.();
 
@@ -1586,7 +1638,7 @@ pruneTimer.unref?.();
 // ============================================================================
 
 // Validate catch (prevents offline fishing)
-app.post('/api/catch/validate', writeLimiter, async (req, res) => {
+app.post('/api/catch/validate', catchLimiter, async (req, res) => {
   const { walletAddress, speciesId, value } = req.body;
   const ip = getClientIP(req);
   
@@ -1605,27 +1657,23 @@ app.post('/api/catch/validate', writeLimiter, async (req, res) => {
   }
   
   try {
-    // Track this catch attempt
-    await trackActivity(ip, walletAddress, 'catch_validate', { speciesId, value });
-    
-    // Check rate limits (catches per minute from this IP)
-    const recentCatches = await pool.query(
-      `SELECT COUNT(*) as count FROM ip_activity 
-       WHERE ip_address = $1 
-       AND action = 'catch_validate' 
+    // Cross-instance soft cap: how many catches this IP has ALREADY been cleared
+    // for in the last minute. We COUNT first and only record an attempt when we
+    // actually allow it — so a rejected flood writes nothing to the audit table
+    // (the in-memory catchLimiter above has already shed anything past
+    // CATCH_RATE_MAX/min). Honest play clears far under this floor.
+    const recent = await pool.query(
+      `SELECT COUNT(*) AS count FROM ip_activity
+       WHERE ip_address = $1 AND action = 'catch_validate'
        AND timestamp > NOW() - INTERVAL '1 minute'`,
       [ip]
     );
-    
-    if (parseInt(recentCatches.rows[0].count) > 10) {
-      console.log(`[catch-validate] Rate limit exceeded for IP: ${ip}`);
-      return res.json({ 
-        allowed: false, 
-        error: 'Too many catches. Please slow down.' 
-      });
+    if (parseInt(recent.rows[0].count, 10) >= 10) {
+      return res.json({ allowed: false, error: 'Too many catches. Please slow down.' });
     }
-    
-    // All checks passed
+
+    // Cleared — record the allowed attempt so it counts toward the window.
+    await trackActivity(ip, walletAddress, 'catch_validate', { speciesId, value });
     res.json({ allowed: true });
   } catch (error) {
     console.error('[catch-validate] Error:', error);
