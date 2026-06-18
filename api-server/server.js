@@ -470,7 +470,15 @@ async function trackActivity(ip, wallet, action, metadata = {}) {
 // minute. This dedicated limiter sheds a flood IN MEMORY (zero DB I/O) at a
 // tight per-IP ceiling, and an IP that keeps slamming it past every limit
 // auto-bans itself so "hitting it over and over" becomes self-defeating.
-const CATCH_RATE_MAX = Number(process.env.CATCH_RATE_MAX) || 40;
+const CATCH_RATE_MAX = Number(process.env.CATCH_RATE_MAX) || 120;
+// Per-WALLET soft cap on catch validations per minute. Keyed by wallet (not IP)
+// so honest players who share an IP never throttle each other, and set far above
+// any human catch cadence (the client enforces a 5s min interval ≈ 12/min, a
+// single catch takes several seconds of gameplay). The authoritative anti-cheat
+// is /api/player/catch — validate is only a soft "are you online" gate that a
+// real bypassing client ignores, so this ceiling exists purely to shed a
+// scripted single-wallet flood without ever blocking legitimate play.
+const CATCH_VALIDATE_SOFT_MAX = Number(process.env.CATCH_VALIDATE_SOFT_MAX) || 60;
 const CATCH_AUTOBAN = process.env.CATCH_AUTOBAN !== '0';
 const CATCH_FLOOD_BAN = Number(process.env.CATCH_FLOOD_BAN) || 150;
 const _catchFlood = new Map(); // ip -> { n, since } rolling 60s reject counter
@@ -1657,18 +1665,20 @@ app.post('/api/catch/validate', catchLimiter, async (req, res) => {
   }
   
   try {
-    // Cross-instance soft cap: how many catches this IP has ALREADY been cleared
-    // for in the last minute. We COUNT first and only record an attempt when we
-    // actually allow it — so a rejected flood writes nothing to the audit table
-    // (the in-memory catchLimiter above has already shed anything past
-    // CATCH_RATE_MAX/min). Honest play clears far under this floor.
+    // Cross-instance soft cap: how many catches this WALLET has ALREADY been
+    // cleared for in the last minute. Keyed by wallet (not IP) so honest players
+    // who share an IP — a household, phones behind carrier-grade NAT, a cafe —
+    // never throttle each other. We COUNT first and only record an attempt when
+    // we actually allow it, so a rejected flood writes nothing to the audit
+    // table. The ceiling sits far above any human catch cadence but still sheds
+    // a scripted single-wallet flood; the authoritative gate is /api/player/catch.
     const recent = await pool.query(
       `SELECT COUNT(*) AS count FROM ip_activity
-       WHERE ip_address = $1 AND action = 'catch_validate'
+       WHERE wallet_address = $1 AND action = 'catch_validate'
        AND timestamp > NOW() - INTERVAL '1 minute'`,
-      [ip]
+      [walletAddress]
     );
-    if (parseInt(recent.rows[0].count, 10) >= 10) {
+    if (parseInt(recent.rows[0].count, 10) >= CATCH_VALIDATE_SOFT_MAX) {
       return res.json({ allowed: false, error: 'Too many catches. Please slow down.' });
     }
 
