@@ -4,13 +4,23 @@
 import { S } from "../state/gameState.js";
 import { formatMoney } from "../utils/utils.js";
 import { shortAddress } from "../web3/solana.js";
-import { FISH_BY_ID } from "../data/fishData.js";
+import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import { apiFetch } from "../utils/api.js";
+import { createFishPreview } from "./fishPreview.js";
 
 export class LeaderboardUI {
   constructor() {
     this.panel = null;
     this.currentTab = "earnings";
+    this._preview = null;
+  }
+
+  // Tear down the animated species model (frees its WebGL context).
+  disposePreview() {
+    if (this._preview) {
+      try { this._preview.dispose(); } catch { /* already gone */ }
+      this._preview = null;
+    }
   }
 
   async show() {
@@ -89,6 +99,7 @@ export class LeaderboardUI {
 
   async loadTab(tab) {
     this.currentTab = tab;
+    this.disposePreview();
     const content = this.panel.querySelector('#leaderboard-content');
     content.innerHTML = '<div class="loading">Loading...</div>';
 
@@ -220,6 +231,7 @@ export class LeaderboardUI {
 
   async loadSpeciesLeaderboard(speciesId) {
     const content = this.panel.querySelector('#leaderboard-content');
+    this.disposePreview();
     content.innerHTML = '<div class="loading">Loading...</div>';
 
     try {
@@ -227,20 +239,46 @@ export class LeaderboardUI {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const species = FISH_BY_ID[speciesId];
+      const rarity = species?.rarity || '';
+      const rmeta = RARITIES[rarity];
+      const rcolor = rmeta?.color || 'var(--accent)';
 
       content.innerHTML = `
         <div class="species-leaderboard">
           <button class="btn-back">← Back to Species</button>
+          <div class="species-preview" style="--r:${this.esc(rcolor)}">
+            <div class="species-preview-stage"></div>
+            <div class="species-preview-name">${this.esc(species?.name || speciesId)}${rmeta ? ` <span class="species-preview-rarity" style="color:${this.esc(rcolor)};border-color:${this.esc(rcolor)}">${this.esc(rmeta.label)}</span>` : ''}</div>
+          </div>
           <h3>${this.esc(species?.name || speciesId)} - Biggest Catches</h3>
           ${this.renderSpeciesCatches(data.catches, species?.name || speciesId)}
         </div>
       `;
 
+      this.mountPreview(speciesId);
+
       content.querySelector('.btn-back').addEventListener('click', () => {
+        this.disposePreview();
         this.loadTab('species');
       });
     } catch (error) {
       content.innerHTML = `<div class="error">Failed to load: ${error.message}</div>`;
+    }
+  }
+
+  // Build and mount the animated 3D model into the species preview stage.
+  mountPreview(speciesId) {
+    const stage = this.panel?.querySelector('.species-preview-stage');
+    if (!stage) return;
+    const w = Math.max(220, Math.min(340, (stage.clientWidth || 300) - 8));
+    const preview = createFishPreview(speciesId, { width: w, height: Math.round(w * 0.62) });
+    if (preview) {
+      stage.appendChild(preview.canvas);
+      this._preview = preview;
+    } else {
+      // No WebGL / unknown species — fall back to the static sprite.
+      const img = FISH_BY_ID[speciesId]?.look?.image;
+      stage.innerHTML = img ? `<img src="${this.esc(img)}" alt="" width="120" />` : '🐟';
     }
   }
 
@@ -288,6 +326,7 @@ export class LeaderboardUI {
   }
 
   hide() {
+    this.disposePreview();
     if (this._escHandler) {
       document.removeEventListener('keydown', this._escHandler, true);
       this._escHandler = null;

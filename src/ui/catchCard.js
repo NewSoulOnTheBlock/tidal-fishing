@@ -5,6 +5,7 @@ import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight, randRange } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
+import { createFishPreview } from "./fishPreview.js";
 import html2canvas from "html2canvas";
 
 const CONFETTI_COLORS = ["#5fd4ff", "#ffc857", "#62d98b", "#c08bff", "#ff8da3"];
@@ -63,7 +64,7 @@ export class CatchCard {
         ${ribbon}
         <div class="catch-rarity">${rarity.label}</div>
         <div class="catch-name">${sp.name}</div>
-        ${fishSVG(sp.look)}
+        <div class="catch-fish-stage">${fishSVG(sp.look)}</div>
         <div class="catch-stats">
           <div class="catch-stat"><span class="cs-label">Length</span><span class="cs-value">${formatLength(fish.sizeCm)}</span></div>
           <div class="catch-stat"><span class="cs-label">Weight</span><span class="cs-value">${formatWeight(fish.weightKg)}</span></div>
@@ -86,6 +87,19 @@ export class CatchCard {
 
       this.root.appendChild(overlay);
       this.overlay = overlay;
+
+      // Swap the static SVG for the animated 3D voxel model when WebGL is
+      // available; the SVG stays as a fallback otherwise. preserveBuffer lets
+      // the html2canvas share screenshot capture the live canvas.
+      this._preview?.dispose();
+      this._preview = null;
+      const stage = overlay.querySelector(".catch-fish-stage");
+      const preview = stage && createFishPreview(fish.speciesId, { width: 220, height: 150, preserveBuffer: true });
+      if (preview) {
+        stage.innerHTML = "";
+        stage.appendChild(preview.canvas);
+        this._preview = preview;
+      }
 
       audio.play(flags.isJackpot || RARITIES[fish.rarity].order >= 4 ? "legendary" : "catch");
       if (flags.isJackpot || flags.isNew || flags.isRecord || RARITIES[fish.rarity].order >= 3) {
@@ -181,6 +195,8 @@ export class CatchCard {
     if (!this.active) return;
     this.active = false;
     audio.play("click");
+    this._preview?.dispose();
+    this._preview = null;
     this.overlay?.remove();
     this.overlay = null;
     const cb = this.onDone;

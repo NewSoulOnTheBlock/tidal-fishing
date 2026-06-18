@@ -17,8 +17,8 @@ export const SERVER_CAPS = {
   earnHour: 8_000,
   earnDay: 40_000,
   // Rarity plausibility caps. Tuned far ABOVE legitimate play (a max-rate ocean
-  // angler nets ~8 legendaries/hr; the jackpot smoking-chicken is a ~0.09%/cast
-  // drop) but well below automation that claims a rare fish every catch.
+  // angler nets ~8 legendaries/hr; a jackpot fish would be a ~0.09%/cast drop)
+  // but well below automation that claims a rare fish every catch.
   legendaryHour: 25,
   legendaryDay: 120,
   jackpotDay: 3,
