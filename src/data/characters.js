@@ -63,6 +63,26 @@ export const CHARACTERS = [
     y: 0,
     z: 0,
   },
+  {
+    // Animated VRM character (vs the static GLB voxels above). The avatar loads
+    // through anglerBody.js's VRM path; the two Mixamo FBX clips are retargeted
+    // onto its humanoid skeleton (idle loops, cast plays once per cast).
+    id: "naruto",
+    name: "Naruto",
+    emoji: "🍥",
+    blurb: "Hidden Leaf's number-one knucklehead — believe it!",
+    url: "/models/characters/naruto.vrm",
+    vrm: true,
+    anims: {
+      idle: "/anim/fishing-idle.fbx",
+      cast: "/anim/fishing-cast.fbx",
+    },
+    height: 1.8,
+    yawDeg: 0,
+    x: 0,
+    y: 0,
+    z: 0,
+  },
 ];
 
 export const DEFAULT_CHARACTER = "r2d2";

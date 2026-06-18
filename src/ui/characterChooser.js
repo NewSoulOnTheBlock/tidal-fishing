@@ -56,7 +56,7 @@ export function mountCharacterChooser(container, opts = {}) {
       chip.classList.toggle("is-selected", on);
       chip.setAttribute("aria-selected", on ? "true" : "false");
     });
-    preview.setModel(c.url, { yawDeg: c.yawDeg });
+    preview.setModel(c.url, { yawDeg: c.yawDeg, vrm: c.vrm, idleAnim: c.anims?.idle });
   }
 
   chips.forEach((chip) => {

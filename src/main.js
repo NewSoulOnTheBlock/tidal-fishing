@@ -347,6 +347,7 @@ machine.register(Phase.FLYING, {
   enter() {
     S.stats.casts += 1;
     audio.play("whoosh");
+    anglerBody.playCast(); // animated characters throw on release (no-op otherwise)
   },
 });
 
@@ -908,6 +909,7 @@ function tick() {
   weatherFX.update(dt, camera.position);
   distantLife.update(dt, camera.position);
   effects.update(dt, camera, gclock.segment);
+  anglerBody.update(dt); // advance the angler's idle/cast animation (no-op for static bodies)
   if (!paused) feedingSpots.update(dt);
 
   if (!paused) {

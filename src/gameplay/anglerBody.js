@@ -43,6 +43,12 @@ export function createAnglerBody(parent, character) {
   let holder = null; // current loaded-model subtree (swapped on setCharacter)
   let loadToken = 0; // guards against an older load resolving after a newer one
 
+  // Animated-character (VRM) state — null for static GLB characters.
+  let vrm = null;
+  let mixer = null;
+  let idleAction = null;
+  let castAction = null;
+
   function applyTransform() {
     root.position.set(cfg.x, cfg.y, cfg.z);
     root.rotation.y = THREE.MathUtils.degToRad(cfg.yawDeg);
@@ -64,54 +70,142 @@ export function createAnglerBody(parent, character) {
     holder = null;
   }
 
-  function load(url) {
-    const token = ++loadToken;
+  // Tear down any active animation mixer/VRM. Called before every (re)load so a
+  // character swap never leaves a stale mixer ticking.
+  function disposeAnim() {
+    if (mixer) {
+      mixer.removeEventListener("finished", onCastFinished);
+      mixer.stopAllAction();
+      mixer = null;
+    }
+    idleAction = null;
+    castAction = null;
+    vrm = null;
+  }
+
+  // Normalise a loaded model subtree to 1 unit tall, centred on X/Z with feet at
+  // y = 0, and mount it under `norm`. Shared by the GLB and VRM load paths.
+  function mountModel(model) {
+    clearModel();
+    holder = new THREE.Group();
+    holder.add(model);
+
+    // world AABB of the imported model (accounts for its own node transforms)
+    const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const center = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(center);
+    const h = size.y || 1;
+
+    // centre on X/Z and drop feet to y = 0 within the holder
+    holder.position.set(-center.x, -box.min.y, -center.z);
+    // normalise to exactly 1 unit tall; root.scale then sets the real height
+    norm.scale.setScalar(1 / h);
+    norm.add(holder);
+
+    model.traverse((o) => {
+      if (o.isMesh) {
+        o.castShadow = true;
+        o.receiveShadow = false;
+        o.frustumCulled = false;
+      }
+    });
+
+    ctrl.loaded = true;
+    ctrl.modelSize = { w: +size.x.toFixed(3), h: +size.y.toFixed(3), d: +size.z.toFixed(3) };
+    console.info(
+      `[angler] ${cfg.id || "body"} loaded — model ${ctrl.modelSize.w}×${ctrl.modelSize.h}×` +
+        `${ctrl.modelSize.d}u, rendered ${cfg.height}u tall. ` +
+        `Tune via __angler.setConfig({ yawDeg, height, x, y, z }).`
+    );
+  }
+
+  // Cast clip is a one-shot; when it finishes, ease back into the idle loop.
+  function onCastFinished(e) {
+    if (e.action === castAction) crossFadeToIdle(0.35);
+  }
+
+  function crossFadeToIdle(fade = 0.3) {
+    if (!idleAction) return;
+    if (castAction) castAction.fadeOut(fade);
+    idleAction.reset();
+    idleAction.setLoop(THREE.LoopRepeat, Infinity);
+    idleAction.fadeIn(fade).play();
+  }
+
+  // Dispatch to the right loader for the current character.
+  function load() {
+    ++loadToken;
     ctrl.loaded = false;
+    disposeAnim();
+    if (cfg.vrm) loadVRM(loadToken);
+    else loadGLB(loadToken);
+  }
+
+  function loadGLB(token) {
     gltfLoader().load(
-      url,
+      cfg.url,
       (gltf) => {
-        // A newer character was requested while this was loading — drop it.
-        if (token !== loadToken) return;
-        clearModel();
-        const model = gltf.scene;
-        holder = new THREE.Group();
-        holder.add(model);
-
-        // world AABB of the imported model (accounts for its own node transforms)
-        const box = new THREE.Box3().setFromObject(model);
-        const size = new THREE.Vector3();
-        const center = new THREE.Vector3();
-        box.getSize(size);
-        box.getCenter(center);
-        const h = size.y || 1;
-
-        // centre on X/Z and drop feet to y = 0 within the holder
-        holder.position.set(-center.x, -box.min.y, -center.z);
-        // normalise to exactly 1 unit tall; root.scale then sets the real height
-        norm.scale.setScalar(1 / h);
-        norm.add(holder);
-
-        model.traverse((o) => {
-          if (o.isMesh) {
-            o.castShadow = true;
-            o.receiveShadow = false;
-            o.frustumCulled = false;
-          }
-        });
-
-        ctrl.loaded = true;
-        ctrl.modelSize = { w: +size.x.toFixed(3), h: +size.y.toFixed(3), d: +size.z.toFixed(3) };
-        console.info(
-          `[angler] ${cfg.id || "body"} loaded — model ${ctrl.modelSize.w}×${ctrl.modelSize.h}×` +
-            `${ctrl.modelSize.d}u, rendered ${cfg.height}u tall. ` +
-            `Tune via __angler.setConfig({ yawDeg, height, x, y, z }).`
-        );
+        if (token !== loadToken) return; // superseded by a newer load
+        mountModel(gltf.scene);
       },
       undefined,
       (err) => {
         if (token === loadToken) console.warn("[angler] failed to load body model:", err);
       }
     );
+  }
+
+  // Animated VRM character: load the avatar, retarget its Mixamo idle/cast clips
+  // onto the humanoid skeleton, and drive them with an AnimationMixer. three-vrm
+  // and the (heavy) FBX retargeter are imported dynamically so they only ship to
+  // players who actually pick an animated character.
+  async function loadVRM(token) {
+    try {
+      const [{ VRMLoaderPlugin, VRMUtils }, { loadMixamoAnimation }] = await Promise.all([
+        import("@pixiv/three-vrm"),
+        import("./mixamoRig.js"),
+      ]);
+      if (token !== loadToken) return;
+
+      const vloader = new GLTFLoader();
+      vloader.register((parser) => new VRMLoaderPlugin(parser));
+      const gltf = await vloader.loadAsync(cfg.url);
+      if (token !== loadToken) return;
+
+      const loaded = gltf.userData?.vrm;
+      if (!loaded) throw new Error("file contains no VRM data");
+
+      VRMUtils.removeUnnecessaryVertices?.(gltf.scene);
+      VRMUtils.combineSkeletons?.(gltf.scene);
+      // VRM 0.x avatars face +Z; rotate 180° so they face -Z like the GLB bodies.
+      VRMUtils.rotateVRM0?.(loaded);
+
+      vrm = loaded;
+      if (vrm.lookAt) vrm.lookAt.autoUpdate = false; // don't head-track the camera
+      mountModel(vrm.scene);
+
+      mixer = new THREE.AnimationMixer(vrm.scene);
+      mixer.addEventListener("finished", onCastFinished);
+
+      const anims = cfg.anims || {};
+      if (anims.idle) {
+        const clip = await loadMixamoAnimation(anims.idle, vrm);
+        if (token !== loadToken) return;
+        idleAction = mixer.clipAction(clip);
+        idleAction.play();
+      }
+      if (anims.cast) {
+        const clip = await loadMixamoAnimation(anims.cast, vrm);
+        if (token !== loadToken) return;
+        castAction = mixer.clipAction(clip);
+        castAction.setLoop(THREE.LoopOnce, 1);
+        castAction.clampWhenFinished = true;
+      }
+    } catch (err) {
+      if (token === loadToken) console.warn("[angler] failed to load VRM body:", err);
+    }
   }
 
   const ctrl = {
@@ -121,30 +215,53 @@ export function createAnglerBody(parent, character) {
     setVisible(v) {
       root.visible = !!v;
     },
+    // Advance the animation each frame (no-op for static GLB characters). Called
+    // from the game loop with the frame delta in seconds.
+    update(dt) {
+      if (mixer) mixer.update(dt);
+      if (vrm) vrm.update(dt);
+    },
+    // Play the one-shot cast animation, then auto-return to idle. No-op until an
+    // animated character's cast clip has loaded.
+    playCast() {
+      if (!castAction) return;
+      if (idleAction) idleAction.fadeOut(0.15);
+      castAction.reset();
+      castAction.setLoop(THREE.LoopOnce, 1);
+      castAction.clampWhenFinished = true;
+      castAction.fadeIn(0.15).play();
+    },
+    playIdle() {
+      crossFadeToIdle(0.3);
+    },
     // Fine placement tuning of the CURRENT model (does not reload).
     setConfig(patch = {}) {
       Object.assign(cfg, patch);
       applyTransform();
       return { ...cfg };
     },
-    // Swap to a different character (id string or config object). Reloads the GLB
-    // and adopts that character's placement defaults.
+    // Swap to a different character (id string or config object). Reloads the
+    // model and adopts that character's placement defaults.
     setCharacter(character) {
       const next = normaliseChar(character);
       if (!next.url) return { ...cfg };
       const sameModel = next.url === cfg.url;
+      // Rebuild config from scratch so per-character fields (vrm/anims) from the
+      // previous character don't leak onto the next one.
+      for (const k of Object.keys(cfg)) delete cfg[k];
       Object.assign(cfg, BASE, next);
       applyTransform();
-      if (!sameModel || !holder) load(cfg.url);
+      if (!sameModel || !holder) load();
       return { ...cfg };
     },
     dispose() {
+      disposeAnim();
       clearModel();
       parent.remove(root);
     },
   };
 
-  if (cfg.url) load(cfg.url);
+  if (cfg.url) load();
   return ctrl;
 }
 
