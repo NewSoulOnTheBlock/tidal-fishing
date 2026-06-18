@@ -21,6 +21,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { evaluateCatch } from './catchRules.js';
+import { makeSkrResolver } from './skrNames.js';
 
 dotenv.config();
 
@@ -476,6 +477,9 @@ try {
 
 // Solana connection
 const connection = new Connection(RPC_URL, 'confirmed');
+
+// Resolves a wallet's .skr (Seeker/ANS) name for the Catch of the Day banner.
+const skrResolver = makeSkrResolver(connection);
 
 // Helper functions
 async function detectTokenProgram(mint) {
@@ -1372,11 +1376,12 @@ app.get('/api/world', async (req, res) => {
     );
     if (r.rows[0]) {
       const c = r.rows[0];
+      const skrName = skrResolver.getSkrNameCached(c.wallet_address);
       catchOfDay = {
         species: prettySpecies(c.species_id),
         sizeCm: Math.round(Number(c.size_cm)),
         rarity: c.rarity,
-        who: c.username || shortWallet(c.wallet_address),
+        who: skrName || c.username || shortWallet(c.wallet_address),
       };
     }
   } catch (e) {
