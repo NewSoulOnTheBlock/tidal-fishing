@@ -8,9 +8,21 @@
 
 import * as THREE from "three";
 import { CREEKFISH_ALBINO_VOX } from "./data/creekfishAlbinoVox.js";
+import { CREEKFISH_BERRYPLUM_VOX } from "./data/creekfishBerryplumVox.js";
+import { CREEKFISH_REDTROUT_VOX } from "./data/creekfishRedtroutVox.js";
+import { CREEKFISH_STEELBLUE_VOX } from "./data/creekfishSteelblueVox.js";
+import { CREEKFISH_SUNRISE_VOX } from "./data/creekfishSunriseVox.js";
+import { CREEKFISH_CAVE_VOX } from "./data/creekfishCaveVox.js";
+import { CREEKFISH_PURPLE_VOX } from "./data/creekfishPurpleVox.js";
 
 const MODELS = {
   creekfish_albino: CREEKFISH_ALBINO_VOX,
+  creekfish_berryplum: CREEKFISH_BERRYPLUM_VOX,
+  creekfish_redtrout: CREEKFISH_REDTROUT_VOX,
+  creekfish_steelblue: CREEKFISH_STEELBLUE_VOX,
+  creekfish_sunrise: CREEKFISH_SUNRISE_VOX,
+  creekfish_cave: CREEKFISH_CAVE_VOX,
+  creekfish_purple: CREEKFISH_PURPLE_VOX,
 };
 
 // Decoded + normalised voxel data, cached per model key.
