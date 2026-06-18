@@ -141,7 +141,10 @@ const bobber = new Bobber(scene, effects);
 // the game runs fine before/without it. The character is the player's saved
 // choice (picked during onboarding). Exposed for live placement tuning.
 const anglerBody = createAnglerBody(casting.rig, S.profile.character);
+const _rodGripWorld = new THREE.Vector3(); // reused per-frame for hand→rod anchoring
 window.__angler = anglerBody;
+// Live tuning for the VRM rod grip: nudge offset (rig-local) and swap rod hand.
+window.__rodGrip = (x = 0, y = 0, z = 0) => casting.setRodGripOffset(x, y, z);
 window.__setCharacter = (id) => anglerBody.setCharacter(id);
 const bite = new BiteSystem(
   () => ({
@@ -946,6 +949,9 @@ function tick() {
   distantLife.update(dt, camera.position);
   effects.update(dt, camera, gclock.segment);
   anglerBody.update(dt); // advance the angler's idle/cast animation (no-op for static bodies)
+  // Anchor the procedural rod to the VRM angler's hand so the pole stays in their
+  // grip through the cast (static voxel bodies return null → rod keeps its mount).
+  casting.setRodAnchorWorld(anglerBody.getGripWorld(_rodGripWorld));
   if (!paused) feedingSpots.update(dt);
 
   if (!paused) {

@@ -48,6 +48,7 @@ export function createAnglerBody(parent, character) {
   let mixer = null;
   let idleAction = null;
   let castAction = null;
+  let handBone = null; // VRM rod-gripping hand bone (for anchoring the rod mesh)
 
   function applyTransform() {
     root.position.set(cfg.x, cfg.y, cfg.z);
@@ -80,6 +81,7 @@ export function createAnglerBody(parent, character) {
     }
     idleAction = null;
     castAction = null;
+    handBone = null;
     vrm = null;
   }
 
@@ -186,6 +188,17 @@ export function createAnglerBody(parent, character) {
       if (vrm.lookAt) vrm.lookAt.autoUpdate = false; // don't head-track the camera
       mountModel(vrm.scene);
 
+      // The hand that grips the rod. main.js anchors the procedural rod mesh to
+      // this bone's world position each frame so the pole stays in-hand through
+      // the whole cast (the Mixamo clip swings the arm, so a fixed mount drifts
+      // off-centre). Default to the right hand (matches the rod's +X mount);
+      // a character can override via `rodHand`.
+      const gripBone = cfg.rodHand || "rightHand";
+      handBone =
+        vrm.humanoid?.getRawBoneNode?.(gripBone) ||
+        vrm.humanoid?.getNormalizedBoneNode?.(gripBone) ||
+        null;
+
       mixer = new THREE.AnimationMixer(vrm.scene);
       mixer.addEventListener("finished", onCastFinished);
 
@@ -221,6 +234,15 @@ export function createAnglerBody(parent, character) {
       if (mixer) mixer.update(dt);
       if (vrm) vrm.update(dt);
     },
+    // World position of the rod-gripping hand (VRM bodies only), written into
+    // `target`. Returns `target` when available, else null (static voxel bodies)
+    // so the caller falls back to the rod's default rig mount. Must be called
+    // after update(dt) so the bone reflects the current animated pose.
+    getGripWorld(target) {
+      if (!handBone) return null;
+      handBone.updateWorldMatrix(true, false);
+      return handBone.getWorldPosition(target);
+    },
     // Play the one-shot cast animation, then auto-return to idle. No-op until an
     // animated character's cast clip has loaded.
     playCast() {
@@ -233,6 +255,18 @@ export function createAnglerBody(parent, character) {
     },
     playIdle() {
       crossFadeToIdle(0.3);
+    },
+    // Re-pick which hand bone the rod anchors to (VRM only). Exposed for live
+    // tuning via window.__angler.setRodHand('leftHand'|'rightHand').
+    setRodHand(name) {
+      cfg.rodHand = name;
+      if (vrm) {
+        handBone =
+          vrm.humanoid?.getRawBoneNode?.(name) ||
+          vrm.humanoid?.getNormalizedBoneNode?.(name) ||
+          handBone;
+      }
+      return name;
     },
     // Fine placement tuning of the CURRENT model (does not reload).
     setConfig(patch = {}) {

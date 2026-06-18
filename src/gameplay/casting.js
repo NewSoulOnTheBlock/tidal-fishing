@@ -42,6 +42,14 @@ export class CastingSystem {
     this.buildPreview();
     this.buildLine();
     this._tip = new THREE.Vector3();
+
+    // Rod-base anchoring. Static voxel bodies keep the fixed rig mount set in
+    // buildRod(); VRM bodies override rodRoot's position each frame with their
+    // hand's world position (converted to rig space) so the pole stays in-grip.
+    this._rodHomePos = this.rodRoot.position.clone();
+    this._rodAnchorWorld = null;
+    this._tmpLocal = new THREE.Vector3();
+    this._rodGripOffset = new THREE.Vector3(0, 0, 0); // fine nudge, rig-local
   }
 
   // ---------- rod ----------
@@ -237,6 +245,24 @@ export class CastingSystem {
     this.rig.rotation.y = 0;
   }
 
+  /** Anchor the rod base to a world-space point (a VRM angler's gripping hand)
+   *  so the pole tracks the hand through the cast. Pass null to release it back
+   *  to the default rig-local mount used by the static voxel bodies. */
+  setRodAnchorWorld(worldPos) {
+    if (!worldPos) {
+      this._rodAnchorWorld = null;
+      return;
+    }
+    (this._rodAnchorWorld ??= new THREE.Vector3()).copy(worldPos);
+  }
+
+  /** Fine-tune the rod's resting point in the hand (rig-local units). Exposed on
+   *  window.__rodGrip for live tuning of the VRM grip alignment. */
+  setRodGripOffset(x = 0, y = 0, z = 0) {
+    this._rodGripOffset.set(x, y, z);
+    return [x, y, z];
+  }
+
   tipPos() {
     return this.tipMarker.getWorldPosition(this._tip);
   }
@@ -415,6 +441,19 @@ export class CastingSystem {
     }
     this.aimYaw = lerp(this.aimYaw, this.targetYaw, 1 - Math.exp(-10 * dt));
     this.rig.rotation.y = -this.aimYaw;
+
+    // Keep the rod base in the VRM angler's hand (converted to rig space), or at
+    // its default mount for static voxel bodies. rig.worldToLocal uses the rig's
+    // matrix from last frame — the same reference the hand position was read
+    // against — so the (cancelling) aim rotation keeps the rod exactly in-grip.
+    if (this._rodAnchorWorld) {
+      this._tmpLocal.copy(this._rodAnchorWorld);
+      this.rig.worldToLocal(this._tmpLocal);
+      this._tmpLocal.add(this._rodGripOffset);
+      this.rodRoot.position.copy(this._tmpLocal);
+    } else if (this._rodHomePos) {
+      this.rodRoot.position.copy(this._rodHomePos);
+    }
 
     if (this.charging) {
       this.chargeT += dt;
