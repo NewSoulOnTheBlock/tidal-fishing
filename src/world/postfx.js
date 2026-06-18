@@ -28,7 +28,7 @@ const GodRaysShader = {
     intensity: { value: 0.0 },
     decay: { value: 0.94 },
     density: { value: 0.7 },
-    weight: { value: 0.32 },
+    weight: { value: 0.22 },
     tint: { value: new THREE.Color(0xfff0d2) },
   },
   vertexShader: /* glsl */ `
@@ -223,8 +223,8 @@ export class PostFX {
     gu.lightPos.value.set(ndc.x * 0.5 + 0.5, ndc.y * 0.5 + 0.5);
     // rays only in daylight, fading as the sun nears/leaves the frame edges
     const edgeFade = onScreen ? 1 - Math.max(Math.abs(ndc.x), Math.abs(ndc.y)) * 0.45 : 0;
-    // god rays kept to a faint whisper — just a hint of sun scatter, never beams
-    const target = Math.max(0, dayFactor) * Math.max(0, edgeFade) * 0.06;
+    // god rays kept to the barest hint of sun scatter — effectively off
+    const target = Math.max(0, dayFactor) * Math.max(0, edgeFade) * 0.025;
     gu.intensity.value += (target - gu.intensity.value) * Math.min(1, dt * 3);
     if (sunColor) gu.tint.value.copy(sunColor).lerp(new THREE.Color(0xffffff), 0.3);
 
