@@ -37,6 +37,7 @@ import { WalletPanel } from "./ui/walletPanel.js";
 import { JournalUI as ProgressionJournalUI } from "./ui/journalUI.js";
 // import { DailyLoginUI } from "./ui/dailyLoginUI.js"; // DISABLED - daily rewards removed
 import { AchievementsUI } from "./ui/achievementsUI.js";
+import { ControlsUI } from "./ui/controlsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
@@ -170,6 +171,7 @@ const mapUI = new MapUI(
 // New progression UIs
 const progressionJournalUI = new ProgressionJournalUI();
 const achievementsUI = new AchievementsUI();
+const controlsUI = new ControlsUI();
 const weatherUI = new WeatherUI(scene);
 const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
@@ -712,6 +714,11 @@ window.addEventListener("keydown", (e) => {
     case "Escape":
       handleEscape();
       break;
+    case "Slash":
+      // "?" (or "/") opens the controls / button-mapping guide.
+      e.preventDefault();
+      controlsUI.toggle();
+      break;
     default:
       break;
   }
@@ -820,6 +827,8 @@ document.getElementById("btn-pause").addEventListener("click", () => {
   audio.play("click");
   setPaused(true);
 });
+document.getElementById("btn-controls").addEventListener("click", () => controlsUI.toggle());
+document.getElementById("menu-controls").addEventListener("click", () => controlsUI.show());
 document.getElementById("hud-bag").addEventListener("click", () => {
   if (machine.is(Phase.IDLE)) {
     audio.play("click");
