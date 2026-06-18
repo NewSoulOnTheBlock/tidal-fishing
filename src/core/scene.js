@@ -14,7 +14,7 @@ export function createCore(container) {
 
   const scene = new THREE.Scene();
   // Fog must exist before the Water shader is built so it compiles with fog support.
-  scene.fog = new THREE.FogExp2(0x9fc3c9, 0.0016);
+  scene.fog = new THREE.FogExp2(0x9fc3c9, 0.00128);
 
   const camera = new THREE.PerspectiveCamera(
     CONFIG.camera.fov,
