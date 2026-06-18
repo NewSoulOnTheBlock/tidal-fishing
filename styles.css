@@ -314,6 +314,48 @@ kbd {
   to   { box-shadow: 0 0 26px rgba(255, 200, 87, 0.9); }
 }
 
+/* steering pads + final heave (directional reel fight) */
+.steer-pads {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-top: 2px; pointer-events: none;
+}
+.steer-pad {
+  pointer-events: auto; flex: none;
+  width: 66px; height: 46px;
+  font-size: 1.35rem; font-weight: 900; line-height: 1;
+  color: #cfeaff; background: rgba(20, 40, 60, 0.55);
+  border: 1px solid var(--stroke); border-radius: 12px; cursor: pointer;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  transition: transform 0.08s ease, background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+}
+.steer-pad:active,
+.steer-pad.active {
+  transform: scale(0.95);
+  color: #fff; background: rgba(70, 198, 255, 0.42);
+  box-shadow: 0 0 14px rgba(70, 198, 255, 0.6);
+}
+/* the side the fish is bolting toward — press this one */
+.steer-pad.call {
+  color: #06222c; background: linear-gradient(90deg, #ffd95e, #ffb347);
+  box-shadow: 0 0 20px rgba(255, 200, 87, 0.85);
+  animation: dodgePulse 0.38s ease-in-out infinite alternate;
+}
+.steer-pad.call.active {
+  color: #06222c; background: linear-gradient(90deg, #7bffb0, #3ec97e);
+  box-shadow: 0 0 20px rgba(120, 255, 180, 0.9);
+}
+.steer-pads.heave .steer-pad { opacity: 0.25; pointer-events: none; }
+.heave-btn {
+  pointer-events: auto; flex: none;
+  padding: 10px 26px; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.04em;
+  color: #06222c; background: linear-gradient(90deg, #7bffb0, #3ec97e);
+  border: none; border-radius: 12px; cursor: pointer;
+  box-shadow: 0 0 20px rgba(120, 255, 180, 0.7);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  animation: dodgePulse 0.38s ease-in-out infinite alternate;
+}
+.heave-btn:active { transform: scale(0.95); }
+
 /* bite indicator */
 .bite-indicator {
   position: absolute; z-index: 12; pointer-events: none;

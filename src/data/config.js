@@ -30,8 +30,8 @@ export const CONFIG = {
   },
 
   bite: {
-    waitMin: 4,
-    waitMax: 13,
+    waitMin: 7,
+    waitMax: 19,
     nibbleChance: 0.65,
     hookWindowBase: 1.05, // scaled down for rarer fish
     retrieveHoldTime: 0.35, // hold-click this long while waiting to retrieve
@@ -47,9 +47,9 @@ export const CONFIG = {
   },
 
   reel: {
-    reelRate: 13.5, // catch progress %/s while reeling (x reel, / heft)
-    escapeRate: 5.5, // progress %/s lost while resting (x strength)
-    tensionGain: 26, // tension %/s while reeling (x strength, / line)
+    reelRate: 8.5, // catch progress %/s while reeling (x reel, / heft)
+    escapeRate: 4.0, // progress %/s lost while resting (x strength)
+    tensionGain: 23, // tension %/s while reeling (x strength, / line)
     tensionRecover: 21, // tension %/s recovered while resting
     surgeReelMult: 3.4, // tension multiplier when reeling through a surge
     surgeRestGain: 7, // passive tension %/s during a surge even at rest
@@ -57,7 +57,7 @@ export const CONFIG = {
     surgeDuration: [1.1, 1.9],
     startProgress: 8,
     startTension: 18,
-    maxFightTime: 55,
+    maxFightTime: 95,
     escapeGraceTime: 2.5,
     minFishDist: 2.2,
     tiredStrengthMult: 0.62, // fish weakens after its stamina runs out
@@ -77,6 +77,20 @@ export const CONFIG = {
     snapSaveWindow: 0.32, // seconds to release in after crossing 100
     snapSaveTension: 80, // tension is dropped to this on a successful save
     snapSavesPerFight: 1, // free saves granted per fight
+    // lateral "runs": the fish bolts left or right and you must lean the rod the
+    // same way (arrow keys / on-screen ◄ ►). Steer wrong and tension climbs fast.
+    run: {
+      firstDelay: 2.4, // grace before the fish's first run
+      every: [3.0, 5.5], // calm seconds between runs
+      telegraph: 0.55, // arrow shows this long before tension starts biting
+      duration: [1.5, 2.4], // how long a run lasts
+      wrongTensionGain: 26, // tension %/s while NOT leaning into the run (x str / line)
+      matchProgress: 1.6, // bonus catch %/s while correctly leaning into a run
+      swing: 1.5, // rad/s the fight point sweeps toward the run side (visual)
+    },
+    // final landing: when the catch bar fills, the fish wallows at the surface
+    // and you must PULL BACK (Up / "HEAVE!") to lift it out of the water.
+    heaveAutoTime: 7, // safety: auto-lift if the player never heaves (no soft-lock)
   },
 
   economy: {

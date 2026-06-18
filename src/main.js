@@ -85,6 +85,8 @@ if (isTelegram()) {
     tgHaptic(isPerfect ? "success" : "heavy")
   );
   events.on("fight:dodge", () => tgHaptic("light"));
+  events.on("fight:run", () => tgHaptic("medium"));
+  events.on("fight:heaveready", () => tgHaptic("heavy"));
   events.on("fight:nearsnap", () => tgHaptic("warning"));
   events.on("fight:save", () => tgHaptic("success"));
   events.on("fight:snap", () => tgHaptic("error"));
@@ -366,6 +368,8 @@ machine.register(Phase.REELING, {
     casting.setBend(0);
     casting.setLineTension(0);
     hud.showReel(false);
+    steerKey = 0;
+    fight.setSteer(0);
   },
 });
 
@@ -504,6 +508,17 @@ events.on("fight:dodge", () => {
   hud.toast("Dodged the surge!", "success");
 });
 
+events.on("fight:run", () => {
+  audio.play("whoosh", { strength: 0.55 });
+  rig.addShake(0.06);
+});
+
+events.on("fight:heaveready", () => {
+  audio.play("splash", { strength: 1.1 });
+  rig.addShake(0.18);
+  hud.toast("It's at the surface — PULL BACK to land it!", "gold");
+});
+
 events.on("fight:nearsnap", () => {
   audio.play("snap", { strength: 0.4 });
   hud.shake();
@@ -536,6 +551,7 @@ applyGearLooks();
 let inputHeld = false;
 let waitingHoldT = 0;
 let spaceHeld = false;
+let steerKey = 0; // which arrow is currently held during a fight (-1 | 0 | +1)
 
 function pressDown() {
   if (paused) return;
@@ -626,6 +642,20 @@ window.addEventListener("keydown", (e) => {
     case "ShiftRight":
       if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
       break;
+    case "ArrowLeft":
+    case "ArrowRight":
+      if (!paused && machine.is(Phase.REELING)) {
+        e.preventDefault();
+        steerKey = e.code === "ArrowLeft" ? -1 : 1;
+        fight.setSteer(steerKey);
+      }
+      break;
+    case "ArrowUp":
+      if (!paused && machine.is(Phase.REELING)) {
+        e.preventDefault();
+        fight.tryHeave();
+      }
+      break;
     case "KeyM":
       toggleScreen(Phase.MAP);
       break;
@@ -677,6 +707,13 @@ window.addEventListener("keyup", (e) => {
     pressUp();
     waitingHoldT = 0;
   }
+  if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+    const dir = e.code === "ArrowLeft" ? -1 : 1;
+    if (steerKey === dir) {
+      steerKey = 0;
+      fight.setSteer(0);
+    }
+  }
 });
 
 if (hud.dodgeBtn) {
@@ -684,6 +721,35 @@ if (hud.dodgeBtn) {
     e.stopPropagation();
     e.preventDefault();
     if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
+  });
+}
+
+// On-screen steering pads (touch): hold a side to lean the rod that way. Pointer
+// events are contained (stopPropagation) so they never toggle the reel.
+function wireSteerPad(btn, dir) {
+  if (!btn) return;
+  const press = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!paused && machine.is(Phase.REELING)) fight.setSteer(dir);
+  };
+  const release = (e) => {
+    e.stopPropagation();
+    if (fight.steer === dir) fight.setSteer(0);
+  };
+  btn.addEventListener("pointerdown", press);
+  btn.addEventListener("pointerup", release);
+  btn.addEventListener("pointerleave", release);
+  btn.addEventListener("pointercancel", release);
+}
+wireSteerPad(hud.steerLeftBtn, -1);
+wireSteerPad(hud.steerRightBtn, 1);
+
+if (hud.heaveBtn) {
+  hud.heaveBtn.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!paused && machine.is(Phase.REELING)) fight.tryHeave();
   });
 }
 

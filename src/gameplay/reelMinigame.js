@@ -66,6 +66,17 @@ export class ReelFight {
     this.surgeT = 0;
     this.splashTimer = 0;
 
+    // lateral runs: the fish bolts left/right and you must lean the rod the same
+    // way or the line tension climbs fast.
+    this.steer = 0; // player's rod lean: -1 left, 0 centred, +1 right
+    this.runState = "none"; // none | telegraph | running
+    this.runDir = 0; // direction of the active/incoming run (-1 | 0 | +1)
+    this.runTimer = R.run.firstDelay; // grace before the first run
+    this.runT = 0;
+
+    // final heave: time spent waiting at the surface for the player's pull-back
+    this.heaveT = 0;
+
     // a real mesh of the actual rolled fish, revealed during jumps + landing
     this.fishMesh = createFishMesh(FISH_BY_ID[fish.speciesId], fish.sizeCm);
     this.fishMesh.visible = false;
@@ -76,6 +87,27 @@ export class ReelFight {
 
   setReeling(on) {
     if (this.phase === "fight") this.reeling = on;
+  }
+
+  /** Player leans the rod: dir < 0 = left, dir > 0 = right, 0 = centred. */
+  setSteer(dir) {
+    this.steer = dir < 0 ? -1 : dir > 0 ? 1 : 0;
+  }
+
+  /** Final pull-back to lift a played-out fish out of the water. */
+  tryHeave() {
+    if (this.phase !== "heave") return false;
+    this.beginLanding();
+    return true;
+  }
+
+  get running() {
+    return this.runState === "running";
+  }
+
+  /** True while the fish is running and the player is leaning the correct way. */
+  get countered() {
+    return this.running && this.steer === this.runDir;
   }
 
   end() {
@@ -122,6 +154,36 @@ export class ReelFight {
         this.surgeSoften = 1;
         const spacing = this.tired ? R.tiredSurgeSpacing : 1;
         this.surgeTimer = randRange(...f.surgeEvery) * spacing;
+      }
+    }
+  }
+
+  // ---------- lateral run cycle ----------
+
+  updateRun(dt) {
+    const RUN = CONFIG.reel.run;
+    if (this.runState === "none") {
+      this.runTimer -= dt;
+      if (this.runTimer <= 0) {
+        this.runState = "telegraph";
+        this.runT = RUN.telegraph;
+        this.runDir = Math.random() < 0.5 ? -1 : 1;
+        this.audio.play("surgeWarn", { strength: 0.5 });
+        events.emit("fight:run", { dir: this.runDir });
+      }
+    } else if (this.runState === "telegraph") {
+      this.runT -= dt;
+      if (this.runT <= 0) {
+        this.runState = "running";
+        this.runT = randRange(RUN.duration[0], RUN.duration[1]);
+      }
+    } else if (this.runState === "running") {
+      this.runT -= dt;
+      if (this.runT <= 0) {
+        this.runState = "none";
+        this.runDir = 0;
+        const spacing = this.tired ? 1.4 : 1;
+        this.runTimer = randRange(RUN.every[0], RUN.every[1]) * spacing;
       }
     }
   }
@@ -174,6 +236,10 @@ export class ReelFight {
       this.updateLanding(dt);
       return;
     }
+    if (this.phase === "heave") {
+      this.updateHeave(dt);
+      return;
+    }
 
     const R = CONFIG.reel;
     const f = this.fish.fight;
@@ -182,11 +248,12 @@ export class ReelFight {
     const strength = f.strength * (this.tired ? R.tiredStrengthMult : 1);
     const { reelSpeed, lineStrength, control } = this.stats;
 
-    // a perfect hook buys a brief window where the fish can't surge
+    // a perfect hook buys a brief window where the fish stays calm
     if (this.graceT > 0) {
       this.graceT -= dt;
     } else {
       this.updateSurge(dt);
+      this.updateRun(dt);
     }
     this.updateJump(dt);
     const surging = this.surgeState === "active";
@@ -206,6 +273,16 @@ export class ReelFight {
       this.tension -= dt * R.tensionRecover * (surging ? 0.45 : 1);
       if (surging) this.tension += dt * R.surgeRestGain * strength * this.surgeSoften / lineStrength;
       this.progress -= dt * R.escapeRate * strength * (surging ? 1.5 : 0.9);
+    }
+
+    // lateral run: lean the rod the same way as the fish or tension spikes fast.
+    // Matching the run keeps tension off and works the fish in a little quicker.
+    if (this.running) {
+      if (this.steer !== this.runDir) {
+        this.tension += dt * R.run.wrongTensionGain * strength / lineStrength;
+      } else if (this.reeling) {
+        this.progress += dt * R.run.matchProgress;
+      }
     }
 
     // near-snap save: only dangerous while actively reeling at max tension.
@@ -257,14 +334,16 @@ export class ReelFight {
     this.tension = clamp(this.tension, 0, 100);
 
     if (this.progress >= 100) {
-      this.beginLanding();
+      this.beginHeave();
       return;
     }
 
-    // fight point wanders around the player and closes in with progress
+    // fight point wanders around the player and closes in with progress; during
+    // a run it sweeps hard toward the run side so you can see which way it bolts
     const dist = lerp(this.startDist, R.minFishDist, this.progress / 100);
     this.angle += Math.sin(this.t * 0.7) * this.angleDrift * dt;
     if (surging) this.angle += Math.sin(this.t * 6) * 1.1 * dt;
+    if (this.running) this.angle += this.runDir * R.run.swing * dt;
     this.fishPoint.set(
       this.playerSpot.x + Math.sin(this.angle) * dist,
       WATER_Y,
@@ -287,7 +366,50 @@ export class ReelFight {
       canDodge: this.surgeState === "telegraph" && this.dodgeArmed && !this.dodged,
       dodged: this.dodged,
       snapArmed: this.snapArmed,
+      runDir: this.running ? this.runDir : 0,
+      runTelegraph: this.runState === "telegraph" ? this.runDir : 0,
+      steer: this.steer,
+      countered: this.countered,
     });
+  }
+
+  // ---------- final heave (pull back to lift the fish out) ----------
+
+  beginHeave() {
+    this.phase = "heave";
+    this.reeling = false;
+    this.runState = "none";
+    this.runDir = 0;
+    this.surgeState = "calm";
+    this.heaveT = 0;
+    this.tension = clamp(this.tension, 0, 70);
+    this.effects.splash(this.fishPoint, 1.2);
+    this.audio.play("splash", { strength: 0.9 });
+    this.fishMesh.visible = true;
+    events.emit("fight:heaveready", { fish: this.fish });
+    events.emit("fight:update", { tension: this.tension, progress: 100, surge: "calm", heave: true, runDir: 0 });
+  }
+
+  updateHeave(dt) {
+    this.heaveT += dt;
+    // the played-out fish wallows at the surface, thrashing, until the lift
+    this.splashTimer -= dt;
+    if (this.splashTimer <= 0) {
+      this.effects.ripple(this.fishPoint, 1.7, 0.7);
+      this.effects.splash(this.fishPoint, 0.5);
+      this.splashTimer = 0.4;
+    }
+    const bob = (Math.sin(this.heaveT * 5) + 1) * 0.5;
+    this.fishMesh.visible = true;
+    this.fishMesh.position.set(this.fishPoint.x, WATER_Y + 0.12 * bob, this.fishPoint.z);
+    this.fishMesh.rotation.y = this.angle + Math.PI / 2;
+    this.fishMesh.rotation.z = Math.sin(this.heaveT * 7) * 0.5;
+    // never soft-lock: lift automatically if the player waits too long
+    if (this.heaveT >= CONFIG.reel.heaveAutoTime) {
+      this.beginLanding();
+      return;
+    }
+    events.emit("fight:update", { tension: 0, progress: 100, surge: "calm", heave: true, runDir: 0 });
   }
 
   // ---------- landing ----------

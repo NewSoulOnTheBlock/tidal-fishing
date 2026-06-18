@@ -15,7 +15,7 @@ const PROMPTS = {
   [Phase.FLYING]: "Nice arc...",
   [Phase.WAITING]: "Wait for a bite — <b>tap</b> to jig the lure · <b>hold</b> Click (or <b>R</b>) to reel back",
   [Phase.BITE]: "HOOK IT! CLICK NOW!",
-  [Phase.REELING]: "<b>Hold</b> to reel — ease into the <b>green zone</b>, <b>let go</b> on surges",
+  [Phase.REELING]: "<b>Hold</b> to reel · steer <b>◄ ►</b> (arrows) with the fish's runs · <b>pull back</b> (▲) to land it",
   [Phase.CATCH]: "",
   [Phase.RETRIEVING]: "Reeling the line back in...",
 };
@@ -46,6 +46,10 @@ export class HUD {
     this.tensionSweet = $("tension-sweet");
     this.dodgeBtn = $("dodge-btn");
     this.progressFill = $("progress-fill");
+    this.steerPads = $("steer-pads");
+    this.steerLeftBtn = $("steer-left");
+    this.steerRightBtn = $("steer-right");
+    this.heaveBtn = $("heave-btn");
     this.bite = $("bite-indicator");
     this.biteRing = $("bite-ring");
     this.toasts = $("toasts");
@@ -180,12 +184,19 @@ export class HUD {
     }
     if (this.tensionSweet) this.tensionSweet.classList.remove("active");
     if (this.dodgeBtn) this.dodgeBtn.classList.add("hidden");
+    if (this.heaveBtn) this.heaveBtn.classList.add("hidden");
+    if (this.steerPads) {
+      this.steerPads.classList.toggle("hidden", !visible);
+      this.steerPads.classList.remove("heave");
+    }
+    if (this.steerLeftBtn) this.steerLeftBtn.classList.remove("call", "active");
+    if (this.steerRightBtn) this.steerRightBtn.classList.remove("call", "active");
     if (!visible) {
       this.vignette.classList.remove("tension-danger", "snap-warn");
     }
   }
 
-  updateFight({ tension, progress, surge, landing, inSweet, canDodge, dodged, snapArmed }) {
+  updateFight({ tension, progress, surge, landing, inSweet, canDodge, dodged, snapArmed, runDir, runTelegraph, steer, countered, heave }) {
     if (landing) {
       this.reelWrap.classList.add("hidden");
       this.vignette.classList.remove("tension-danger", "snap-warn");
@@ -200,12 +211,49 @@ export class HUD {
     this.vignette.classList.toggle("tension-danger", tension > 75 && !snapArmed);
     this.vignette.classList.toggle("snap-warn", !!snapArmed);
 
-    if (this.dodgeBtn) this.dodgeBtn.classList.toggle("hidden", !canDodge);
+    if (this.dodgeBtn) this.dodgeBtn.classList.toggle("hidden", !canDodge || heave);
+
+    // ----- final heave: pull back to lift the fish out -----
+    if (heave) {
+      if (this.heaveBtn) this.heaveBtn.classList.remove("hidden");
+      if (this.steerPads) this.steerPads.classList.add("heave");
+      if (this.steerLeftBtn) this.steerLeftBtn.classList.remove("call", "active");
+      if (this.steerRightBtn) this.steerRightBtn.classList.remove("call", "active");
+      this.surgeBanner.textContent = "PULL BACK — HEAVE IT OUT! ▲";
+      this.surgeBanner.classList.remove("hidden", "telegraph", "snap");
+      this.surgeBanner.classList.add("dodged");
+      return;
+    }
+    if (this.heaveBtn) this.heaveBtn.classList.add("hidden");
+    if (this.steerPads) this.steerPads.classList.remove("heave");
+
+    // ----- lateral run: which way to lean the rod -----
+    const call = runTelegraph || runDir || 0; // the side the fish is bolting
+    if (this.steerLeftBtn) {
+      this.steerLeftBtn.classList.toggle("call", call === -1);
+      this.steerLeftBtn.classList.toggle("active", steer === -1);
+    }
+    if (this.steerRightBtn) {
+      this.steerRightBtn.classList.toggle("call", call === 1);
+      this.steerRightBtn.classList.toggle("active", steer === 1);
+    }
 
     if (snapArmed) {
       this.surgeBanner.textContent = "ON THE BRINK — LET GO!";
       this.surgeBanner.classList.remove("hidden", "telegraph");
       this.surgeBanner.classList.add("snap");
+    } else if (runDir && !countered) {
+      this.surgeBanner.textContent = runDir === 1 ? "IT'S RUNNING RIGHT — LEAN ►" : "IT'S RUNNING LEFT — LEAN ◄";
+      this.surgeBanner.classList.remove("hidden", "dodged", "snap");
+      this.surgeBanner.classList.add("telegraph");
+    } else if (runTelegraph) {
+      this.surgeBanner.textContent = runTelegraph === 1 ? "IT'S BOLTING RIGHT..." : "IT'S BOLTING LEFT...";
+      this.surgeBanner.classList.remove("hidden", "dodged", "snap");
+      this.surgeBanner.classList.add("telegraph");
+    } else if (countered) {
+      this.surgeBanner.textContent = "ON IT! 🎣";
+      this.surgeBanner.classList.remove("hidden", "telegraph", "snap");
+      this.surgeBanner.classList.add("dodged");
     } else if (dodged && surge === "active") {
       this.surgeBanner.textContent = "DODGED!";
       this.surgeBanner.classList.remove("hidden", "telegraph", "snap");

@@ -84,5 +84,5 @@ export function rollBiteWait(ctx) {
   if (ctx.zone === "deep") wait *= CONFIG.bite.deepWaitMult;
   // casting into a feeding spot brings bites in much faster
   if (ctx.spotBonus?.biteMult) wait /= ctx.spotBonus.biteMult;
-  return clamp(wait, 2, 25);
+  return clamp(wait, 3, 30);
 }
