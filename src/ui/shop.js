@@ -4,6 +4,7 @@
 
 import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
+import { BAITS, BAIT_BY_ID, baitStatLines } from "../data/baitData.js";
 import { lookSwatch } from "../data/gearLooks.js";
 import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import { PREMIUM_ANGLERS, getCharacter } from "../data/characters.js";
@@ -26,12 +27,16 @@ export class ShopUI {
     this.contentEl = $("shop-content");
     this.moneyEl = $("shop-money");
     this.tab = "rods";
+    this.baitQty = 10;
     $("shop-close").addEventListener("click", () => {
       audio.play("click");
       this.onClose();
     });
     events.on("money", () => {
       if (!this.screen.classList.contains("hidden")) this.render();
+    });
+    events.on("bait", () => {
+      if (!this.screen.classList.contains("hidden") && this.tab === "bait") this.render();
     });
   }
 
@@ -50,6 +55,7 @@ export class ShopUI {
     this.renderTabs();
     if (this.tab === "sell") this.renderSell();
     else if (this.tab === "anglers") this.renderAnglers();
+    else if (this.tab === "bait") this.renderBait();
     else this.renderGear(this.tab);
   }
 
@@ -57,6 +63,7 @@ export class ShopUI {
     this.tabsEl.innerHTML = "";
     const tabs = [
       ...GEAR_CATS.map((c) => ({ key: c.key, label: c.label })),
+      { key: "bait", label: "Bait" },
       { key: "anglers", label: "Anglers" },
       { key: "sell", label: `Sell (${S.inventory.length})` },
     ];
@@ -179,6 +186,118 @@ export class ShopUI {
           action.appendChild(btn);
         }
       }
+      this.contentEl.appendChild(row);
+    });
+  }
+
+  renderBait() {
+    this.contentEl.innerHTML = "";
+    const intro = document.createElement("div");
+    intro.className = "shop-anglers-intro";
+    intro.innerHTML =
+      `Every cast spends <b>1 bait</b>. Cheaper bait lands mostly common fish; pricier bait lifts your odds for rare, epic & legendary catches. Stock up in bulk below.`;
+    this.contentEl.appendChild(intro);
+
+    // Bulk-quantity selector (applies to every buy button on the tab).
+    const presets = [10, 25, 50, 100];
+    if (!presets.includes(this.baitQty)) this.baitQty = 10;
+    const qtyRow = document.createElement("div");
+    qtyRow.className = "bait-qty-row";
+    const qtyLabel = document.createElement("span");
+    qtyLabel.className = "bait-qty-label";
+    qtyLabel.textContent = "Quantity:";
+    qtyRow.appendChild(qtyLabel);
+    for (const q of presets) {
+      const b = document.createElement("button");
+      b.className = `tab-btn${this.baitQty === q ? " active" : ""}`;
+      b.textContent = `×${q}`;
+      b.addEventListener("click", () => {
+        audio.play("click");
+        this.baitQty = q;
+        this.render();
+      });
+      qtyRow.appendChild(b);
+    }
+    this.contentEl.appendChild(qtyRow);
+
+    const qty = this.baitQty;
+    const selected = S.bait?.selected;
+    const walletConnected = Boolean(currentPublicKey());
+    const solPayAvailable = isSolPayEnabled();
+
+    BAITS.forEach((b) => {
+      const count = economy.baitCount(b.id);
+      const isActive = selected === b.id;
+      const tideCost = Math.round((b.tidePrice || 0) * qty);
+      const afford = S.profile.money >= tideCost;
+      const solCost = Number((b.solPrice * qty).toFixed(4));
+
+      const row = document.createElement("div");
+      row.className = `shop-item${isActive ? " equipped" : ""}`;
+      const stats = baitStatLines(b)
+        .map((s) => `<span>${s}</span>`)
+        .join(" · ");
+      const swatch = `#${lookSwatch(b.look).toString(16).padStart(6, "0")}`;
+      row.innerHTML = `
+        <div class="shop-item-info">
+          <div class="shop-item-name"><span class="gear-swatch" style="background:${swatch}"></span>${b.name} <span class="tier-badge">×${count} owned</span></div>
+          <div class="shop-item-stats">${stats}</div>
+          <div class="shop-item-blurb">${b.blurb}</div>
+        </div>
+        <div class="shop-item-action"></div>
+      `;
+
+      const action = row.querySelector(".shop-item-action");
+
+      // Make-active control.
+      if (isActive) {
+        const tag = document.createElement("span");
+        tag.className = "equipped-tag";
+        tag.textContent = "Active";
+        action.appendChild(tag);
+      } else if (count > 0) {
+        const selBtn = document.createElement("button");
+        selBtn.className = "btn";
+        selBtn.textContent = "Use this";
+        selBtn.addEventListener("click", () => {
+          audio.play("click");
+          economy.selectBait(b.id);
+          events.emit("toast", { msg: `Now baiting with ${b.name}`, kind: "success" });
+          this.render();
+        });
+        action.appendChild(selBtn);
+      }
+
+      // Purchase options — SOL is the headline price; $TIDE is the f2p fallback.
+      const paymentOptions = document.createElement("div");
+      paymentOptions.className = "payment-options";
+
+      const tideBtn = document.createElement("button");
+      tideBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
+      tideBtn.innerHTML = `
+        <span class="pay-label">Buy ×${qty} · $TIDE</span>
+        <span class="pay-amount">${formatMoney(tideCost)}</span>
+      `;
+      if (afford) {
+        tideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-offchain"));
+      } else {
+        tideBtn.disabled = true;
+        tideBtn.title = "Not enough $TIDE";
+      }
+      paymentOptions.appendChild(tideBtn);
+
+      if (walletConnected && solPayAvailable) {
+        const solBtn = document.createElement("button");
+        solBtn.className = "btn btn-sol";
+        solBtn.innerHTML = `
+          <span class="pay-label">Buy ×${qty} · SOL</span>
+          <span class="pay-amount">${formatSol(solCost)}</span>
+        `;
+        solBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "sol", solCost));
+        paymentOptions.appendChild(solBtn);
+      }
+
+      action.appendChild(paymentOptions);
       this.contentEl.appendChild(row);
     });
   }
@@ -326,6 +445,47 @@ export class ShopUI {
       }
       this.contentEl.appendChild(row);
     });
+  }
+
+  /**
+   * Buy bait with the selected payment method.
+   * @param {string} id - Bait id
+   * @param {number} qty - Quantity to buy
+   * @param {string} method - 'tide-offchain' or 'sol'
+   * @param {number} solAmount - SOL amount if method is 'sol'
+   */
+  async buyBaitWith(id, qty, method, solAmount = 0) {
+    const b = BAIT_BY_ID[id];
+    if (method === "tide-offchain") {
+      const res = economy.buyBait(id, qty);
+      if (res.ok) {
+        audio.play("buy");
+        events.emit("toast", { msg: `Bought ×${res.qty} ${b.name}`, kind: "success" });
+      } else {
+        audio.play("error");
+        events.emit("toast", { msg: res.reason, kind: "warn" });
+      }
+      this.render();
+    } else if (method === "sol") {
+      try {
+        events.emit("toast", { msg: "Processing SOL payment...", kind: "info" });
+        const sig = await paySol(solAmount, { memo: `tidal:bait:${id}:${qty}` });
+        economy.grantBaitOnChain(id, qty, sig);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `Bought ×${qty} ${b.name} with ${formatSol(solAmount)} · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] SOL bait payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "SOL payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+    }
   }
 
   /**

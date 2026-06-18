@@ -3,6 +3,7 @@
 
 import { EventBus } from "../utils/utils.js";
 import { CONFIG } from "../data/config.js";
+import { DEFAULT_BAIT_ID, STARTER_BAIT_QTY } from "../data/baitData.js";
 
 export const events = new EventBus();
 
@@ -68,8 +69,13 @@ export function createDefaultState() {
       tutorialSeen: false,
     },
     gear: {
-      owned: { rods: [0], reels: [0], lines: [0], baits: [0] },
-      equipped: { rods: 0, reels: 0, lines: 0, baits: 0 },
+      owned: { rods: [0], reels: [0], lines: [0] },
+      equipped: { rods: 0, reels: 0, lines: 0 },
+    },
+    // Consumable bait: one is spent per cast. `owned` maps baitId -> count.
+    bait: {
+      owned: { [DEFAULT_BAIT_ID]: STARTER_BAIT_QTY },
+      selected: DEFAULT_BAIT_ID,
     },
     world: {
       current: "lake",

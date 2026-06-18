@@ -67,7 +67,9 @@ export async function savePlayerState(playerState = {}) {
           equippedRod: equippedGear.rods,
           equippedReel: equippedGear.reels,
           equippedLine: equippedGear.lines,
-          equippedBait: equippedGear.baits,
+          // Bait is now a consumable persisted in the client save; the legacy
+          // integer `equipped_bait` column is no longer meaningful.
+          equippedBait: 0,
           ownedGear,
         }
       }),

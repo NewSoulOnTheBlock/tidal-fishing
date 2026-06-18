@@ -19,9 +19,16 @@ export class AchievementsUI {
     });
   }
 
+  isOpen() {
+    return !!this.panel || !!document.getElementById("achievements-panel");
+  }
+
   show() {
     if (!S.achievements) return;
-    
+    // Never stack panels: clear any existing instance (and stray orphans from
+    // earlier rapid opens) before creating a fresh one.
+    this.hide();
+
     this.panel = document.createElement("div");
     this.panel.id = "achievements-panel";
     this.panel.className = "modal-overlay";
@@ -117,6 +124,17 @@ export class AchievementsUI {
         this.applyFilter(e.target.dataset.filter);
       }
     });
+
+    // Close on Escape. Capture phase so this beats the global keydown handler,
+    // which would otherwise pause the game (the panel doesn't change phase).
+    this._escHandler = (e) => {
+      if (e.key === 'Escape' || e.code === 'Escape') {
+        e.stopPropagation();
+        e.preventDefault();
+        this.hide();
+      }
+    };
+    document.addEventListener('keydown', this._escHandler, true);
   }
 
   applyFilter(filter) {
@@ -159,9 +177,13 @@ export class AchievementsUI {
   }
 
   hide() {
-    if (this.panel) {
-      this.panel.remove();
-      this.panel = null;
+    // Remove the tracked panel plus any stray duplicates left by earlier opens,
+    // so the menu can never get into an un-closeable stacked state.
+    document.querySelectorAll('#achievements-panel').forEach((el) => el.remove());
+    this.panel = null;
+    if (this._escHandler) {
+      document.removeEventListener('keydown', this._escHandler, true);
+      this._escHandler = null;
     }
   }
 }

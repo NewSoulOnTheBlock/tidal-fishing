@@ -63,6 +63,14 @@ export const CHARACTERS = [
     emoji: "🐢",
     blurb: "Water-type turtle — a natural by the lake.",
     url: "/models/characters/squirtle.glb",
+    // Squirtle cycles through a handful of voice clips, one per cast (in order).
+    castSounds: [
+      "/sfx/squirtle-1.mp3",
+      "/sfx/squirtle-2.mp3",
+      "/sfx/squirtle-3.mp3",
+      "/sfx/squirtle-4.mp3",
+      "/sfx/squirtle-5.mp3",
+    ],
     height: 1.2,
     yawDeg: 180,
     x: 0,
@@ -83,7 +91,13 @@ export const CHARACTERS = [
       idle: "/anim/fishing-idle.fbx",
       cast: "/anim/fishing-cast.fbx",
     },
-    castSound: "/sfx/naruto-cast.mp3",
+    // Naruto cycles through his voice lines, one per cast (in order).
+    castSounds: [
+      "/sfx/naruto-cast.mp3",
+      "/sfx/naruto-2.mp3",
+      "/sfx/naruto-3.mp3",
+      "/sfx/naruto-4.mp3",
+    ],
     height: 1.8,
     yawDeg: 180,
     x: 0,

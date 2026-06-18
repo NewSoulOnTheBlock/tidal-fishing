@@ -146,12 +146,18 @@ window.__angler = anglerBody;
 // Live tuning for the VRM rod grip: nudge offset (rig-local) and swap rod hand.
 window.__rodGrip = (x = 0, y = 0, z = 0) => casting.setRodGripOffset(x, y, z);
 window.__setCharacter = (id) => anglerBody.setCharacter(id);
+// The bait consumed for the in-flight cast (set on cast commit). Drives the
+// fish-rarity roll for that cast regardless of later selection auto-switches.
+let activeCastBait = null;
 const bite = new BiteSystem(
   () => ({
     location: currentLoc(),
     hours: gclock.hours,
     weather: S.world.weather,
-    bait: economy.getStats().bait,
+    // The bait the current cast was made with (snapshotted at consume) so the
+    // fish rolls against the odds the player actually paid for, even if the
+    // selected tier auto-switched as it ran dry. Falls back to the selection.
+    bait: activeCastBait || economy.getStats().bait,
   }),
   bobber
 );
@@ -584,6 +590,11 @@ function pressDown() {
   audio.init();
   switch (machine.current) {
     case Phase.IDLE:
+      if (!economy.hasBait()) {
+        events.emit("toast", { msg: "Out of bait — grab some in the Shop.", kind: "bad" });
+        machine.set(Phase.SHOP, { tab: "bait" });
+        break;
+      }
       machine.set(Phase.CHARGING);
       break;
     case Phase.BITE:
@@ -602,6 +613,15 @@ function pressUp() {
   switch (machine.current) {
     case Phase.CHARGING: {
       const power = casting.endCharge();
+      // Mandatory: every cast spends one bait. If the player somehow ran dry
+      // between charge and release, abort the cast instead of fishing for free.
+      const used = economy.consumeBait();
+      if (!used) {
+        events.emit("toast", { msg: "Out of bait — grab some in the Shop.", kind: "bad" });
+        machine.set(Phase.IDLE);
+        break;
+      }
+      activeCastBait = used;
       const { origin, velocity } = casting.computeLaunch(power, economy.getStats().castMult);
       bobber.launch(origin, velocity, env.playerSpot);
       machine.set(Phase.FLYING);
@@ -705,9 +725,10 @@ window.addEventListener("keydown", (e) => {
       }
       break;
     case "KeyA":
-      // Open achievements
+      // Toggle achievements
       if (!paused && isGameplayPhase(machine.current)) {
-        achievementsUI.show();
+        if (achievementsUI.isOpen()) achievementsUI.hide();
+        else achievementsUI.show();
       }
       break;
     case "KeyP":
@@ -1065,6 +1086,9 @@ onWalletChange(({ account }) => {
   prevWalletAddr = addr;
 
   const had = setWalletSlot(addr);
+  // Owner/dev wallets get everything unlocked (gear, anglers, locations, bait).
+  const isDev = economy.applyDevUnlocks(addr);
+  if (isDev) saveGame();
   applySettings();
   travelTo(S.world.current, true);
   gclock.hours = S.world.hour;
@@ -1072,7 +1096,11 @@ onWalletChange(({ account }) => {
   anglerBody.setCharacter(S.profile.character); // match the loaded save's choice
   if (machine.current !== Phase.MENU) {
     if (addr) {
-      hud.toast(had ? `Loaded save for ${shortAddress(addr)}` : `New save bound to ${shortAddress(addr)}`, "success");
+      if (isDev) {
+        hud.toast("Owner wallet — everything unlocked ⚓", "gold");
+      } else {
+        hud.toast(had ? `Loaded save for ${shortAddress(addr)}` : `New save bound to ${shortAddress(addr)}`, "success");
+      }
     } else {
       hud.toast("Disconnected — playing on local save", "warn");
     }

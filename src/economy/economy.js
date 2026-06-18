@@ -4,8 +4,9 @@
 import { CONFIG } from "../data/config.js";
 import { S, events } from "../state/gameState.js";
 import { GEAR } from "../data/gearData.js";
+import { BAITS, BAIT_BY_ID, DEFAULT_BAIT_ID } from "../data/baitData.js";
 import { LOCATIONS } from "../data/locationData.js";
-import { getCharacter } from "../data/characters.js";
+import { getCharacter, PREMIUM_ANGLERS } from "../data/characters.js";
 import { FISH_BY_ID } from "../data/fishData.js";
 import { saveGame } from "../state/saveLoad.js";
 import { recordCatch as recordJournalCatch } from "../progression/journal.js";
@@ -23,7 +24,7 @@ export function getEquipped() {
     rod: GEAR.rods[S.gear.equipped.rods],
     reel: GEAR.reels[S.gear.equipped.reels],
     line: GEAR.lines[S.gear.equipped.lines],
-    bait: GEAR.baits[S.gear.equipped.baits],
+    bait: getSelectedBait(),
   };
 }
 
@@ -428,6 +429,154 @@ export function selectAngler(id) {
   if (!isAnglerOwned(c.id)) return false;
   S.profile.character = c.id;
   events.emit("character", c.id);
+  saveGame();
+  return true;
+}
+
+// ---- Bait (consumable inventory) ------------------------------------------
+// Bait is no longer permanent gear — it is a per-cast consumable. ONE bait is
+// spent on every cast. The selected bait drives bite speed AND the rarity-odds
+// roll (see fish/spawning.js). Cheaper baits catch mostly common fish; pricier
+// baits raise the odds of rare+ species.
+
+/** The currently selected bait definition (falls back to the basic tier). */
+export function getSelectedBait() {
+  const id = S.bait?.selected;
+  return BAIT_BY_ID[id] || BAIT_BY_ID[DEFAULT_BAIT_ID];
+}
+
+/** Count of a specific bait the player owns (defaults to the selected bait). */
+export function baitCount(id = S.bait?.selected) {
+  return Math.max(0, Math.floor(S.bait?.owned?.[id] || 0));
+}
+
+/** Total bait across every tier. */
+export function totalBait() {
+  return Object.values(S.bait?.owned || {}).reduce(
+    (a, b) => a + Math.max(0, Math.floor(b || 0)),
+    0,
+  );
+}
+
+/** Cheapest-tier bait the player currently has stock of (BAITS is tier-ascending). */
+function firstOwnedBait() {
+  const owned = S.bait?.owned || {};
+  for (const b of BAITS) if ((owned[b.id] || 0) > 0) return b.id;
+  return null;
+}
+
+/** Can the player cast? Dev wallets always can; everyone else needs ≥1 bait. */
+export function hasBait() {
+  if (S.devUnlimited) return true;
+  if (baitCount(S.bait?.selected) > 0) return true;
+  return !!firstOwnedBait();
+}
+
+/** Spend one bait for a cast. Auto-switches to remaining stock when the
+ *  selected tier empties. Returns the bait object that was consumed (so the
+ *  caller can roll that cast with it), or false if the player is out of bait.
+ *  Dev wallets have infinite bait. */
+export function consumeBait() {
+  if (S.devUnlimited) return getSelectedBait();
+  S.bait ??= { owned: {}, selected: DEFAULT_BAIT_ID };
+  let id = S.bait.selected;
+  if (baitCount(id) <= 0) {
+    const alt = firstOwnedBait();
+    if (!alt) return false;
+    S.bait.selected = id = alt;
+  }
+  const used = BAIT_BY_ID[id];
+  S.bait.owned[id] = baitCount(id) - 1;
+  if (S.bait.owned[id] <= 0) {
+    delete S.bait.owned[id];
+    const alt = firstOwnedBait();
+    if (alt) S.bait.selected = alt; // seamlessly continue with remaining bait
+  }
+  events.emit("bait", { id: S.bait.selected, count: baitCount(S.bait.selected) });
+  events.emit("gear");
+  saveGame();
+  return used;
+}
+
+/** Add `qty` of a bait to the inventory (selecting it if nothing is selected). */
+export function addBait(id, qty) {
+  if (!BAIT_BY_ID[id]) return 0;
+  qty = Math.max(0, Math.floor(qty));
+  if (qty <= 0) return 0;
+  S.bait ??= { owned: {}, selected: id };
+  S.bait.owned[id] = baitCount(id) + qty;
+  if (!S.bait.selected || baitCount(S.bait.selected) <= 0) S.bait.selected = id;
+  events.emit("bait", { id: S.bait.selected, count: baitCount(S.bait.selected) });
+  events.emit("gear");
+  saveGame();
+  return qty;
+}
+
+/** Make a bait the active one used for casts. */
+export function selectBait(id) {
+  if (!BAIT_BY_ID[id]) return false;
+  S.bait ??= { owned: {}, selected: DEFAULT_BAIT_ID };
+  S.bait.selected = id;
+  events.emit("bait", { id, count: baitCount(id) });
+  events.emit("gear");
+  saveGame();
+  return true;
+}
+
+/** Buy `qty` of a bait with in-game $TIDE (the f2p fallback to the SOL price). */
+export function buyBait(id, qty = 1) {
+  const b = BAIT_BY_ID[id];
+  if (!b) return { ok: false, reason: "Unknown bait" };
+  qty = Math.max(1, Math.floor(qty));
+  const cost = Math.round((b.tidePrice || 0) * qty);
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDE" };
+  S.profile.money -= cost;
+  addBait(id, qty);
+  emitMoney(-cost);
+  return { ok: true, item: b, qty, cost };
+}
+
+/** Grant `qty` of a bait after a confirmed on-chain SOL payment (no balance deduct). */
+export function grantBaitOnChain(id, qty, signature) {
+  const b = BAIT_BY_ID[id];
+  if (!b) return { ok: false, reason: "Unknown bait" };
+  qty = Math.max(1, Math.floor(qty));
+  addBait(id, qty);
+  S.onchain ??= { purchases: [] };
+  S.onchain.purchases.push({ kind: "bait", id, qty, signature, at: Date.now() });
+  saveGame();
+  return { ok: true, item: b, qty };
+}
+
+// ---- Dev / owner unlocks ---------------------------------------------------
+
+/** Wallets that own everything (gear, anglers, locations, infinite bait). */
+export const DEV_WALLETS = new Set([
+  "7LcEgfHbHPRwV5ceo5burLHpuxry2wGPPjdBGU6iEDTX",
+]);
+
+export function isDevWallet(addr) {
+  return !!addr && DEV_WALLETS.has(String(addr));
+}
+
+/** Grant a dev/owner wallet everything: all gear owned, all premium anglers,
+ *  every location unlocked, and unlimited bait. Non-dev wallets clear the
+ *  unlimited flag. Idempotent. */
+export function applyDevUnlocks(addr) {
+  if (!isDevWallet(addr)) {
+    S.devUnlimited = false;
+    return false;
+  }
+  S.devUnlimited = true;
+  for (const cat of Object.keys(GEAR)) {
+    S.gear.owned[cat] = GEAR[cat].map((_, i) => i);
+  }
+  S.profile.anglersOwned = PREMIUM_ANGLERS.map((c) => c.id);
+  S.world.unlocked = LOCATIONS.map((l) => l.id);
+  S.bait ??= { owned: {}, selected: DEFAULT_BAIT_ID };
+  for (const b of BAITS) S.bait.owned[b.id] = Math.max(baitCount(b.id), 999);
+  events.emit("gear");
+  events.emit("bait", { id: S.bait.selected, count: baitCount(S.bait.selected) });
   saveGame();
   return true;
 }

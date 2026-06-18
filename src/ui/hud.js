@@ -2,7 +2,7 @@
 // indicator, zone hint, toasts. Mostly event-driven off the shared bus.
 
 import { S, events, Phase } from "../state/gameState.js";
-import { xpToNext, getEquipped, inventoryValue } from "../economy/economy.js";
+import { xpToNext, getEquipped, inventoryValue, baitCount } from "../economy/economy.js";
 import { LOCATION_BY_ID } from "../data/locationData.js";
 import { CONFIG } from "../data/config.js";
 import { formatMoney, hourToClock, clamp } from "../utils/utils.js";
@@ -79,6 +79,7 @@ export class HUD {
     events.on("journal:new", () => this.toast("New species logged in the Journal!", "success"));
     events.on("inventory", () => this.updateBag());
     events.on("gear", () => this.updateGear());
+    events.on("bait", () => this.updateGear());
     events.on("weather", ({ weather }) => {
       this.weather.textContent = weather === "cloudy" ? "Cloudy" : "Clear";
     });
@@ -128,7 +129,8 @@ export class HUD {
   updateGear() {
     const eq = getEquipped();
     this.rodChip.querySelector(".gear-name").textContent = eq.rod.name;
-    this.baitChip.querySelector(".gear-name").textContent = eq.bait.name;
+    const remaining = baitCount();
+    this.baitChip.querySelector(".gear-name").textContent = `${eq.bait.name} ×${remaining}`;
   }
 
   updateBag() {
