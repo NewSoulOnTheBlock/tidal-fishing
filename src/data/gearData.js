@@ -6,6 +6,12 @@
 // lines: strength  -> divides tension gain (effectively a higher snap threshold)
 // baits: biteSpeed -> multiplies bite wait time (lower = faster bites)
 //        bias      -> per-rarity spawn weight multipliers
+//
+// Every item also carries a cosmetic `look` (colour + shape variant) attached
+// below from gearLooks.js, so equipping gear visibly changes the rod, reel,
+// line and bait in the 3D rig.
+
+import { gearLook } from "./gearLooks.js";
 
 export const GEAR = {
   rods: [
@@ -169,6 +175,13 @@ export const GEAR = {
     },
   ],
 };
+
+// Attach a per-tier cosmetic look to every gear item.
+for (const cat of ["rods", "reels", "lines", "baits"]) {
+  GEAR[cat].forEach((item, i) => {
+    item.look = gearLook(cat, i);
+  });
+}
 
 export const GEAR_CATS = [
   { key: "rods", label: "Rods", equipKey: "rods" },

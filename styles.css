@@ -948,6 +948,10 @@ kbd {
 .shop-item.locked { opacity: 0.55; }
 .shop-item-info { flex: 1; }
 .shop-item-name { font-weight: 700; font-size: 1rem; display: flex; gap: 8px; align-items: center; }
+.gear-swatch {
+  width: 12px; height: 12px; border-radius: 50%; flex: 0 0 auto;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 1px 3px rgba(0, 0, 0, 0.4);
+}
 .tier-badge {
   font-size: 0.62rem; font-weight: 800; letter-spacing: 0.08em; color: #0a141e;
   background: linear-gradient(135deg, #9fd9ff, #5fb6e8); border-radius: 5px; padding: 1px 7px;

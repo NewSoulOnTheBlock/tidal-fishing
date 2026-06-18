@@ -4,6 +4,7 @@
 
 import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
+import { lookSwatch } from "../data/gearLooks.js";
 import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import * as economy from "../economy/economy.js";
 import { audio } from "../audio/audioManager.js";
@@ -82,9 +83,11 @@ export class ShopUI {
         .map((s) => `<span class="${idx > equippedIdx ? "stat-up" : ""}">${s}</span>`)
         .join(" · ");
 
+      const swatch = `#${lookSwatch(item.look).toString(16).padStart(6, "0")}`;
+
       row.innerHTML = `
         <div class="shop-item-info">
-          <div class="shop-item-name">${item.name} <span class="tier-badge">TIER ${item.tier}</span></div>
+          <div class="shop-item-name"><span class="gear-swatch" style="background:${swatch}"></span>${item.name} <span class="tier-badge">TIER ${item.tier}</span></div>
           <div class="shop-item-stats">${stats}</div>
           <div class="shop-item-blurb">${item.blurb}</div>
         </div>

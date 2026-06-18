@@ -480,8 +480,16 @@ events.on("fight:save", () => {
 events.on("gear", () => {
   casting.castMult = economy.getStats().castMult;
   feedingSpots.setBounds(env.playerSpot, CONFIG.cast.minDist, CONFIG.cast.baseMaxDist * economy.getStats().castMult);
+  applyGearLooks();
 });
 casting.castMult = economy.getStats().castMult;
+
+function applyGearLooks() {
+  const eq = economy.getEquipped();
+  casting.applyGear({ rod: eq.rod.look, reel: eq.reel.look, line: eq.line.look });
+  bobber.applyLook(eq.bait.look);
+}
+applyGearLooks();
 
 // ---------------------------------------------------------------------------
 // input
