@@ -14,6 +14,16 @@ import { CREEKFISH_STEELBLUE_VOX } from "./data/creekfishSteelblueVox.js";
 import { CREEKFISH_SUNRISE_VOX } from "./data/creekfishSunriseVox.js";
 import { CREEKFISH_CAVE_VOX } from "./data/creekfishCaveVox.js";
 import { CREEKFISH_PURPLE_VOX } from "./data/creekfishPurpleVox.js";
+import { DARTTAIL_VOX } from "./data/darttailVox.js";
+import { DARTTAIL_CORALSHOCK_VOX } from "./data/darttailCoralshockVox.js";
+import { DARTTAIL_EMBER_VOX } from "./data/darttailEmberVox.js";
+import { DARTTAIL_ICE_VOX } from "./data/darttailIceVox.js";
+import { DARTTAIL_TOXIC_VOX } from "./data/darttailToxicVox.js";
+import { DEEPFIN_VOX } from "./data/deepfinVox.js";
+import { DEEPFIN_AMBERLEAF_VOX } from "./data/deepfinAmberleafVox.js";
+import { DEEPFIN_MOSS_VOX } from "./data/deepfinMossVox.js";
+import { DEEPFIN_PLUMTIDE_VOX } from "./data/deepfinPlumtideVox.js";
+import { DEEPFIN_SUNSET_VOX } from "./data/deepfinSunsetVox.js";
 
 const MODELS = {
   creekfish_albino: CREEKFISH_ALBINO_VOX,
@@ -23,6 +33,16 @@ const MODELS = {
   creekfish_sunrise: CREEKFISH_SUNRISE_VOX,
   creekfish_cave: CREEKFISH_CAVE_VOX,
   creekfish_purple: CREEKFISH_PURPLE_VOX,
+  darttail: DARTTAIL_VOX,
+  darttail_coralshock: DARTTAIL_CORALSHOCK_VOX,
+  darttail_ember: DARTTAIL_EMBER_VOX,
+  darttail_ice: DARTTAIL_ICE_VOX,
+  darttail_toxic: DARTTAIL_TOXIC_VOX,
+  deepfin: DEEPFIN_VOX,
+  deepfin_amberleaf: DEEPFIN_AMBERLEAF_VOX,
+  deepfin_moss: DEEPFIN_MOSS_VOX,
+  deepfin_plumtide: DEEPFIN_PLUMTIDE_VOX,
+  deepfin_sunset: DEEPFIN_SUNSET_VOX,
 };
 
 // Decoded + normalised voxel data, cached per model key.

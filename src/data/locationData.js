@@ -50,6 +50,8 @@ export const LOCATIONS = [
     biteMult: 0.95,
     fishTable: [
       ["mackerel", 30], ["flounder", 20], ["eel", 12], ["seabass", 9], ["snapper", 7],
+      ["darttail", 14], ["darttail_ice", 12],
+      ["darttail_coralshock", 5], ["darttail_ember", 4.5], ["darttail_toxic", 3.5],
     ],
   },
   {
@@ -66,6 +68,8 @@ export const LOCATIONS = [
     fishTable: [
       ["mackerel", 22], ["snapper", 16], ["mahi", 9], ["tuna", 7],
       ["swordfish", 2.2], ["marlin", 1.8],
+      ["deepfin", 12], ["deepfin_moss", 10],
+      ["deepfin_amberleaf", 4.5], ["deepfin_plumtide", 3.5], ["deepfin_sunset", 3],
       ["smokingchicken", 0.05], // jackpot — ~36× rarer than a marlin
     ],
   },

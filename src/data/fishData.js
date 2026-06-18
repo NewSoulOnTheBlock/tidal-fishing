@@ -412,6 +412,66 @@ export const FISH_SPECIES = [
     look: { shape: "standard", colorA: 0xd4574a, colorB: 0xf0907f, finColor: 0xa83a30 },
     desc: "Crimson, keen-eyed and worth every cent at market.",
   },
+  {
+    id: "darttail", name: "Blue Darttail", rarity: "uncommon",
+    locations: ["pier"], zones: ["shallow", "mid"], time: ["day"],
+    sizeCm: [18, 48], weightMidKg: 0.7, baseValue: 128,
+    fight: { strength: 0.95, surgeEvery: [2.8, 4.6], heft: 0.7, stamina: 11 },
+    look: {
+      shape: "slim",
+      colorA: 0x1c3876, colorB: 0xa69ae0, finColor: 0x2a1e52,
+      voxel: "darttail", image: "/darttail.png",
+    },
+    desc: "A needle-quick raider of the pilings, indigo-backed with a forked tail it snaps like a whip. Surges constantly — never stops moving.",
+  },
+  {
+    id: "darttail_ice", name: "Frost Darttail", rarity: "uncommon",
+    locations: ["pier"], zones: ["shallow", "mid"], time: ["dawn", "day"],
+    sizeCm: [18, 48], weightMidKg: 0.7, baseValue: 142,
+    fight: { strength: 1.0, surgeEvery: [2.6, 4.4], heft: 0.72, stamina: 11 },
+    look: {
+      shape: "slim",
+      colorA: 0x1a4e80, colorB: 0xb0def0, finColor: 0x0a1016,
+      voxel: "darttail_ice", image: "/darttail-ice.png",
+    },
+    desc: "Pale glacier-blue and cold to the touch, it runs the surface chop at first light.",
+  },
+  {
+    id: "darttail_coralshock", name: "Coralshock Darttail", rarity: "rare",
+    locations: ["pier"], zones: ["mid"], time: ["day", "dusk"],
+    sizeCm: [20, 50], weightMidKg: 0.8, baseValue: 296,
+    fight: { strength: 1.15, surgeEvery: [2.4, 4], heft: 0.8, stamina: 12 },
+    look: {
+      shape: "slim",
+      colorA: 0x52227a, colorB: 0xfacadc, finColor: 0x080a0c, glow: true,
+      voxel: "darttail_coralshock", image: "/darttail-coralshock.png",
+    },
+    desc: "Electric violet flushed with shock-pink, lit like a reef at carnival. A prize among the dart shoals.",
+  },
+  {
+    id: "darttail_ember", name: "Ember Darttail", rarity: "rare",
+    locations: ["pier"], zones: ["mid", "deep"], time: ["dusk", "night"],
+    sizeCm: [20, 50], weightMidKg: 0.8, baseValue: 318,
+    fight: { strength: 1.2, surgeEvery: [2.3, 3.9], heft: 0.82, stamina: 12 },
+    look: {
+      shape: "slim",
+      colorA: 0x601e16, colorB: 0xe8805a, finColor: 0x120a0a, glow: true,
+      voxel: "darttail_ember", image: "/darttail-ember.png",
+    },
+    desc: "Smoulders rust-red and ember-orange in the dark water, hunting the lamplit pilings after sunset.",
+  },
+  {
+    id: "darttail_toxic", name: "Toxic Darttail", rarity: "rare",
+    locations: ["pier"], zones: ["deep"], time: ["night"],
+    sizeCm: [22, 52], weightMidKg: 0.85, baseValue: 352,
+    fight: { strength: 1.25, surgeEvery: [2.2, 3.8], heft: 0.85, stamina: 13 },
+    look: {
+      shape: "slim",
+      colorA: 0x2a5618, colorB: 0xcaf474, finColor: 0x0c120a, glow: true,
+      voxel: "darttail_toxic", image: "/darttail-toxic.png",
+    },
+    desc: "Acid-green and faintly glowing, the rarest dart morph. They say the brighter ones aren't safe to touch.",
+  },
   // --- 10 MORE PIER FISH ---
   {
     id: "porgy", name: "Scup (Porgy)", rarity: "common",
@@ -526,6 +586,66 @@ export const FISH_SPECIES = [
     fight: { strength: 2.4, surgeEvery: [2.6, 4.2], heft: 2.6, stamina: 28 },
     look: { shape: "billed", colorA: 0x2f5fa8, colorB: 0x7fb3e8, finColor: 0x1d3f78, tallDorsal: true, glow: true },
     desc: "The crown of the ocean. A once-in-a-lifetime battle.",
+  },
+  {
+    id: "deepfin", name: "Teal Deepfin", rarity: "uncommon",
+    locations: ["ocean"], zones: ["mid", "deep"], time: ["day", "dusk"],
+    sizeCm: [22, 60], weightMidKg: 2.4, baseValue: 196,
+    fight: { strength: 1.3, surgeEvery: [3.6, 5.6], heft: 1.4, stamina: 15 },
+    look: {
+      shape: "standard",
+      colorA: 0x88bcac, colorB: 0x203e46, finColor: 0x0a0e12,
+      voxel: "deepfin", image: "/deepfin.png",
+    },
+    desc: "A tall, deep-bodied drifter of the cold middle water, sea-teal fading to slate. Heaves hard but tires honest.",
+  },
+  {
+    id: "deepfin_moss", name: "Moss Deepfin", rarity: "uncommon",
+    locations: ["ocean"], zones: ["mid", "deep"], time: ["day"],
+    sizeCm: [22, 60], weightMidKg: 2.5, baseValue: 210,
+    fight: { strength: 1.35, surgeEvery: [3.5, 5.5], heft: 1.45, stamina: 15 },
+    look: {
+      shape: "standard",
+      colorA: 0xa6c470, colorB: 0x24341e, finColor: 0x0c100c,
+      voxel: "deepfin_moss", image: "/deepfin-moss.png",
+    },
+    desc: "Olive and moss-green, mottled like a kelp shadow. Holds station over the deep reefs by day.",
+  },
+  {
+    id: "deepfin_amberleaf", name: "Amberleaf Deepfin", rarity: "rare",
+    locations: ["ocean"], zones: ["deep"], time: ["day", "dusk"],
+    sizeCm: [24, 66], weightMidKg: 3, baseValue: 432,
+    fight: { strength: 1.6, surgeEvery: [3.2, 5], heft: 1.7, stamina: 17 },
+    look: {
+      shape: "standard",
+      colorA: 0xe8ecb0, colorB: 0x768c38, finColor: 0x080a0c,
+      voxel: "deepfin_amberleaf", image: "/deepfin-amberleaf.png",
+    },
+    desc: "Pale amber dappled with leaf-gold, a rare giant that rises from the deep when the light slants low.",
+  },
+  {
+    id: "deepfin_plumtide", name: "Plumtide Deepfin", rarity: "rare",
+    locations: ["ocean"], zones: ["deep"], time: ["dusk", "night"],
+    sizeCm: [24, 68], weightMidKg: 3.2, baseValue: 488,
+    fight: { strength: 1.65, surgeEvery: [3, 4.8], heft: 1.8, stamina: 18 },
+    look: {
+      shape: "standard",
+      colorA: 0xe2d8f8, colorB: 0x6c5caa, finColor: 0x080a0c, glow: true,
+      voxel: "deepfin_plumtide", image: "/deepfin-plumtide.png",
+    },
+    desc: "Lavender-pale washing into deep plum, faintly luminous in the twilight depths. A collector's prize.",
+  },
+  {
+    id: "deepfin_sunset", name: "Sunset Deepfin", rarity: "rare",
+    locations: ["ocean"], zones: ["deep"], time: ["dawn", "dusk"],
+    sizeCm: [24, 68], weightMidKg: 3.2, baseValue: 520,
+    fight: { strength: 1.7, surgeEvery: [3, 4.7], heft: 1.85, stamina: 18 },
+    look: {
+      shape: "standard",
+      colorA: 0xeea47e, colorB: 0x4e223a, finColor: 0x120c12, glow: true,
+      voxel: "deepfin_sunset", image: "/deepfin-sunset.png",
+    },
+    desc: "Peach-gold flank bleeding into deep maroon, the colours of the horizon at the turn of the day. The rarest deepfin of all.",
   },
   // --- 10 MORE OCEAN FISH ---
   {
