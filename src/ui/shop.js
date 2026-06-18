@@ -320,15 +320,27 @@ export class ShopUI {
     }
 
     S.inventory.forEach((fish, idx) => {
+      // A save can hold fish whose species id was since renamed (the catalog has
+      // been reworked over time). Render a safe fallback so a single orphaned
+      // catch can't throw and blank the entire Sell tab — it stays fully
+      // sellable via its stored value.
       const sp = FISH_BY_ID[fish.speciesId];
-      const rarity = RARITIES[sp.rarity];
+      const rarity = sp ? RARITIES[sp.rarity] : null;
+      const name = sp ? sp.name : "Mystery catch";
+      const color = rarity ? rarity.color : "var(--text-secondary, #9bb0c0)";
+      const art = sp ? fishSVG(sp.look) : "🐟";
+      const meta =
+        Number.isFinite(fish.sizeCm) && Number.isFinite(fish.weightKg)
+          ? `${formatLength(fish.sizeCm)} · ${formatWeight(fish.weightKg)}`
+          : "Legacy catch";
+      const value = Number.isFinite(fish.value) ? fish.value : 0;
       const row = document.createElement("div");
       row.className = "sell-row";
       row.innerHTML = `
-        <div class="fish-mini">${fishSVG(sp.look)}</div>
-        <span class="sell-name" style="color:${rarity.color}">${sp.name}</span>
-        <span class="sell-meta">${formatLength(fish.sizeCm)} · ${formatWeight(fish.weightKg)}</span>
-        <span class="sell-value">${formatMoney(fish.value)}</span>
+        <div class="fish-mini">${art}</div>
+        <span class="sell-name" style="color:${color}">${name}</span>
+        <span class="sell-meta">${meta}</span>
+        <span class="sell-value">${formatMoney(value)}</span>
       `;
       const btn = document.createElement("button");
       btn.className = "btn";

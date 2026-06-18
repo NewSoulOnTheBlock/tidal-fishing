@@ -15,6 +15,11 @@ const ICON = (paths) =>
 
 const SLIDES = [
   {
+    icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-1" /><path d="M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 7v2" />'),
+    title: "Bait every cast",
+    body: "Every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>SOL</b> or <b>$TIDE</b> — same value either way.",
+  },
+  {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-4l3 3" /><path d="M14 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M16 5v-2" />'),
     title: "Cast your line",
     body: "Aim with your mouse. <b>Hold Click</b> (or <b>Space</b>) to charge the power meter, then release to cast. Cast farther to reach deeper water and bigger fish.",
@@ -32,7 +37,7 @@ const SLIDES = [
   {
     icon: ICON('<path d="M3 7c3 -2 6 -2 9 0s6 2 9 0" /><path d="M3 17c3 -2 6 -2 9 0s6 2 9 0" /><path d="M3 12c3 -2 6 -2 9 0s6 2 9 0" />'),
     title: "Ride the surges",
-    body: "Fish fight back with sudden surges. Watch for the warning flash, then <b>ease off</b> — or tap <b>Give Line</b> (press <b>D</b>) to <b>dodge</b> and soften it.",
+    body: "Fish fight back with sudden surges. Watch for the warning flash, then <b>ease off</b> — or tap <b>Give Line</b> (press <b>Shift</b>) to <b>dodge</b> and soften it.",
   },
   {
     icon: ICON('<path d="M8 13v-7.5a1.5 1.5 0 0 1 3 0v6.5" /><path d="M11 5.5v-2a1.5 1.5 0 1 1 3 0v8.5" /><path d="M14 5.5a1.5 1.5 0 0 1 3 0v6.5" /><path d="M17 7.5a1.5 1.5 0 0 1 3 0v8.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47" />'),

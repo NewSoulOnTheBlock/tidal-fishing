@@ -252,18 +252,20 @@ export async function registerCatch(fish) {
   return { isNew, isRecord, xpGained, levels, isJackpot };
 }
 
-export const inventoryValue = () => S.inventory.reduce((sum, f) => sum + f.value, 0);
+export const inventoryValue = () =>
+  S.inventory.reduce((sum, f) => sum + (Number.isFinite(f.value) ? f.value : 0), 0);
 
 export function sellFishAt(index) {
   const fish = S.inventory[index];
   if (!fish) return 0;
+  const value = Number.isFinite(fish.value) ? fish.value : 0;
   S.inventory.splice(index, 1);
-  S.profile.money += fish.value;
-  S.stats.earned += fish.value;
-  emitMoney(fish.value);
+  S.profile.money += value;
+  S.stats.earned += value;
+  emitMoney(value);
   events.emit("inventory");
   saveGame();
-  return fish.value;
+  return value;
 }
 
 export function sellAll() {
