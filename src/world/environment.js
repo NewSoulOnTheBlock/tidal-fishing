@@ -74,20 +74,6 @@ function makeBuoy() {
   return g;
 }
 
-function makeMountainRing(group, { color, count = 12, rMin = 650, rMax = 950, hMin = 70, hMax = 200, arcStart = 0, arcEnd = Math.PI * 2 }) {
-  const mat = std(color, { flatShading: true });
-  for (let i = 0; i < count; i++) {
-    const a = arcStart + (i / count) * (arcEnd - arcStart) + randRange(-0.1, 0.1);
-    const r = randRange(rMin, rMax);
-    const h = randRange(hMin, hMax);
-    const cone = mesh(new THREE.ConeGeometry(h * randRange(1.1, 1.7), h, 5), mat, {
-      x: Math.sin(a) * r, y: h * 0.42, z: Math.cos(a) * r, ry: randRange(0, Math.PI),
-    });
-    group.add(cone);
-  }
-}
-
-/** Irregular landmass: a noisy displaced disc sitting just above the water. */
 function makeLandmass({ color, radius = 70, x = 0, z = 60, height = 2.2 }) {
   const geo = new THREE.CircleGeometry(radius, 48);
   const pos = geo.attributes.position;
@@ -176,7 +162,6 @@ function buildLake(group) {
     group.add(reeds);
   }
 
-  makeMountainRing(group, { color: 0x2c4242, count: 14 });
   group.add(makeDock({ length: 13, width: 2.4, deckY: 0.62, startZ: 9 }));
   return { playerSpot: new THREE.Vector3(0, 0.66, -2.6) };
 }
@@ -217,7 +202,6 @@ function buildRiver(group) {
     group.add(reeds);
   }
 
-  makeMountainRing(group, { color: 0x35504a, count: 12, hMin: 110, hMax: 260 });
   group.add(makeDock({ length: 9, width: 2.1, deckY: 0.58, startZ: 8 }));
   return { playerSpot: new THREE.Vector3(0, 0.62, -0.8) };
 }
@@ -258,7 +242,6 @@ function buildPier(group) {
   const b1 = makeBuoy(); b1.position.set(-26, 0, -34); group.add(b1);
   const b2 = makeBuoy(); b2.position.set(30, 0, -52); group.add(b2);
 
-  makeMountainRing(group, { color: 0x3a4a55, count: 6, arcStart: Math.PI * 0.65, arcEnd: Math.PI * 1.35, rMin: 750, rMax: 1000 });
   return { playerSpot: new THREE.Vector3(0, deckY + 0.04, -4.5) };
 }
 
@@ -292,12 +275,6 @@ function buildOcean(group) {
   }), { x: 1.05, y: deckY + 1.68, z: -2.1 }));
 
   const b = makeBuoy(); b.position.set(-22, 0, -30); group.add(b);
-
-  // tiny far islands so the horizon isn't empty
-  const islandMat = std(0x2f4452, { flatShading: true });
-  for (const [x, z, s] of [[-500, -700, 60], [620, -540, 80], [200, -880, 50]]) {
-    group.add(mesh(new THREE.ConeGeometry(s * 1.6, s, 5), islandMat, { x, y: s * 0.35, z }));
-  }
 
   return { playerSpot: new THREE.Vector3(0, deckY + 0.04, -1.7) };
 }

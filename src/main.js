@@ -19,6 +19,7 @@ import { CloudLayer } from "./world/clouds.js";
 import { NightSky } from "./world/nightSky.js";
 import { WeatherFX } from "./world/weatherFX.js";
 import { DistantLife } from "./world/distantLife.js";
+import { MountainRange } from "./world/mountainRange.js";
 import { CastingSystem } from "./gameplay/casting.js";
 import { Bobber } from "./gameplay/bobber.js";
 import { createAnglerBody } from "./gameplay/anglerBody.js";
@@ -125,6 +126,8 @@ const weatherFX = new WeatherFX(scene, {
   },
 });
 const distantLife = new DistantLife(scene);
+const mountains = new MountainRange(scene);
+window.__mountains = mountains;
 const underwaterFX = new UnderwaterFX();
 const postfx = new PostFX(renderer, scene, camera, S.settings.quality);
 window.__postfx = postfx;
@@ -261,6 +264,7 @@ function travelTo(locId, silent = false) {
   water.setParams(loc.water);
   effects.setLocationAmbient(loc);
   distantLife.setLocation(loc);
+  mountains.setLocation(loc);
   audio.setAmbience(loc.ambience, gclock.segment);
   hud.updateLocation();
   events.emit("location", { id: loc.id });
