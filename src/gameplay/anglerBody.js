@@ -4,8 +4,8 @@
 // scale to a target height — then apply a facing yaw and a small position offset
 // so the procedural rod sits in front of the body.
 //
-// Model: "Reisen Inaba - Touhou Voxel Model" by Staycalm182 (Sketchfab),
-// licensed CC-BY-4.0. Attribution is shown in the title-screen footer.
+// Model: voxel R2-D2 (Sketchfab GLB). Static mesh, no skeleton/animation.
+// If a specific author/licence applies, attribution belongs in the footer.
 //
 // Placement is intentionally runtime-tunable (see window.__angler in main.js):
 // the model's authored facing/scale can't be known up front, so values can be
