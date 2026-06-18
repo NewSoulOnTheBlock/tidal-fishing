@@ -141,8 +141,8 @@ const GradeShader = {
 };
 
 const QUALITY = {
-  high: { bloom: 0.5, godrays: true, grain: 0.05 },
-  low: { bloom: 0.34, godrays: false, grain: 0.03 },
+  high: { bloom: 0.28, godrays: true, grain: 0.05 },
+  low: { bloom: 0.18, godrays: false, grain: 0.03 },
 };
 
 export class PostFX {
@@ -168,10 +168,9 @@ export class PostFX {
     this.renderPass = new RenderPass(scene, camera);
     this.composer.addPass(this.renderPass);
 
-    // threshold sits above 1.0 so only true HDR highlights (the sun disc,
-    // specular glints on the water) bloom — NOT the broadly-bright daytime sky,
-    // which would otherwise flood the whole frame with white haze.
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(w, h), QUALITY[this.quality].bloom, 0.4, 1.15);
+    // higher threshold = only the very brightest highlights (sun disc, sharp
+    // water glints) glow; keeps the overall scene clean rather than hazy-bright.
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(w, h), QUALITY[this.quality].bloom, 0.4, 1.35);
     this.composer.addPass(this.bloom);
 
     this.godrays = new ShaderPass(GodRaysShader);
