@@ -1239,6 +1239,16 @@ body.weather-cloudy {
   color: #f44336;
 }
 
+.leaderboard-caption {
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  margin: 0 0 12px;
+  opacity: 0.85;
+}
+
 .leaderboard-list {
   display: flex;
   flex-direction: column;

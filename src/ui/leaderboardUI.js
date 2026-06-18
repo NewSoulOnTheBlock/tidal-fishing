@@ -41,7 +41,7 @@ export class LeaderboardUI {
         </div>
         
         <div class="leaderboard-tabs">
-          <button class="tab-btn active" data-tab="earnings">Top Earners</button>
+          <button class="tab-btn active" data-tab="earnings">Today's Top</button>
           <button class="tab-btn" data-tab="recent">Recent Catches</button>
           <button class="tab-btn" data-tab="species">By Species</button>
         </div>
@@ -137,16 +137,20 @@ export class LeaderboardUI {
 
   renderEarnings(leaderboard) {
     if (!leaderboard || leaderboard.length === 0) {
-      return '<div class="empty">No entries yet. Be the first to fish and claim your spot!</div>';
+      return `
+        <div class="leaderboard-caption">🗓️ Today's rankings · resets at midnight UTC</div>
+        <div class="empty">No catches yet today — be the first to claim the top spot!</div>
+      `;
     }
 
     return `
+      <div class="leaderboard-caption">🗓️ Today's rankings · resets at midnight UTC</div>
       <div class="leaderboard-list">
         ${leaderboard.map((entry, i) => `
           <div class="leaderboard-entry ${i < 3 ? `rank-${entry.rank}` : ''}">
             <div class="entry-rank">${entry.rank}</div>
             <div class="entry-info">
-              <div class="entry-wallet">${shortAddress(entry.wallet_address)}</div>
+              <div class="entry-wallet">${entry.username ? this.esc(entry.username) : shortAddress(entry.wallet_address)}</div>
               <div class="entry-stats">
                 <span class="entry-value">${formatMoney(entry.total_earned)} earned</span>
                 <span class="entry-meta"> • ${entry.total_catches} catches</span>

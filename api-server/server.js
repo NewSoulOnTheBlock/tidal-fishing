@@ -1223,9 +1223,25 @@ app.get('/api/leaderboard', async (req, res) => {
       return res.json({ catches: result.rows });
     }
 
-    // Default: top earners.
-    const result = await pool.query('SELECT * FROM leaderboard LIMIT $1', [limit]);
-    res.json({ leaderboard: result.rows });
+    // Default: DAILY leaderboard — ranks anglers by what they've earned TODAY,
+    // aggregated from the day's catches. Using date_trunc('day', NOW()) (the
+    // same clock catches are stamped with) means it resets automatically at
+    // midnight server time (UTC on our host) with no cron job. Only anglers who
+    // caught something today appear.
+    const result = await pool.query(
+      `SELECT p.wallet_address, p.username, p.level,
+              COUNT(c.id)::int AS total_catches,
+              COALESCE(SUM(c.value), 0)::int AS total_earned,
+              MAX(c.caught_at) AS last_catch
+       FROM catches c
+       JOIN players p ON c.player_id = p.id
+       WHERE c.caught_at >= date_trunc('day', NOW()::timestamp)
+       GROUP BY p.id
+       ORDER BY total_earned DESC, total_catches DESC, last_catch ASC
+       LIMIT $1`,
+      [limit]
+    );
+    res.json({ leaderboard: result.rows, period: 'daily' });
   } catch (error) {
     console.error('[leaderboard] Error:', error);
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
