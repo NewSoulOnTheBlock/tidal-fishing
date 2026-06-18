@@ -2,21 +2,22 @@
 // (glyder / snowy / stuart), replacing the old procedural ConeGeometry ring.
 //
 // Three source models are loaded once, normalised to unit height (centred on
-// X/Z, feet at y = 0) and then cloned many times around the horizon — at
-// varied radius, height, rotation and a little vertical sink — to compose a
-// layered range. Clones SHARE the template geometry & materials, so a whole
-// range is cheap (a handful of draw calls, geometry uploaded once per model).
+// X/Z, feet at y = 0) and then cloned many times around the FULL horizon to
+// compose a continuous, gap-free range. The range is built ONCE and then left
+// alone — it is a global backdrop, identical at every location, so travelling
+// between areas never reshuffles or rebuilds it.
 //
-// Atmospheric perspective comes for free: every material keeps `fog = true`, so
-// the scene's FogExp2 fades far peaks toward the sky colour, exactly like the
-// cones it replaces — only now the silhouettes are real mountains.
+// "No open spaces on the horizon": each ring computes how many peaks it needs
+// from the models' real footprint so neighbouring silhouettes always overlap —
+// there is never a see-through gap to the sky. A clearly-visible MID ring forms
+// the solid mountainous skyline that meets the water's edge; a fainter, taller
+// FAR ring sits behind it for depth and fades into the fog/sky.
 //
-// Placement is per-location (setLocation) and async-safe: a load token guards
-// against a peak resolving after the player has already travelled elsewhere.
+// Clones SHARE the template geometry & materials, so the whole range is a
+// handful of geometries uploaded once. A seeded RNG keeps the layout stable.
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { randRange, pick } from "../utils/utils.js";
 
 const MODELS = {
   glyder: "/models/mountains/glyder.glb",
@@ -24,28 +25,31 @@ const MODELS = {
   stuart: "/models/mountains/stuart.glb",
 };
 
-// Per-location range recipes. Each entry is one "band" of peaks; stacking a far
-// + near band gives the range real depth. Angles are measured so a≈π faces the
-// camera's view direction (−Z), where the player looks while casting, so the
-// grandest peaks sit in front of them.
-const RANGES = {
-  lake: [
-    { keys: ["glyder", "snowy", "stuart"], count: 7, rMin: 880, rMax: 1080, hMin: 240, hMax: 380, arc: [0, Math.PI * 2], sink: 14 },
-    { keys: ["snowy", "stuart", "glyder"], count: 9, rMin: 600, rMax: 790, hMin: 120, hMax: 230, arc: [0, Math.PI * 2], sink: 8 },
-  ],
-  river: [
-    { keys: ["snowy", "stuart", "glyder"], count: 7, rMin: 900, rMax: 1100, hMin: 280, hMax: 430, arc: [0, Math.PI * 2], sink: 16 },
-    { keys: ["stuart", "snowy"], count: 9, rMin: 620, rMax: 820, hMin: 150, hMax: 270, arc: [0, Math.PI * 2], sink: 8 },
-  ],
-  pier: [
-    { keys: ["snowy", "stuart", "glyder"], count: 6, rMin: 950, rMax: 1180, hMin: 260, hMax: 420, arc: [Math.PI * 0.55, Math.PI * 1.45], sink: 18 },
-    { keys: ["stuart", "snowy"], count: 5, rMin: 780, rMax: 940, hMin: 150, hMax: 260, arc: [Math.PI * 0.6, Math.PI * 1.4], sink: 10 },
-  ],
-  ocean: [
-    // open water — only a faint, very distant range hugging the back horizon
-    { keys: ["snowy", "stuart"], count: 6, rMin: 1350, rMax: 1750, hMin: 200, hMax: 360, arc: [Math.PI * 0.42, Math.PI * 1.58], sink: 40 },
-  ],
-};
+// One global range, full 360°. Each band is a continuous ring; the peak count
+// is derived at build time from the models' footprint (see _placeRing) so the
+// silhouettes always overlap. `overlap` > 1 packs them tighter than touching.
+// Only the two clean alpine scans (snowy + stuart) are used — glyder is omitted
+// (it carries a thin scan-spike artifact and a ragged spiky base).
+//   FAR  — taller & further, hazy behind the mid ring, fading into the sky.
+//          Kept far enough back that even the tallest peak never looms overhead.
+//   MID  — the dominant, clearly-visible skyline that meets the waterline.
+const BANDS = [
+  { keys: ["snowy", "stuart"], rMin: 1380, rMax: 1720, hMin: 360, hMax: 500, sink: 42, overlap: 1.7, offset: 0.0, minCount: 14, maxCount: 64 },
+  { keys: ["snowy", "stuart"], rMin: 880, rMax: 1140, hMin: 215, hMax: 320, sink: 14, overlap: 1.7, offset: 0.21, minCount: 16, maxCount: 80 },
+];
+
+// Deterministic RNG so the range looks intentional and never changes between
+// builds (mulberry32).
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 let loader = null;
 function gltfLoader() {
@@ -53,9 +57,13 @@ function gltfLoader() {
   return loader;
 }
 
-const templates = new Map(); // key -> Promise<{ root, height }>
+const templates = new Map(); // key -> Promise<{ root, footHalf }>
 
-/** Load + normalise a source peak to a unit-tall, X/Z-centred, feet-at-0 group. */
+/**
+ * Load + normalise a source peak to a unit-tall, X/Z-centred, feet-at-0 group.
+ * `footHalf` is the normalised half-footprint (max of X/Z half-extent at unit
+ * height) — used to size each ring so its peaks overlap with no horizon gaps.
+ */
 function loadTemplate(key) {
   if (templates.has(key)) return templates.get(key);
   const p = new Promise((resolve, reject) => {
@@ -88,7 +96,8 @@ function loadTemplate(key) {
         const root = new THREE.Group();
         root.add(model);
         root.scale.setScalar(1 / h); // unit height; instances re-scale to taste
-        resolve({ root, height: 1 });
+        const footHalf = (0.5 * Math.max(size.x, size.z)) / h;
+        resolve({ root, footHalf });
       },
       undefined,
       (err) => reject(err)
@@ -104,55 +113,85 @@ export class MountainRange {
     this.group = new THREE.Group();
     this.group.name = "mountainRange";
     scene.add(this.group);
-    this._token = 0;
-    this._env = null;
+    this._built = false;
+    this.ready = this._build();
   }
 
-  /** Swap the range to a location's recipe (keyed by loc.env). */
-  setLocation(loc) {
-    const envKey = (loc && loc.env) || "lake";
-    if (envKey === this._env) return;
-    this._env = envKey;
-    const token = ++this._token;
+  /**
+   * Location changes no longer touch the range — it is a fixed global backdrop.
+   * Kept for call-site compatibility; building happens once in the constructor.
+   */
+  setLocation() {
+    /* intentionally a no-op: the range is built once and left in place */
+  }
+
+  async _build() {
+    if (this._built) return;
+    const needed = [...new Set(BANDS.flatMap((b) => b.keys))];
+    const entries = await Promise.all(
+      needed.map((k) => loadTemplate(k).then((t) => [k, t]).catch(() => null))
+    );
+    if (this._built) return;
+    const ready = new Map(entries.filter(Boolean));
+    if (!ready.size) return;
     this._clear();
-
-    const bands = RANGES[envKey] || RANGES.lake;
-    const needed = [...new Set(bands.flatMap((b) => b.keys))];
-
-    Promise.all(needed.map((k) => loadTemplate(k).then((t) => [k, t]).catch(() => null)))
-      .then((entries) => {
-        if (token !== this._token) return; // travelled away mid-load
-        const ready = new Map(entries.filter(Boolean));
-        if (!ready.size) return;
-        for (const band of bands) this._placeBand(band, ready, token);
-      });
+    this._debug = [];
+    const rng = makeRng(0x7d4f17);
+    for (const band of BANDS) this._placeRing(band, ready, rng);
+    this._built = true;
   }
 
-  _placeBand(band, ready, token) {
-    const { keys, count, rMin, rMax, hMin, hMax, arc, sink = 8 } = band;
-    const [a0, a1] = arc;
-    const usable = keys.filter((k) => ready.has(k));
+  _placeRing(band, ready, rng) {
+    const usable = band.keys.filter((k) => ready.has(k));
     if (!usable.length) return;
+
+    // Worst-case angular half-width: narrowest model, shortest height, largest
+    // radius. Spacing the ring tighter than 2× this (scaled by `overlap`)
+    // guarantees neighbouring silhouettes overlap → no see-through gaps.
+    let minFoot = Infinity;
+    for (const k of usable) minFoot = Math.min(minFoot, ready.get(k).footHalf);
+    const thetaMin = (minFoot * band.hMin) / band.rMax;
+    const step = (2 * thetaMin) / band.overlap;
+    let count = Math.ceil((Math.PI * 2) / Math.max(step, 1e-3));
+    const capped = count > band.maxCount;
+    count = Math.max(band.minCount, Math.min(band.maxCount, count));
+    const baseStep = (Math.PI * 2) / count;
+    // marginRatio >= 1 means even the worst-case (narrowest/shortest/farthest)
+    // peak still spans the full angular step → no horizon gap. Jitter is 0.20
+    // of baseStep, so we want margin comfortably above 1.
+    if (this._debug) {
+      this._debug.push({
+        keys: usable,
+        minFoot: +minFoot.toFixed(3),
+        count,
+        capped,
+        baseStepDeg: +((baseStep * 180) / Math.PI).toFixed(2),
+        worstWidthDeg: +(((2 * thetaMin) * 180) / Math.PI).toFixed(2),
+        marginRatio: +((2 * thetaMin) / baseStep).toFixed(2),
+      });
+    }
+
     for (let i = 0; i < count; i++) {
-      if (token !== this._token) return;
-      const key = pick(usable);
+      const key = usable[Math.floor(rng() * usable.length)];
       const tmpl = ready.get(key);
-      const a = a0 + ((i + 0.5) / count) * (a1 - a0) + randRange(-0.14, 0.14);
-      const r = randRange(rMin, rMax);
-      const h = randRange(hMin, hMax);
+      // even spacing + a little jitter (kept well under the overlap margin so
+      // coverage is never broken)
+      const a = band.offset + (i + 0.5) * baseStep + (rng() - 0.5) * baseStep * 0.2;
+      const r = band.rMin + rng() * (band.rMax - band.rMin);
+      const h = band.hMin + rng() * (band.hMax - band.hMin);
       const inst = new THREE.Group();
       const clone = tmpl.root.clone(true);
       inst.add(clone);
       inst.scale.setScalar(h);
-      inst.position.set(Math.sin(a) * r, -sink, Math.cos(a) * r);
-      inst.rotation.y = randRange(0, Math.PI * 2);
+      inst.position.set(Math.sin(a) * r, -band.sink, Math.cos(a) * r);
+      inst.rotation.y = rng() * Math.PI * 2;
       this.group.add(inst);
     }
   }
 
   _clear() {
     // Remove clones WITHOUT disposing geometry/materials — they are shared with
-    // the persistent templates and reused by the next location.
+    // the persistent templates.
     for (let i = this.group.children.length - 1; i >= 0; i--) {
       this.group.remove(this.group.children[i]);
     }
