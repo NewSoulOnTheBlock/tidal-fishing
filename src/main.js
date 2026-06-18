@@ -16,6 +16,7 @@ import { EnvironmentManager } from "./world/environment.js";
 import { Effects } from "./world/effects.js";
 import { CastingSystem } from "./gameplay/casting.js";
 import { Bobber } from "./gameplay/bobber.js";
+import { createAnglerBody } from "./gameplay/anglerBody.js";
 import { BiteSystem } from "./gameplay/biteSystem.js";
 import { ReelFight } from "./gameplay/reelMinigame.js";
 import { FeedingSpots } from "./gameplay/feedingSpots.js";
@@ -110,6 +111,10 @@ const env = new EnvironmentManager(scene);
 const effects = new Effects(scene);
 const casting = new CastingSystem(scene);
 const bobber = new Bobber(scene, effects);
+// Voxel angler body mounted on the casting rig (turns with aim). Async-loaded;
+// the game runs fine before/without it. Exposed for live placement tuning.
+const anglerBody = createAnglerBody(casting.rig);
+window.__angler = anglerBody;
 const bite = new BiteSystem(
   () => ({
     location: currentLoc(),
