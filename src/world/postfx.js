@@ -141,8 +141,8 @@ const GradeShader = {
 };
 
 const QUALITY = {
-  high: { bloom: 0.28, godrays: true, grain: 0.05 },
-  low: { bloom: 0.18, godrays: false, grain: 0.03 },
+  high: { bloom: 0, godrays: true, grain: 0.05 },
+  low: { bloom: 0, godrays: false, grain: 0.03 },
 };
 
 export class PostFX {
@@ -171,6 +171,7 @@ export class PostFX {
     // higher threshold = only the very brightest highlights (sun disc, sharp
     // water glints) glow; keeps the overall scene clean rather than hazy-bright.
     this.bloom = new UnrealBloomPass(new THREE.Vector2(w, h), QUALITY[this.quality].bloom, 0.4, 1.35);
+    this.bloom.enabled = false; // bloom disabled — no glow (composer skips the pass)
     this.composer.addPass(this.bloom);
 
     this.godrays = new ShaderPass(GodRaysShader);
