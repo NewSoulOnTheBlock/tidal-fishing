@@ -6,6 +6,8 @@ import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight, randRange } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
 import { createFishPreview } from "./fishPreview.js";
+import { recordCatchClip, shareClip } from "./catchShare.js";
+import { events } from "../state/gameState.js";
 import html2canvas from "html2canvas";
 
 const CONFETTI_COLORS = ["#5fd4ff", "#ffc857", "#62d98b", "#c08bff", "#ff8da3"];
@@ -47,6 +49,16 @@ export class CatchCard {
       return;
     }
 
+    // Details burned into the shareable video clip / image of this catch.
+    this._share = {
+      speciesId: fish.speciesId,
+      name: sp.name,
+      rarityLabel: rarity.label,
+      rarityColor: rarity.color,
+      statsText: `${formatLength(fish.sizeCm)} • ${formatWeight(fish.weightKg)}`,
+      valueText: `Worth ${formatMoney(fish.value)}`,
+    };
+
     const overlay = document.createElement("div");
     overlay.className = "catch-overlay";
 
@@ -73,14 +85,14 @@ export class CatchCard {
         <div class="catch-xp">+${flags.xpGained} XP${flags.isNew ? " (first catch bonus)" : ""}</div>
         <div class="catch-actions">
           <button class="btn btn-primary btn-big">${flags.isJackpot ? "I'm rich" : "Keep it"}</button>
-          <button class="btn btn-share" title="Share Screenshot">📸 Share</button>
+          <button class="btn btn-share" title="Share your catch as a video">🎥 Share</button>
         </div>
       </div>
     `;
 
     try {
       overlay.querySelector(".btn-primary").addEventListener("click", () => this.dismiss());
-      overlay.querySelector(".btn-share").addEventListener("click", () => this.shareScreenshot(overlay.querySelector(".catch-card"), sp.name));
+      overlay.querySelector(".btn-share").addEventListener("click", (e) => this.shareCatch(e.currentTarget));
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) this.dismiss();
       });
@@ -126,7 +138,47 @@ export class CatchCard {
     }
   }
 
-  async shareScreenshot(cardEl, fishName) {
+  // Record the spinning voxel fish as a short branded video and share it so the
+  // fish itself is visible in the post. Falls back to a static card image when
+  // video recording isn't supported.
+  async shareCatch(btnEl) {
+    const info = this._share;
+    if (!info) return;
+    const original = btnEl ? btnEl.textContent : "";
+    const setBtn = (txt, disabled) => {
+      if (btnEl && btnEl.isConnected) { btnEl.textContent = txt; btnEl.disabled = disabled; }
+    };
+    setBtn("🎥 Recording…", true);
+    try {
+      const clip = await recordCatchClip(info.speciesId, {
+        name: info.name,
+        rarityLabel: info.rarityLabel,
+        rarityColor: info.rarityColor,
+        statsText: info.statsText,
+        valueText: info.valueText,
+      });
+      if (clip) {
+        setBtn("📤 Sharing…", true);
+        const res = await shareClip({ ...clip, name: info.name });
+        if (res === "downloaded") {
+          events.emit("toast", { msg: "🎥 Catch clip saved — attach it to your post!", kind: "info" });
+        }
+        return;
+      }
+      // No MediaRecorder/WebGL — fall back to a static card image (still shows the fish).
+      const card = this.overlay?.querySelector(".catch-card");
+      if (card) await this.shareCardImage(card, info.name);
+    } catch (err) {
+      console.error("[CatchCard] share failed:", err);
+      const card = this.overlay?.querySelector(".catch-card");
+      if (card) await this.shareCardImage(card, info.name).catch(() => {});
+      else events.emit("toast", { msg: "Couldn't create a share clip", kind: "warn" });
+    } finally {
+      setBtn(original || "🎥 Share", false);
+    }
+  }
+
+  async shareCardImage(cardEl, fishName) {
     try {
       // Hide confetti and share button temporarily
       const confettiBits = cardEl.querySelectorAll('.confetti-bit');
