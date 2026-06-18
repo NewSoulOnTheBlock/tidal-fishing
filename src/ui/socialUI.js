@@ -3,6 +3,7 @@
 
 import { events, S } from "../state/gameState.js";
 import { startWorld, getWorld } from "../web3/world.js";
+import { anglersModal } from "./anglersModal.js";
 
 function esc(s) {
   return String(s ?? "")
@@ -23,7 +24,11 @@ export class SocialUI {
     this.badge = document.createElement("div");
     this.badge.id = "world-badge";
     this.badge.className = "world-badge hidden";
+    this.badge.title = "See who's fishing now";
     document.body.appendChild(this.badge);
+
+    // The badge is the "Fishing Now" button — open the online-anglers modal.
+    this.badge.addEventListener("click", () => anglersModal.show());
 
     events.on("world:update", (w) => this.render(w));
     // Re-render the "you're here" highlight when the player travels.

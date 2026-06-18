@@ -2255,6 +2255,14 @@ body.weather-cloudy {
   border: 1px solid var(--stroke);
   backdrop-filter: blur(6px);
   white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.world-badge .wb-online:hover,
+.world-badge .wb-hot:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(95, 212, 255, 0.25);
 }
 .world-badge .wb-dot {
   width: 7px;
@@ -2276,6 +2284,57 @@ body.weather-cloudy {
   .world-badge { font-size: 0.66rem; gap: 5px; top: 6px; }
   .world-badge .wb-hot-sub { display: none; }
 }
+
+/* ── "Fishing Now" online-anglers modal ─────────────────────────────────── */
+.anglers-modal { width: 420px; max-width: 94vw; }
+.anglers-body { padding: 16px 22px 8px; overflow-y: auto; max-height: 56vh; }
+.anglers-count {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #eaf7ff;
+  margin-bottom: 10px;
+}
+.anglers-count b { color: var(--accent); font-size: 1.35rem; }
+.anglers-list { list-style: none; margin: 0; padding: 0; }
+.anglers-list li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-weight: 600;
+  color: #dfeefc;
+}
+.anglers-list li:last-child { border-bottom: none; }
+.anglers-list .ang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #56e08a;
+  box-shadow: 0 0 8px #56e08a;
+  flex: 0 0 auto;
+}
+.anglers-empty,
+.anglers-loading {
+  padding: 16px 4px;
+  color: #9fb3c6;
+  font-weight: 600;
+  text-align: center;
+}
+.anglers-guests {
+  margin-top: 10px;
+  color: #9fb3c6;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.anglers-foot {
+  padding: 12px 22px;
+  border-top: 2px solid var(--stroke);
+  color: #ffe2a6;
+  font-weight: 600;
+  text-align: center;
+}
+.anglers-foot b { color: var(--gold); }
 
 /* ── Catch of the Day banner on the title screen ─────────────────────────── */
 .menu-cod {

@@ -47,13 +47,13 @@ export const CONFIG = {
   },
 
   reel: {
-    reelRate: 8.5, // catch progress %/s while reeling (x reel, / heft)
+    reelRate: 7.0, // catch progress %/s while reeling (x reel, / heft)
     escapeRate: 4.0, // progress %/s lost while resting (x strength)
-    tensionGain: 23, // tension %/s while reeling (x strength, / line)
+    tensionGain: 20, // tension %/s while reeling (x strength, / line)
     tensionRecover: 21, // tension %/s recovered while resting
-    surgeReelMult: 3.4, // tension multiplier when reeling through a surge
+    surgeReelMult: 3.0, // tension multiplier when reeling through a surge
     surgeRestGain: 7, // passive tension %/s during a surge even at rest
-    telegraphTime: 0.75,
+    telegraphTime: 0.95,
     surgeDuration: [1.1, 1.9],
     startProgress: 8,
     startTension: 18,
@@ -80,13 +80,15 @@ export const CONFIG = {
     // lateral "runs": the fish bolts left or right and you must lean the rod the
     // same way (arrow keys / on-screen ◄ ►). Steer wrong and tension climbs fast.
     run: {
-      firstDelay: 2.4, // grace before the fish's first run
-      every: [3.0, 5.5], // calm seconds between runs
-      telegraph: 0.55, // arrow shows this long before tension starts biting
-      duration: [1.5, 2.4], // how long a run lasts
-      wrongTensionGain: 26, // tension %/s while NOT leaning into the run (x str / line)
+      firstDelay: 3.2, // grace before the fish's first run
+      every: [4.5, 7.5], // calm seconds between runs
+      telegraph: 0.85, // arrow shows this long before tension starts biting
+      duration: [1.5, 2.2], // how long a run lasts
+      wrongTensionGain: 19, // tension %/s while NOT leaning into the run (x str / line)
       matchProgress: 1.6, // bonus catch %/s while correctly leaning into a run
-      swing: 1.5, // rad/s the fight point sweeps toward the run side (visual)
+      swing: 0.5, // rad/s the fight point eases toward the run side (visual)
+      maxAngle: 0.6, // clamp: fight point stays within this many rad of the cast
+                     // direction so the rod/line/camera never whip around
     },
     // desktop fight feel: drag the mouse left/right to lean the rod against a run
     // (instead of tapping the ◄ ► buttons). The drag builds a signal that decays

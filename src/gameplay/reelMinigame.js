@@ -57,7 +57,8 @@ export class ReelFight {
     const dz = startPos.z - playerSpot.z;
     this.startDist = Math.max(4, Math.sqrt(dx * dx + dz * dz));
     this.angle = Math.atan2(dx, dz); // angle around player, z-forward convention
-    this.angleDrift = randRange(0.2, 0.5) * (Math.random() < 0.5 ? -1 : 1);
+    this.baseAngle = this.angle; // runs/drift stay within a bounded arc of this
+    this.angleDrift = randRange(0.08, 0.18) * (Math.random() < 0.5 ? -1 : 1);
     this.fishPoint.copy(startPos);
     this.fishPoint.y = WATER_Y;
 
@@ -339,11 +340,16 @@ export class ReelFight {
     }
 
     // fight point wanders around the player and closes in with progress; during
-    // a run it sweeps hard toward the run side so you can see which way it bolts
+    // a run it eases toward the run side so you can read which way it bolts. The
+    // angle is kept within a bounded arc IN FRONT of the player (baseAngle ±
+    // run.maxAngle) so the rod, line and camera never whip/spin around — that
+    // unbounded sweep was the "glitch" when a fish ran left/right.
     const dist = lerp(this.startDist, R.minFishDist, this.progress / 100);
     this.angle += Math.sin(this.t * 0.7) * this.angleDrift * dt;
-    if (surging) this.angle += Math.sin(this.t * 6) * 1.1 * dt;
+    if (surging) this.angle += Math.sin(this.t * 4) * 0.45 * dt;
     if (this.running) this.angle += this.runDir * R.run.swing * dt;
+    const maxA = R.run.maxAngle ?? 0.6;
+    this.angle = clamp(this.angle, this.baseAngle - maxA, this.baseAngle + maxA);
     this.fishPoint.set(
       this.playerSpot.x + Math.sin(this.angle) * dist,
       WATER_Y,

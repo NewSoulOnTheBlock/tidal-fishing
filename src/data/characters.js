@@ -116,6 +116,8 @@ export const CHARACTERS = [
   ...premiumAngler("pikachu-libre", "Pikachu (Libre)", "⚡", "Masked luchador of the lake. ¡Olé!"),
   ...premiumAngler("rick", "Rick Sanchez", "🧪", "Interdimensional genius — *burp* — the fish don't stand a chance."),
   ...premiumAngler("luffy", "Luffy", "👒", "The straw-hatted captain. He's gonna be King of the Anglers!"),
+  ...premiumAngler("link", "Link", "🗡️", "The Hero of Hyrule — courage enough to reel in any leviathan."),
+  ...premiumAngler("zelda", "Zelda", "👑", "Princess of Hyrule. Wisdom guides every perfect cast."),
 ];
 
 export const DEFAULT_CHARACTER = "r2d2";

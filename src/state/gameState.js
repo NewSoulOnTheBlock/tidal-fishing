@@ -3,7 +3,7 @@
 
 import { EventBus } from "../utils/utils.js";
 import { CONFIG } from "../data/config.js";
-import { DEFAULT_BAIT_ID, STARTER_BAIT_QTY } from "../data/baitData.js";
+import { DEFAULT_BAIT_ID } from "../data/baitData.js";
 
 export const events = new EventBus();
 
@@ -73,8 +73,9 @@ export function createDefaultState() {
       equipped: { rods: 0, reels: 0, lines: 0 },
     },
     // Consumable bait: one is spent per cast. `owned` maps baitId -> count.
+    // Fresh saves start with NO bait — players must buy bait before casting.
     bait: {
-      owned: { [DEFAULT_BAIT_ID]: STARTER_BAIT_QTY },
+      owned: {},
       selected: DEFAULT_BAIT_ID,
     },
     world: {

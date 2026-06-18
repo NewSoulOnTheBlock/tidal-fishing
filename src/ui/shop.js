@@ -14,6 +14,7 @@ import { formatMoney, formatLength, formatWeight } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
 import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
 import { isSolPayEnabled, paySol, tideToSol, formatSol } from "../web3/solPayment.js";
+import { solToTideLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
 import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 import { currentPublicKey } from "../web3/wallet.js";
 
@@ -225,12 +226,21 @@ export class ShopUI {
     const walletConnected = Boolean(currentPublicKey());
     const solPayAvailable = isSolPayEnabled();
 
+    // $TIDE bait prices are the LIVE SOL-equivalent (Jupiter rate) so paying in
+    // $TIDE always costs the same value as paying the SOL price. Ensure we have a
+    // rate; if it loads while this tab is open, re-render so prices reflect the
+    // live market instead of the cold-start fallback.
+    const rateWasLoaded = isRateLoaded();
+    refreshRate().then(() => {
+      if (this.tab === "bait" && !rateWasLoaded && isRateLoaded()) this.render();
+    });
+
     BAITS.forEach((b) => {
       const count = economy.baitCount(b.id);
       const isActive = selected === b.id;
-      const tideCost = Math.round((b.tidePrice || 0) * qty);
-      const afford = S.profile.money >= tideCost;
       const solCost = Number((b.solPrice * qty).toFixed(4));
+      const tideCost = solToTideLive(solCost);
+      const afford = S.profile.money >= tideCost;
 
       const row = document.createElement("div");
       row.className = `shop-item${isActive ? " equipped" : ""}`;
@@ -279,7 +289,7 @@ export class ShopUI {
         <span class="pay-amount">${formatMoney(tideCost)}</span>
       `;
       if (afford) {
-        tideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-offchain"));
+        tideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-offchain", 0, tideCost));
       } else {
         tideBtn.disabled = true;
         tideBtn.title = "Not enough $TIDE";
@@ -454,10 +464,10 @@ export class ShopUI {
    * @param {string} method - 'tide-offchain' or 'sol'
    * @param {number} solAmount - SOL amount if method is 'sol'
    */
-  async buyBaitWith(id, qty, method, solAmount = 0) {
+  async buyBaitWith(id, qty, method, solAmount = 0, tideCost = 0) {
     const b = BAIT_BY_ID[id];
     if (method === "tide-offchain") {
-      const res = economy.buyBait(id, qty);
+      const res = economy.buyBait(id, qty, tideCost);
       if (res.ok) {
         audio.play("buy");
         events.emit("toast", { msg: `Bought ×${res.qty} ${b.name}`, kind: "success" });

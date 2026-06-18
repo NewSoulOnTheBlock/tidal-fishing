@@ -18,9 +18,9 @@ const GROUPS = [
     title: "🐟 Fighting a Fish",
     rows: [
       { keys: ["Hold Click", "Space"], desc: "Reel it in — let go to ease the tension" },
-      { keys: ["Move Mouse", "◄ ►"], desc: "Fight its runs — lean the rod the way it bolts" },
-      { keys: ["Pull Back", "▲"], desc: "Heave the fish out of the water to land it" },
-      { keys: ["D", "Shift"], desc: "Dodge / give line when it surges" },
+      { keys: ["Move Mouse", "◄ ►", "A / D"], desc: "Fight its runs — lean the rod the way it bolts" },
+      { keys: ["Pull Back", "▲", "W"], desc: "Heave the fish out of the water to land it" },
+      { keys: ["Shift"], desc: "Dodge / give line when it surges" },
     ],
   },
   {

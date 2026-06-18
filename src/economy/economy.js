@@ -16,6 +16,7 @@ import { currentPublicKey } from "../web3/wallet.js";
 import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFarming.js";
 import { validateCatch, showBanMessage } from "../web3/catchValidation.js";
 import { isHotSpot } from "../web3/world.js";
+import { solToTideLive } from "../web3/priceConvert.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -523,12 +524,16 @@ export function selectBait(id) {
   return true;
 }
 
-/** Buy `qty` of a bait with in-game $TIDE (the f2p fallback to the SOL price). */
-export function buyBait(id, qty = 1) {
+/** Buy `qty` of a bait with in-game $TIDE. The $TIDE price is the live
+ *  SOL-equivalent of the bait's SOL price (Jupiter rate). `costOverride` lets the
+ *  shop charge exactly the amount it displayed, avoiding mid-render rate drift. */
+export function buyBait(id, qty = 1, costOverride = null) {
   const b = BAIT_BY_ID[id];
   if (!b) return { ok: false, reason: "Unknown bait" };
   qty = Math.max(1, Math.floor(qty));
-  const cost = Math.round((b.tidePrice || 0) * qty);
+  const cost = Number.isFinite(costOverride) && costOverride > 0
+    ? Math.round(costOverride)
+    : solToTideLive(b.solPrice * qty);
   if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDE" };
   S.profile.money -= cost;
   addBait(id, qty);

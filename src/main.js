@@ -50,6 +50,7 @@ import { onChange as onWalletChange } from "./web3/wallet.js";
 import { initMobileWalletAdapter } from "./web3/mwa.js";
 import { initTelegram, isTelegram, tgHaptic, tgSetBackButton } from "./platform/telegram.js";
 import { shortAddress } from "./web3/solana.js";
+import { refreshRate as warmTideRate } from "./web3/priceConvert.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
 // import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js"; // DISABLED - daily rewards removed
@@ -215,6 +216,10 @@ if (!isInstalledPWA()) {
 // banner. Mounted always — it's a passive, lightweight overlay.
 const socialUI = new SocialUI();
 socialUI.mount();
+
+// Warm the live SOL→$TIDE rate (Jupiter) so the bait shop shows the correct
+// $TIDE price the first time it's opened. Fire-and-forget; self-throttled.
+warmTideRate().catch(() => {});
 
 // Title-screen market-cap pill + $TIDE contract-address footer. Lazy-loaded so
 // this non-critical widget stays out of the main entry chunk (keeps the wallet
@@ -690,20 +695,28 @@ window.addEventListener("keydown", (e) => {
     case "KeyR":
       if (!paused && machine.is(Phase.WAITING)) machine.set(Phase.RETRIEVING);
       break;
-    case "KeyD":
     case "ShiftLeft":
     case "ShiftRight":
       if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
       break;
     case "ArrowLeft":
     case "ArrowRight":
+    case "KeyA":
+    case "KeyD":
+      // WASD mirror the arrow keys during a fight: A/← lean left, D/→ lean right.
       if (!paused && machine.is(Phase.REELING)) {
         e.preventDefault();
-        steerKey = e.code === "ArrowLeft" ? -1 : 1;
+        steerKey = (e.code === "ArrowLeft" || e.code === "KeyA") ? -1 : 1;
         fight.setSteer(steerKey);
+      } else if (e.code === "KeyA" && !paused && isGameplayPhase(machine.current)) {
+        // Outside a fight, "A" keeps its legacy role: toggle Achievements.
+        if (achievementsUI.isOpen()) achievementsUI.hide();
+        else achievementsUI.show();
       }
       break;
     case "ArrowUp":
+    case "KeyW":
+      // W / ↑ heave the fish out of the water to land it.
       if (!paused && machine.is(Phase.REELING)) {
         e.preventDefault();
         fight.tryHeave();
@@ -722,13 +735,6 @@ window.addEventListener("keydown", (e) => {
       // Open fish collection journal
       if (!paused && isGameplayPhase(machine.current)) {
         progressionJournalUI.show();
-      }
-      break;
-    case "KeyA":
-      // Toggle achievements
-      if (!paused && isGameplayPhase(machine.current)) {
-        if (achievementsUI.isOpen()) achievementsUI.hide();
-        else achievementsUI.show();
       }
       break;
     case "KeyP":
@@ -766,8 +772,8 @@ window.addEventListener("keyup", (e) => {
     pressUp();
     waitingHoldT = 0;
   }
-  if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
-    const dir = e.code === "ArrowLeft" ? -1 : 1;
+  if (e.code === "ArrowLeft" || e.code === "ArrowRight" || e.code === "KeyA" || e.code === "KeyD") {
+    const dir = (e.code === "ArrowLeft" || e.code === "KeyA") ? -1 : 1;
     if (steerKey === dir) {
       steerKey = 0;
       fight.setSteer(0);

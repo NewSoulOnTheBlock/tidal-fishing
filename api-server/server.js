@@ -219,20 +219,33 @@ function publicPlayer(row = {}) {
   };
 }
 
-// In-memory presence: per-tab id -> last-seen ms. Counts tabs active in the last
-// 60s. Resets on restart (fine — it's flavor), single Render instance.
+// In-memory presence: per-tab id -> { at: last-seen ms, wallet|null }. Counts
+// tabs active in the last 60s. Resets on restart (fine — it's flavor), single
+// Render instance.
 const presence = new Map();
 const PRESENCE_TTL_MS = 60_000;
 const PRESENCE_MAX = 5000;
-function touchPresence(id) {
+const SOL_ADDR_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+function touchPresence(id, wallet) {
   if (typeof id !== 'string' || id.length < 6 || id.length > 64) return;
   if (!presence.has(id) && presence.size >= PRESENCE_MAX) return;
-  presence.set(id, Date.now());
+  const w = (typeof wallet === 'string' && SOL_ADDR_RE.test(wallet)) ? wallet : null;
+  presence.set(id, { at: Date.now(), wallet: w });
+}
+function prunePresence() {
+  const cutoff = Date.now() - PRESENCE_TTL_MS;
+  for (const [id, v] of presence) if (!v || v.at < cutoff) presence.delete(id);
 }
 function onlineCount() {
-  const cutoff = Date.now() - PRESENCE_TTL_MS;
-  for (const [id, t] of presence) if (t < cutoff) presence.delete(id);
+  prunePresence();
   return presence.size;
+}
+// Distinct wallets currently online (deduped across a player's multiple tabs).
+function onlineWallets() {
+  prunePresence();
+  const set = new Set();
+  for (const v of presence.values()) if (v.wallet) set.add(v.wallet);
+  return set;
 }
 
 // Post a system "live feed" line into the global chat. Fire-and-forget so it
@@ -1449,7 +1462,7 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
 // live online count + today's hot spot. In-memory, no DB, no session required.
 app.post('/api/presence', (req, res) => {
   const { id, walletAddress } = req.body || {};
-  touchPresence(id || walletAddress);
+  touchPresence(id || walletAddress, walletAddress);
   res.json({ online: onlineCount(), hotSpot: dailyHotSpot() });
 });
 
@@ -1481,8 +1494,54 @@ app.get('/api/world', async (req, res) => {
   res.json({ online: onlineCount(), hotSpot: dailyHotSpot(), hotSpotLabel: HOT_SPOT_LABEL[dailyHotSpot()], catchOfDay });
 });
 
-// 4f. Daily check-in — advance the consecutive-day streak and, once per UTC day,
-// credit a small $TIDE bonus to the withdrawable ledger. Session-guarded.
+// 4e-bis. Anglers panel data for the "fishing now" modal: who is online right now
+// (named, deduped by wallet) plus the all-time total number of anglers ever to
+// have a saved profile. Read-only, public (covered by the global limiter). The
+// all-time count is cached briefly so opening the modal can't hammer the DB.
+let anglersTotalCache = { n: 0, at: 0 };
+const ANGLERS_TOTAL_TTL_MS = 30_000;
+app.get('/api/anglers/online', async (req, res) => {
+  const online = onlineCount();
+  const wallets = [...onlineWallets()].slice(0, 100);
+
+  // Resolve display names for the online wallets.
+  let anglers = [];
+  if (wallets.length) {
+    let nameByWallet = new Map();
+    try {
+      const r = await pool.query(
+        `SELECT wallet_address, username FROM players WHERE wallet_address = ANY($1)`,
+        [wallets]
+      );
+      nameByWallet = new Map(r.rows.map((row) => [row.wallet_address, row.username]));
+    } catch (e) {
+      console.error('[anglers] name lookup error:', e.message);
+    }
+    anglers = wallets.map((w) => {
+      const skr = skrResolver.getSkrNameCached(w);
+      return { name: skr || nameByWallet.get(w) || shortWallet(w) };
+    });
+    // Stable, friendly ordering by name.
+    anglers.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Anonymous tabs (no connected wallet) shown only as a count.
+  const guests = Math.max(0, online - wallets.length);
+
+  // All-time total anglers ever (cached 30s).
+  let totalEver = anglersTotalCache.n;
+  if (Date.now() - anglersTotalCache.at > ANGLERS_TOTAL_TTL_MS) {
+    try {
+      const t = await pool.query(`SELECT COUNT(*)::int AS n FROM players`);
+      totalEver = t.rows[0]?.n || 0;
+      anglersTotalCache = { n: totalEver, at: Date.now() };
+    } catch (e) {
+      console.error('[anglers] total count error:', e.message);
+    }
+  }
+
+  res.json({ online, anglers, guests, totalEver });
+});
 app.post('/api/player/checkin', writeLimiter, requireSession, async (req, res) => {
   const { walletAddress } = req.body || {};
   if (!walletAddress || walletAddress.length < 32) {
