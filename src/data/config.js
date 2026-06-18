@@ -80,7 +80,7 @@ export const CONFIG = {
   },
 
   economy: {
-    xpBase: 700,
+    xpBase: 350,
     xpPow: 1.4, // xp to next level = round(xpBase * level^xpPow)
     newSpeciesXpMult: 2,
     startMoney: 0,
