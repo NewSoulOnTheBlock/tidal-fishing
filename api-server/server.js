@@ -160,13 +160,11 @@ try {
 }
 const VALID_LOCATIONS = new Set(['lake', 'river', 'pier', 'ocean']);
 
-// Minimum angler level a location's unlock requires — mirrors the `unlock.level`
-// gates in src/data/locationData.js (lake 1 / river 3 / pier 6 / ocean 10).
-const LOCATION_MIN_LEVEL = { lake: 1, river: 3, pier: 6, ocean: 10 };
 // Server-recorded catch counts that any legitimate angler comfortably exceeds
-// long before unlocking a high-tier spot (reaching pier=L6 / ocean=L10 takes
-// hundreds of catches). Used only as the SECOND half of a permissive OR gate
-// in /api/player/catch, so honest and migrating players are never blocked.
+// long before they could afford to unlock a high-tier spot (the TIDE needed to
+// unlock pier/ocean requires far more catches than these floors). Used as the
+// sole, SERVER-AUTHORITATIVE progression gate in /api/player/catch, so honest
+// and migrating players are never blocked while a level-forging client is.
 const LOCATION_CATCH_FLOOR = { pier: 12, ocean: 30 };
 
 // Catch validation rules (reachability gate, value/size/weight clamps, rarity
@@ -389,6 +387,17 @@ const writeLimiter = rateLimit({
   standardHeaders: true, legacyHeaders: false,
   message: { error: 'Too many requests. Slow down.' },
 });
+// Universal baseline limiter applied to EVERY /api route (public reads included)
+// so no endpoint is completely unmetered. Deliberately generous: a single very-
+// active player peaks well under 40 req/min, so even dozens of players sharing a
+// CGNAT/household IP stay clear, while a scraper or flooder (thousands/min) is
+// bounded. The stricter per-route limiters (write/withdraw/admin) stack on top.
+const globalLimiter = rateLimit({
+  windowMs: 60_000, max: Number(process.env.GLOBAL_RATE_MAX) || 1200,
+  standardHeaders: true, legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
+  message: { error: 'Too many requests. Slow down.' },
+});
 
 // IP extraction helper
 function getClientIP(req) {
@@ -453,7 +462,9 @@ async function trackActivity(ip, wallet, action, metadata = {}) {
   }
 }
 
-// Apply ban check to all API routes
+// Baseline per-IP rate limit + ban check on every API route. The limiter is
+// registered first so a flood is shed cheaply, before the ban-lookup DB query.
+app.use('/api', globalLimiter);
 app.use('/api', checkBans);
 
 // Load treasury keypair
@@ -881,7 +892,7 @@ app.get('/api/player/profile/:wallet', async (req, res) => {
 // ============================================================================
 
 // 1. Auth - Get or create player profile
-app.post('/api/player/auth', async (req, res) => {
+app.post('/api/player/auth', writeLimiter, async (req, res) => {
   const { walletAddress } = req.body;
   
   if (!walletAddress || walletAddress.length < 32) {
@@ -990,7 +1001,7 @@ app.post('/api/player/save', writeLimiter, requireSession, async (req, res) => {
   try {
     await pool.query(
       `UPDATE players SET 
-        level = GREATEST(players.level, $2),
+        level = LEAST(GREATEST(players.level, $2), players.total_catches + 10),
         xp = GREATEST(players.xp, $3),
         money = $4,
         perfect_hooks = GREATEST(players.perfect_hooks, $5),
@@ -1063,26 +1074,27 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     // per-player; different players never contend.
     await client.query('SELECT pg_advisory_xact_lock($1::bigint)', [playerId]);
 
-    // Fresh, under-lock read of the progression-gate signals.
-    const gp = await client.query('SELECT level, total_catches FROM players WHERE id = $1', [playerId]);
-    const playerLevel = Number(gp.rows[0]?.level) || 1;
+    // Fresh, under-lock read of the progression-gate signal. SERVER-AUTHORITATIVE:
+    // we read total_catches (incremented only by this endpoint) and never trust a
+    // client-asserted level here.
+    const gp = await client.query('SELECT total_catches FROM players WHERE id = $1', [playerId]);
     const recordedCatches = Number(gp.rows[0]?.total_catches) || 0;
 
-    // Location speed-bump (anti-progression-skip). Silently decline to RECORD a
-    // catch in a high-tier spot the player demonstrably hasn't reached — but
-    // only when BOTH the server level AND the server catch history disprove
-    // access. Any legitimately-leveled angler passes on level; any migrating
-    // player (fresh server row, high local level) passes once their level
-    // mirrors or once they've logged a handful of catches — so honest players
-    // are never blocked. Gameplay is unaffected (the client already credited
-    // the catch locally); we simply don't mirror/credit a clearly-unreachable
-    // one, which keeps the leaderboard and live feed honest. Financial damage
-    // is independently bounded by the earnings + rarity caps in evaluateCatch.
-    const reqLevel = LOCATION_MIN_LEVEL[location] || 1;
+    // Location speed-bump (anti-progression-skip), SERVER-AUTHORITATIVE. Silently
+    // decline to RECORD a catch in a high-tier spot until the player's *server-
+    // side* catch history proves they've put in the baseline grind to reach it.
+    // lake/river are ungated starters, so honest players always build this up
+    // there first — and the TIDE needed to even unlock pier/ocean requires far
+    // more catches than these floors, so legit anglers are never blocked. The
+    // client already credited the catch locally, so gameplay is unaffected; we
+    // simply don't mirror/credit a clearly-unreachable one, keeping the
+    // leaderboard and live feed honest. We no longer consult the client-settable
+    // level at all. Financial damage is independently bounded by the earnings +
+    // rarity caps in evaluateCatch.
     const floor = LOCATION_CATCH_FLOOR[location];
-    if (floor != null && playerLevel < reqLevel && recordedCatches < floor) {
+    if (floor != null && recordedCatches < floor) {
       await client.query('ROLLBACK');
-      console.warn(`[catch] SKIP location_locked loc=${location} lvl=${playerLevel} catches=${recordedCatches} wallet=${walletAddress}`);
+      console.warn(`[catch] SKIP location_locked loc=${location} catches=${recordedCatches} need=${floor} wallet=${walletAddress}`);
       return res.json({ success: true, creditedValue: 0, skipped: 'location_locked' });
     }
 
