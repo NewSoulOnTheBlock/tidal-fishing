@@ -35,6 +35,8 @@ export const LOCATIONS = [
       ["creekfish_redtrout", 18], ["creekfish_steelblue", 16], ["creekfish_albino", 14],
       ["creekfish_sunrise", 11], ["creekfish_berryplum", 12], ["creekfish_purple", 5],
       ["creekfish_cave", 4],
+      // rare voxel trophy fish
+      ["bladejaw", 5], ["bladejaw_obsidian", 5], ["bladejaw_reefsteel", 5], ["bladejaw_venomgold", 5],
     ],
   },
   {
@@ -52,6 +54,9 @@ export const LOCATIONS = [
       ["mackerel", 30], ["flounder", 20], ["eel", 12], ["seabass", 9], ["snapper", 7],
       ["darttail", 14], ["darttail_ice", 12],
       ["darttail_coralshock", 5], ["darttail_ember", 4.5], ["darttail_toxic", 3.5],
+      // rare voxel trophy fish
+      ["crownfin", 5], ["crownfin_amethyst", 5], ["crownfin_crimsoncrest", 5], ["crownfin_emerald", 5],
+      ["crownfin_frost", 5], ["crownfin_sunburst", 5], ["crownfin_tidejade", 5],
     ],
   },
   {
@@ -70,6 +75,18 @@ export const LOCATIONS = [
       ["swordfish", 2.2], ["marlin", 1.8],
       ["deepfin", 12], ["deepfin_moss", 10],
       ["deepfin_amberleaf", 4.5], ["deepfin_plumtide", 3.5], ["deepfin_sunset", 3],
+      // voxel trophy fish (epic → ultra mythic)
+      ["celestialcrest", 1.05], ["moonveil", 1.5], ["moonveil_aurora", 1.5], ["moonveil_glacierfin", 1.5],
+      ["moonveil_nightblossom", 1.5], ["moonveil_roseglow", 1.5], ["thornback", 1.5], ["thornback_emberstone", 1.5],
+      ["thornback_jadefire", 1.5], ["thornback_mossglow", 1.5], ["thornback_sunstone", 1.5], ["bastionray", 0.6],
+      ["bastionray_marshfire", 0.6], ["bastionray_moonjade", 0.6], ["bastionray_royalplum", 0.6], ["leviathan", 0.42],
+      ["prismacrown", 0.42], ["skyspear", 0.6], ["skyspear_citrinejade", 0.6], ["skyspear_emberwave", 0.6],
+      ["skyspear_solarflare", 0.6], ["skyspear_voidfrost", 0.6], ["aetherwing", 0.13], ["dreadmaw", 0.13],
+      ["oracleray", 0.18], ["oracleray_abyssglow", 0.18], ["oracleray_duskgold", 0.18], ["oracleray_emberbloom", 0.18],
+      ["oracleray_jadeveil", 0.18], ["oracleray_sunoracle", 0.18], ["stormreaver", 0.18], ["stormreaver_shockflare", 0.18],
+      ["stormreaver_tideflare", 0.18], ["emperorray", 0.03], ["moonfang", 0.03], ["royalcrest", 0.05],
+      ["royalcrest_amethyst", 0.05], ["royalcrest_aurora", 0.05], ["royalcrest_emerald", 0.05], ["royalcrest_frostfire", 0.05],
+      ["royalcrest_obsidian", 0.05], ["royalcrest_sandstone", 0.05], ["royalcrest_sunset", 0.05], ["starforge", 0.03],
       ["smokingchicken", 0.05], // jackpot — ~36× rarer than a marlin
     ],
   },

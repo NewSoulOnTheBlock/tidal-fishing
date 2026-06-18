@@ -62,7 +62,7 @@ export function evaluateCatch({ cap, location, validLocation, isHotSpot, catchDa
 
   // Server-authoritative rarity (never trust the client's claim).
   const rarity = String(cap.rarity || 'common').slice(0, 20);
-  const isLegendary = rarity === 'legendary';
+  const isLegendary = rarity === 'legendary' || rarity === 'mythic' || rarity === 'ultramythic';
   const isJackpot = !!cap.jackpot;
 
   const m = Number(counts.m) || 0;

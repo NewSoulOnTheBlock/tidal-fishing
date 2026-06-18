@@ -171,7 +171,7 @@ export class HUD {
     this.reelWrap.classList.toggle("hidden", !visible);
     if (visible && fish) {
       this.fightName.textContent = "Something is hooked...";
-      this.fightStars.textContent = "★".repeat(fish.stars) + "☆".repeat(5 - fish.stars);
+      this.fightStars.textContent = "★".repeat(fish.stars) + "☆".repeat(Math.max(0, 5 - fish.stars));
       this.surgeBanner.classList.add("hidden");
       this.surgeBanner.classList.remove("snap", "dodged", "telegraph");
       this.tensionFill.classList.remove("sweet");

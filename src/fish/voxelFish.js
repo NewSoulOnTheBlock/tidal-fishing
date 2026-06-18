@@ -24,6 +24,61 @@ import { DEEPFIN_AMBERLEAF_VOX } from "./data/deepfinAmberleafVox.js";
 import { DEEPFIN_MOSS_VOX } from "./data/deepfinMossVox.js";
 import { DEEPFIN_PLUMTIDE_VOX } from "./data/deepfinPlumtideVox.js";
 import { DEEPFIN_SUNSET_VOX } from "./data/deepfinSunsetVox.js";
+import { BLADEJAW_VOX } from "./data/bladejawVox.js";
+import { BLADEJAW_OBSIDIAN_VOX } from "./data/bladejawObsidianVox.js";
+import { BLADEJAW_REEFSTEEL_VOX } from "./data/bladejawReefsteelVox.js";
+import { BLADEJAW_VENOMGOLD_VOX } from "./data/bladejawVenomgoldVox.js";
+import { CROWNFIN_VOX } from "./data/crownfinVox.js";
+import { CROWNFIN_AMETHYST_VOX } from "./data/crownfinAmethystVox.js";
+import { CROWNFIN_CRIMSONCREST_VOX } from "./data/crownfinCrimsoncrestVox.js";
+import { CROWNFIN_EMERALD_VOX } from "./data/crownfinEmeraldVox.js";
+import { CROWNFIN_FROST_VOX } from "./data/crownfinFrostVox.js";
+import { CROWNFIN_SUNBURST_VOX } from "./data/crownfinSunburstVox.js";
+import { CROWNFIN_TIDEJADE_VOX } from "./data/crownfinTidejadeVox.js";
+import { CELESTIALCREST_VOX } from "./data/celestialcrestVox.js";
+import { MOONVEIL_VOX } from "./data/moonveilVox.js";
+import { MOONVEIL_AURORA_VOX } from "./data/moonveilAuroraVox.js";
+import { MOONVEIL_GLACIERFIN_VOX } from "./data/moonveilGlacierfinVox.js";
+import { MOONVEIL_NIGHTBLOSSOM_VOX } from "./data/moonveilNightblossomVox.js";
+import { MOONVEIL_ROSEGLOW_VOX } from "./data/moonveilRoseglowVox.js";
+import { THORNBACK_VOX } from "./data/thornbackVox.js";
+import { THORNBACK_EMBERSTONE_VOX } from "./data/thornbackEmberstoneVox.js";
+import { THORNBACK_JADEFIRE_VOX } from "./data/thornbackJadefireVox.js";
+import { THORNBACK_MOSSGLOW_VOX } from "./data/thornbackMossglowVox.js";
+import { THORNBACK_SUNSTONE_VOX } from "./data/thornbackSunstoneVox.js";
+import { BASTIONRAY_VOX } from "./data/bastionrayVox.js";
+import { BASTIONRAY_MARSHFIRE_VOX } from "./data/bastionrayMarshfireVox.js";
+import { BASTIONRAY_MOONJADE_VOX } from "./data/bastionrayMoonjadeVox.js";
+import { BASTIONRAY_ROYALPLUM_VOX } from "./data/bastionrayRoyalplumVox.js";
+import { LEVIATHAN_VOX } from "./data/leviathanVox.js";
+import { PRISMACROWN_VOX } from "./data/prismacrownVox.js";
+import { SKYSPEAR_VOX } from "./data/skyspearVox.js";
+import { SKYSPEAR_CITRINEJADE_VOX } from "./data/skyspearCitrinejadeVox.js";
+import { SKYSPEAR_EMBERWAVE_VOX } from "./data/skyspearEmberwaveVox.js";
+import { SKYSPEAR_SOLARFLARE_VOX } from "./data/skyspearSolarflareVox.js";
+import { SKYSPEAR_VOIDFROST_VOX } from "./data/skyspearVoidfrostVox.js";
+import { AETHERWING_VOX } from "./data/aetherwingVox.js";
+import { DREADMAW_VOX } from "./data/dreadmawVox.js";
+import { ORACLERAY_VOX } from "./data/oraclerayVox.js";
+import { ORACLERAY_ABYSSGLOW_VOX } from "./data/oraclerayAbyssglowVox.js";
+import { ORACLERAY_DUSKGOLD_VOX } from "./data/oraclerayDuskgoldVox.js";
+import { ORACLERAY_EMBERBLOOM_VOX } from "./data/oraclerayEmberbloomVox.js";
+import { ORACLERAY_JADEVEIL_VOX } from "./data/oraclerayJadeveilVox.js";
+import { ORACLERAY_SUNORACLE_VOX } from "./data/oracleraySunoracleVox.js";
+import { STORMREAVER_VOX } from "./data/stormreaverVox.js";
+import { STORMREAVER_SHOCKFLARE_VOX } from "./data/stormreaverShockflareVox.js";
+import { STORMREAVER_TIDEFLARE_VOX } from "./data/stormreaverTideflareVox.js";
+import { EMPERORRAY_VOX } from "./data/emperorrayVox.js";
+import { MOONFANG_VOX } from "./data/moonfangVox.js";
+import { ROYALCREST_VOX } from "./data/royalcrestVox.js";
+import { ROYALCREST_AMETHYST_VOX } from "./data/royalcrestAmethystVox.js";
+import { ROYALCREST_AURORA_VOX } from "./data/royalcrestAuroraVox.js";
+import { ROYALCREST_EMERALD_VOX } from "./data/royalcrestEmeraldVox.js";
+import { ROYALCREST_FROSTFIRE_VOX } from "./data/royalcrestFrostfireVox.js";
+import { ROYALCREST_OBSIDIAN_VOX } from "./data/royalcrestObsidianVox.js";
+import { ROYALCREST_SANDSTONE_VOX } from "./data/royalcrestSandstoneVox.js";
+import { ROYALCREST_SUNSET_VOX } from "./data/royalcrestSunsetVox.js";
+import { STARFORGE_VOX } from "./data/starforgeVox.js";
 
 const MODELS = {
   creekfish_albino: CREEKFISH_ALBINO_VOX,
@@ -43,6 +98,61 @@ const MODELS = {
   deepfin_moss: DEEPFIN_MOSS_VOX,
   deepfin_plumtide: DEEPFIN_PLUMTIDE_VOX,
   deepfin_sunset: DEEPFIN_SUNSET_VOX,
+  bladejaw: BLADEJAW_VOX,
+  bladejaw_obsidian: BLADEJAW_OBSIDIAN_VOX,
+  bladejaw_reefsteel: BLADEJAW_REEFSTEEL_VOX,
+  bladejaw_venomgold: BLADEJAW_VENOMGOLD_VOX,
+  crownfin: CROWNFIN_VOX,
+  crownfin_amethyst: CROWNFIN_AMETHYST_VOX,
+  crownfin_crimsoncrest: CROWNFIN_CRIMSONCREST_VOX,
+  crownfin_emerald: CROWNFIN_EMERALD_VOX,
+  crownfin_frost: CROWNFIN_FROST_VOX,
+  crownfin_sunburst: CROWNFIN_SUNBURST_VOX,
+  crownfin_tidejade: CROWNFIN_TIDEJADE_VOX,
+  celestialcrest: CELESTIALCREST_VOX,
+  moonveil: MOONVEIL_VOX,
+  moonveil_aurora: MOONVEIL_AURORA_VOX,
+  moonveil_glacierfin: MOONVEIL_GLACIERFIN_VOX,
+  moonveil_nightblossom: MOONVEIL_NIGHTBLOSSOM_VOX,
+  moonveil_roseglow: MOONVEIL_ROSEGLOW_VOX,
+  thornback: THORNBACK_VOX,
+  thornback_emberstone: THORNBACK_EMBERSTONE_VOX,
+  thornback_jadefire: THORNBACK_JADEFIRE_VOX,
+  thornback_mossglow: THORNBACK_MOSSGLOW_VOX,
+  thornback_sunstone: THORNBACK_SUNSTONE_VOX,
+  bastionray: BASTIONRAY_VOX,
+  bastionray_marshfire: BASTIONRAY_MARSHFIRE_VOX,
+  bastionray_moonjade: BASTIONRAY_MOONJADE_VOX,
+  bastionray_royalplum: BASTIONRAY_ROYALPLUM_VOX,
+  leviathan: LEVIATHAN_VOX,
+  prismacrown: PRISMACROWN_VOX,
+  skyspear: SKYSPEAR_VOX,
+  skyspear_citrinejade: SKYSPEAR_CITRINEJADE_VOX,
+  skyspear_emberwave: SKYSPEAR_EMBERWAVE_VOX,
+  skyspear_solarflare: SKYSPEAR_SOLARFLARE_VOX,
+  skyspear_voidfrost: SKYSPEAR_VOIDFROST_VOX,
+  aetherwing: AETHERWING_VOX,
+  dreadmaw: DREADMAW_VOX,
+  oracleray: ORACLERAY_VOX,
+  oracleray_abyssglow: ORACLERAY_ABYSSGLOW_VOX,
+  oracleray_duskgold: ORACLERAY_DUSKGOLD_VOX,
+  oracleray_emberbloom: ORACLERAY_EMBERBLOOM_VOX,
+  oracleray_jadeveil: ORACLERAY_JADEVEIL_VOX,
+  oracleray_sunoracle: ORACLERAY_SUNORACLE_VOX,
+  stormreaver: STORMREAVER_VOX,
+  stormreaver_shockflare: STORMREAVER_SHOCKFLARE_VOX,
+  stormreaver_tideflare: STORMREAVER_TIDEFLARE_VOX,
+  emperorray: EMPERORRAY_VOX,
+  moonfang: MOONFANG_VOX,
+  royalcrest: ROYALCREST_VOX,
+  royalcrest_amethyst: ROYALCREST_AMETHYST_VOX,
+  royalcrest_aurora: ROYALCREST_AURORA_VOX,
+  royalcrest_emerald: ROYALCREST_EMERALD_VOX,
+  royalcrest_frostfire: ROYALCREST_FROSTFIRE_VOX,
+  royalcrest_obsidian: ROYALCREST_OBSIDIAN_VOX,
+  royalcrest_sandstone: ROYALCREST_SANDSTONE_VOX,
+  royalcrest_sunset: ROYALCREST_SUNSET_VOX,
+  starforge: STARFORGE_VOX,
 };
 
 // Decoded + normalised voxel data, cached per model key.

@@ -1095,8 +1095,8 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
          COUNT(*)                                                        AS d,
          COALESCE(SUM(value) FILTER (WHERE caught_at > NOW() - INTERVAL '1 hour'), 0) AS eh,
          COALESCE(SUM(value), 0)                                                       AS ed,
-         COUNT(*) FILTER (WHERE rarity = 'legendary' AND caught_at > NOW() - INTERVAL '1 hour') AS lh,
-         COUNT(*) FILTER (WHERE rarity = 'legendary')                                          AS ld,
+         COUNT(*) FILTER (WHERE rarity IN ('legendary','mythic','ultramythic') AND caught_at > NOW() - INTERVAL '1 hour') AS lh,
+         COUNT(*) FILTER (WHERE rarity IN ('legendary','mythic','ultramythic'))                                          AS ld,
          COUNT(*) FILTER (WHERE species_id = $2)                                               AS js
        FROM catches
        WHERE player_id = $1 AND caught_at > NOW() - INTERVAL '1 day'`,
@@ -1153,13 +1153,18 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     await client.query('COMMIT');
 
     // Live social feed (fire-and-forget — never blocks the catch response).
-    // First catch → welcome; legendary → gold broadcast; epic / perfect-hook
-    // rare → ticker line. Bounded set so the chat never floods.
+    // First catch → welcome; ultra mythic / mythic / legendary → gold
+    // broadcast; epic / perfect-hook rare → ticker line. Bounded set so the
+    // chat never floods.
     const rl2 = rarity.toLowerCase();
     const sizeR = Math.round(sizeCm);
     const fishName = prettySpecies(speciesId);
     if (priorCatches === 0) {
       insertSystemChat(`👋 Welcome ${playerName} to the waters — first catch: a ${sizeR}cm ${fishName}!`, 'welcome');
+    } else if (rl2 === 'ultramythic') {
+      insertSystemChat(`🌌 ULTRA MYTHIC!! ${playerName} hauled in a ${sizeR}cm ${fishName} — a once-in-a-lifetime catch!`, 'rare');
+    } else if (rl2 === 'mythic') {
+      insertSystemChat(`🌟 MYTHIC! ${playerName} landed a ${sizeR}cm ${fishName}!`, 'rare');
     } else if (rl2 === 'legendary') {
       insertSystemChat(`⭐ LEGENDARY! ${playerName} landed a ${sizeR}cm ${fishName}!`, 'rare');
     } else if (rl2 === 'epic') {

@@ -347,6 +347,8 @@ export function getGameStats() {
       rare: rarityCounts.rare || 0,
       epic: rarityCounts.epic || 0,
       legendary: rarityCounts.legendary || 0,
+      mythic: rarityCounts.mythic || 0,
+      ultramythic: rarityCounts.ultramythic || 0,
     },
     lifetimeEarnings: S.stats.earned,
     unlockedLocations: S.world.unlocked,

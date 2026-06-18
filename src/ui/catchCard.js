@@ -87,7 +87,7 @@ export class CatchCard {
       this.root.appendChild(overlay);
       this.overlay = overlay;
 
-      audio.play(flags.isJackpot || fish.rarity === "legendary" ? "legendary" : "catch");
+      audio.play(flags.isJackpot || RARITIES[fish.rarity].order >= 4 ? "legendary" : "catch");
       if (flags.isJackpot || flags.isNew || flags.isRecord || RARITIES[fish.rarity].order >= 3) {
         this.confetti(overlay.querySelector(".catch-card"), flags.isJackpot ? 96 : 26);
       }
