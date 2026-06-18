@@ -10,7 +10,7 @@
 // All values are runtime-tunable via window.__angler.setConfig({...}) so they
 // can be eyeballed on a real device and then baked back in here.
 //
-// NOTE: several of these models depict third-party characters (R2-D2, Sonic,
+// NOTE: several of these models depict third-party characters (R2-D2,
 // Squirtle). They are bundled here as player-chosen skins; review the IP
 // position before any commercial release.
 
@@ -58,42 +58,6 @@ export const CHARACTERS = [
     blurb: "Water-type turtle — a natural by the lake.",
     url: "/models/characters/squirtle.glb",
     height: 1.2,
-    yawDeg: 180,
-    x: 0,
-    y: 0,
-    z: 0,
-  },
-  {
-    id: "sonic",
-    name: "Sonic",
-    emoji: "💙",
-    blurb: "Gotta fish fast.",
-    url: "/models/characters/sonic.glb",
-    height: 1.6,
-    yawDeg: 180,
-    x: 0,
-    y: 0,
-    z: 0,
-  },
-  {
-    id: "skeleton",
-    name: "Skeleton",
-    emoji: "💀",
-    blurb: "Spooky angler dredged up from the deep.",
-    url: "/models/characters/skeleton.glb",
-    height: 1.8,
-    yawDeg: 180,
-    x: 0,
-    y: 0,
-    z: 0,
-  },
-  {
-    id: "wanderer",
-    name: "Wanderer",
-    emoji: "🧍",
-    blurb: "A mysterious voxel traveler.",
-    url: "/models/characters/wanderer.glb",
-    height: 1.8,
     yawDeg: 180,
     x: 0,
     y: 0,
