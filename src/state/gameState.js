@@ -63,6 +63,7 @@ export function createDefaultState() {
       username: "",
       bio: "",
       avatar: "default",
+      character: "r2d2",
       tutorialSeen: false,
     },
     gear: {

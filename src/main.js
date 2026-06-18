@@ -112,9 +112,11 @@ const effects = new Effects(scene);
 const casting = new CastingSystem(scene);
 const bobber = new Bobber(scene, effects);
 // Voxel angler body mounted on the casting rig (turns with aim). Async-loaded;
-// the game runs fine before/without it. Exposed for live placement tuning.
-const anglerBody = createAnglerBody(casting.rig);
+// the game runs fine before/without it. The character is the player's saved
+// choice (picked during onboarding). Exposed for live placement tuning.
+const anglerBody = createAnglerBody(casting.rig, S.profile.character);
 window.__angler = anglerBody;
+window.__setCharacter = (id) => anglerBody.setCharacter(id);
 const bite = new BiteSystem(
   () => ({
     location: currentLoc(),
@@ -153,6 +155,9 @@ const tutorialUI = new TutorialUI();
 events.on("onboarding:needed", () => onboardingUI.show());
 // Right after a new angler picks a name, walk them through how to fish.
 events.on("onboarding:complete", () => tutorialUI.show());
+// Swap the visible angler body when the player chooses a different character
+// (during onboarding or from their Profile).
+events.on("character", (id) => anglerBody.setCharacter(id));
 
 // Global Fishermans Hole (global chat) — only on the browser-tab web version,
 // hidden in the installed/standalone PWA.
@@ -863,6 +868,7 @@ onWalletChange(({ account }) => {
   travelTo(S.world.current, true);
   gclock.hours = S.world.hour;
   hud.refreshAll();
+  anglerBody.setCharacter(S.profile.character); // match the loaded save's choice
   if (machine.current !== Phase.MENU) {
     if (addr) {
       hud.toast(had ? `Loaded save for ${shortAddress(addr)}` : `New save bound to ${shortAddress(addr)}`, "success");

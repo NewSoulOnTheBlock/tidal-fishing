@@ -5,6 +5,8 @@ import { currentPublicKey } from "../web3/wallet.js";
 import { updateProfile, getPlayerProfile } from "../web3/database.js";
 import { saveGame } from "../state/saveLoad.js";
 import { PROFILE_AVATARS, getAvatar } from "../data/profileAvatars.js";
+import { mountCharacterChooser } from "./characterChooser.js";
+import { getCharacter } from "../data/characters.js";
 import { ACHIEVEMENTS } from "../progression/achievements.js";
 import { formatMoney } from "../utils/utils.js";
 import { shortAddress } from "../web3/solana.js";
@@ -138,6 +140,7 @@ export class ProfileUI {
                 <span class="avatar-emoji">${avatar.emoji}</span>
               </div>
               <button class="btn btn-secondary btn-change-avatar">Change Avatar</button>
+              <button class="btn btn-secondary btn-change-character">Change Character</button>
             </div>
             
             <div class="profile-info-section">
@@ -263,6 +266,15 @@ export class ProfileUI {
         e.preventDefault();
         e.stopPropagation();
         this.selectAvatar();
+      });
+    }
+
+    const changeCharacterBtn = this.panel.querySelector('.btn-change-character');
+    if (changeCharacterBtn) {
+      changeCharacterBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.selectCharacter();
       });
     }
   }
@@ -439,6 +451,49 @@ export class ProfileUI {
     await this.persistProfile({ avatar: avatarId }, { profilePicture: avatarId });
     events.emit('toast', { msg: '✅ Avatar updated!', kind: 'success' });
     this.refresh();
+  }
+
+  selectCharacter() {
+    const picker = document.createElement('div');
+    picker.className = 'avatar-picker-modal character-picker-modal';
+    picker.innerHTML = `
+      <div class="avatar-picker-content character-picker-content">
+        <h3>Choose Your Character</h3>
+        <div class="character-picker-mount"></div>
+        <button class="btn btn-secondary btn-cancel">Cancel</button>
+      </div>
+    `;
+    this.panel.appendChild(picker);
+
+    const mount = picker.querySelector('.character-picker-mount');
+    const chooser = mountCharacterChooser(mount, {
+      initial: S.profile.character || 'r2d2',
+      confirmLabel: 'Use {name}',
+      onConfirm: (id) => {
+        const char = getCharacter(id);
+        this.currentProfile.player.character = char.id;
+        S.profile.character = char.id;
+        try {
+          saveGame();
+        } catch (e) {
+          console.warn('[ProfileUI] saveGame failed:', e?.message);
+        }
+        // Swap the live in-game body.
+        events.emit('character', char.id);
+        chooser.dispose();
+        picker.remove();
+        events.emit('toast', { msg: `✅ Now fishing as ${char.name}!`, kind: 'success' });
+      },
+    });
+
+    const cancel = () => {
+      chooser.dispose();
+      picker.remove();
+    };
+    picker.querySelector('.btn-cancel').addEventListener('click', cancel);
+    picker.addEventListener('click', (e) => {
+      if (e.target === picker) cancel();
+    });
   }
 
   refresh() {
