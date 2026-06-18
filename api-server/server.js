@@ -159,6 +159,15 @@ try {
 }
 const VALID_LOCATIONS = new Set(['lake', 'river', 'pier', 'ocean']);
 
+// Minimum angler level a location's unlock requires — mirrors the `unlock.level`
+// gates in src/data/locationData.js (lake 1 / river 3 / pier 6 / ocean 10).
+const LOCATION_MIN_LEVEL = { lake: 1, river: 3, pier: 6, ocean: 10 };
+// Server-recorded catch counts that any legitimate angler comfortably exceeds
+// long before unlocking a high-tier spot (reaching pier=L6 / ocean=L10 takes
+// hundreds of catches). Used only as the SECOND half of a permissive OR gate
+// in /api/player/catch, so honest and migrating players are never blocked.
+const LOCATION_CATCH_FLOOR = { pier: 12, ocean: 30 };
+
 // Catch validation rules (reachability gate, value/size/weight clamps, rarity
 // + earnings caps) live in catchRules.js so they can be unit-tested in
 // isolation.
@@ -188,6 +197,27 @@ function shortWallet(w) {
 // Prettify a species id ("largemouth_bass") into a display name ("Largemouth Bass").
 function prettySpecies(id) {
   return String(id || 'fish').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 40);
+}
+
+// Whitelist the player columns safe to return from the UNAUTHENTICATED
+// /api/player/auth lookup. Deliberately omits `money` and `total_withdrawn`
+// (financial internals) and other private columns — everything here is already
+// public via the leaderboard / profile endpoints. The client only reads
+// username/level/xp from this response (src/web3/databaseIntegration.js).
+function publicPlayer(row = {}) {
+  return {
+    wallet_address: row.wallet_address,
+    username: row.username,
+    level: row.level,
+    xp: row.xp,
+    total_earned: row.total_earned,
+    total_catches: row.total_catches,
+    perfect_hooks: row.perfect_hooks,
+    profile_picture: row.profile_picture,
+    bio: row.bio,
+    created_at: row.created_at,
+    last_login: row.last_login,
+  };
 }
 
 // In-memory presence: per-tab id -> last-seen ms. Counts tabs active in the last
@@ -253,6 +283,17 @@ const SESSION_SECRET = process.env.SESSION_SECRET ||
   crypto.createHash('sha256')
     .update(`tidal-session|${process.env.ADMIN_SECRET || ''}|${TIDE_MINT_STR || ''}`)
     .digest('hex');
+// Fail-loud guard: if NEITHER a dedicated SESSION_SECRET nor an ADMIN_SECRET is
+// set, the derived fallback above is computed from publicly-known constants only
+// (empty secret + the public mint), making session tokens forgeable. Warn
+// prominently on boot so the operator sets a real secret on the host.
+if (!process.env.SESSION_SECRET && !process.env.ADMIN_SECRET) {
+  console.error(
+    '⚠️  SECURITY: neither SESSION_SECRET nor ADMIN_SECRET is set — session ' +
+    'tokens are signed with a PUBLICLY-DERIVABLE key and can be forged. Set a ' +
+    'strong SESSION_SECRET (and ADMIN_SECRET) env var on the host immediately.'
+  );
+}
 // Default to enforcing; set SESSION_ENFORCE=false only as an emergency escape hatch.
 const SESSION_ENFORCE = String(process.env.SESSION_ENFORCE ?? 'true').toLowerCase() !== 'false';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24h
@@ -868,7 +909,7 @@ app.post('/api/player/auth', async (req, res) => {
       console.log('[auth] Player logged in:', walletAddress);
     }
 
-    res.json({ player: result.rows[0] });
+    res.json({ player: publicPlayer(result.rows[0]) });
   } catch (error) {
     console.error('[auth] Error:', error);
     res.status(500).json({ error: 'Database error' });
@@ -959,8 +1000,8 @@ app.post('/api/player/save', writeLimiter, requireSession, async (req, res) => {
        WHERE wallet_address = $1`,
       [
         walletAddress,
-        intOr(state.level, 1, 1, 1000),
-        intOr(state.xp, 0),
+        intOr(state.level, 1, 1, 200),
+        intOr(state.xp, 0, 0, 5_000_000),
         intOr(state.money, 0),
         intOr(state.perfectHooks, 0),
         intOr(state.snaps, 0),
@@ -991,6 +1032,11 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     return res.status(400).json({ error: 'Missing wallet address or catch data' });
   }
 
+  const speciesId = String(catchData.speciesId || '').slice(0, 50);
+  const cap = FISH_VALUES.species[speciesId];
+  const location = String(catchData.location || '');
+
+  let client;
   try {
     const player = await pool.query(
       'SELECT id, username, total_catches FROM players WHERE wallet_address = $1',
@@ -1004,13 +1050,41 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     const playerName = player.rows[0].username || shortWallet(walletAddress);
     const priorCatches = Number(player.rows[0].total_catches) || 0;
 
-    const speciesId = String(catchData.speciesId || '').slice(0, 50);
-    const cap = FISH_VALUES.species[speciesId];
-    const location = String(catchData.location || '');
+    client = await pool.connect();
+    await client.query('BEGIN');
+    // Serialize catch processing for THIS player. Without it, two concurrent
+    // catches both read the same hourly/daily earnings allowance and can each
+    // credit against it, slightly over-paying the cap. The xact-scoped advisory
+    // lock (auto-released on COMMIT/ROLLBACK) makes the read→credit atomic
+    // per-player; different players never contend.
+    await client.query('SELECT pg_advisory_xact_lock($1::bigint)', [playerId]);
+
+    // Fresh, under-lock read of the progression-gate signals.
+    const gp = await client.query('SELECT level, total_catches FROM players WHERE id = $1', [playerId]);
+    const playerLevel = Number(gp.rows[0]?.level) || 1;
+    const recordedCatches = Number(gp.rows[0]?.total_catches) || 0;
+
+    // Location speed-bump (anti-progression-skip). Silently decline to RECORD a
+    // catch in a high-tier spot the player demonstrably hasn't reached — but
+    // only when BOTH the server level AND the server catch history disprove
+    // access. Any legitimately-leveled angler passes on level; any migrating
+    // player (fresh server row, high local level) passes once their level
+    // mirrors or once they've logged a handful of catches — so honest players
+    // are never blocked. Gameplay is unaffected (the client already credited
+    // the catch locally); we simply don't mirror/credit a clearly-unreachable
+    // one, which keeps the leaderboard and live feed honest. Financial damage
+    // is independently bounded by the earnings + rarity caps in evaluateCatch.
+    const reqLevel = LOCATION_MIN_LEVEL[location] || 1;
+    const floor = LOCATION_CATCH_FLOOR[location];
+    if (floor != null && playerLevel < reqLevel && recordedCatches < floor) {
+      await client.query('ROLLBACK');
+      console.warn(`[catch] SKIP location_locked loc=${location} lvl=${playerLevel} catches=${recordedCatches} wallet=${walletAddress}`);
+      return res.json({ success: true, creditedValue: 0, skipped: 'location_locked' });
+    }
 
     // Per-player catch counts over rolling windows, plus per-rarity / jackpot-
     // species tallies for the plausibility backstop. Drives all the caps below.
-    const rl = await pool.query(
+    const rl = await client.query(
       `SELECT
          COUNT(*) FILTER (WHERE caught_at > NOW() - INTERVAL '1 minute') AS m,
          COUNT(*) FILTER (WHERE caught_at > NOW() - INTERVAL '1 hour')   AS h,
@@ -1037,6 +1111,7 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
       counts,
     });
     if (!decision.ok) {
+      await client.query('ROLLBACK');
       if (decision.code === 'BAD_SPECIES_LOCATION' || decision.code === 'RARITY_LIMIT') {
         // Log clear cheat signals so abusers can be identified from server logs.
         console.warn(`[catch] REJECT ${decision.code} species=${speciesId} loc=${location} wallet=${walletAddress} counts=${JSON.stringify(counts)}`);
@@ -1047,14 +1122,14 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     const perfect = !!catchData.perfectHook;
 
     // Insert catch with the server-validated value
-    await pool.query(
+    await client.query(
       `INSERT INTO catches (player_id, species_id, location, rarity, size_cm, weight_kg, value, perfect_hook)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [playerId, speciesId, location, rarity, sizeCm, weightKg, value, perfect]
     );
 
     // Update journal entry
-    await pool.query(
+    await client.query(
       `INSERT INTO journal_entries (player_id, species_id, total_caught, biggest_size_cm, biggest_weight_kg)
        VALUES ($1, $2, 1, $3, $4)
        ON CONFLICT (player_id, species_id) 
@@ -1066,10 +1141,12 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
     );
 
     // Authoritative ledger update — the only place total_earned grows.
-    await pool.query(
+    await client.query(
       `UPDATE players SET total_earned = total_earned + $2, total_catches = total_catches + 1 WHERE id = $1`,
       [playerId, value]
     );
+
+    await client.query('COMMIT');
 
     // Live social feed (fire-and-forget — never blocks the catch response).
     // First catch → welcome; legendary → gold broadcast; epic / perfect-hook
@@ -1089,8 +1166,11 @@ app.post('/api/player/catch', writeLimiter, requireSession, async (req, res) => 
 
     res.json({ success: true, creditedValue: value });
   } catch (error) {
+    if (client) { try { await client.query('ROLLBACK'); } catch { /* already aborted */ } }
     console.error('[catch] Error:', error);
     res.status(500).json({ error: 'Failed to record catch' });
+  } finally {
+    if (client) client.release();
   }
 });
 
@@ -1202,14 +1282,11 @@ app.get('/api/chat', async (req, res) => {
 // Banned wallets are already blocked by checkBans (walletAddress in body).
 // Requires a chosen angler name, enforces a length cap + per-wallet cooldown.
 app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
-  const { walletAddress, username } = req.body;
+  const { walletAddress } = req.body;
   let { message } = req.body;
 
   if (!walletAddress || walletAddress.length < 32) {
     return res.status(400).json({ error: 'Valid wallet address required' });
-  }
-  if (!username || !username.trim()) {
-    return res.status(400).json({ error: 'Set an angler name before chatting', code: 'NAME_REQUIRED' });
   }
   if (typeof message !== 'string') {
     return res.status(400).json({ error: 'Message required' });
@@ -1220,9 +1297,23 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
   if (!message) {
     return res.status(400).json({ error: 'Message is empty' });
   }
-  const cleanName = username.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 50);
 
   try {
+    // Authoritative identity: take the poster's display name (and level flair)
+    // from the DB, NOT the request body, so a tampered client can't post under
+    // another angler's name in the global feed.
+    let cleanName = '';
+    let posterLevel = 0;
+    try {
+      const lr = await pool.query('SELECT username, level FROM players WHERE wallet_address = $1', [walletAddress]);
+      cleanName = (lr.rows[0]?.username || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 50);
+      posterLevel = Number(lr.rows[0]?.level) || 0;
+    } catch (e) { /* identity lookup failed — treat as no name set */ }
+
+    if (!cleanName) {
+      return res.status(400).json({ error: 'Set an angler name before chatting', code: 'NAME_REQUIRED' });
+    }
+
     // Per-wallet cooldown (anti-flood): reject if last post was < 1.5s ago.
     const last = await pool.query(
       `SELECT created_at FROM chat_messages WHERE wallet_address = $1 ORDER BY id DESC LIMIT 1`,
@@ -1234,13 +1325,6 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
         return res.status(429).json({ error: 'Slow down a sec', code: 'RATE_LIMIT' });
       }
     }
-
-    // Fetch the poster's level for in-chat flair (cheap, cached column).
-    let posterLevel = 0;
-    try {
-      const lr = await pool.query('SELECT level FROM players WHERE wallet_address = $1', [walletAddress]);
-      posterLevel = Number(lr.rows[0]?.level) || 0;
-    } catch (e) { /* flair is best-effort */ }
 
     const inserted = await pool.query(
       `INSERT INTO chat_messages (wallet_address, username, message, kind, level)
