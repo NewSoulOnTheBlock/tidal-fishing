@@ -1827,6 +1827,32 @@ body.weather-cloudy {
   box-shadow: 0 0 0 3px rgba(95, 212, 255, 0.18);
 }
 
+.cc-chip {
+  position: relative;
+}
+
+.cc-chip.is-locked {
+  opacity: 0.55;
+  filter: grayscale(0.55);
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.cc-chip.is-locked:hover {
+  transform: none;
+  border-color: rgba(255, 196, 0, 0.55);
+}
+
+.cc-chip-lock {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.78rem;
+  line-height: 1;
+  filter: none;
+  opacity: 0.95;
+}
+
 .cc-chip-emoji {
   font-size: 1.5rem;
   line-height: 1;

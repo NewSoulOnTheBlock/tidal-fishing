@@ -7,12 +7,15 @@
 
 import { CHARACTERS, getCharacter, DEFAULT_CHARACTER } from "../data/characters.js";
 import { createCharacterPreview } from "./characterPreview.js";
+import { isAnglerOwned } from "../economy/economy.js";
+import { events } from "../state/gameState.js";
+import { formatMoney } from "../utils/utils.js";
 
 export function mountCharacterChooser(container, opts = {}) {
   const confirmLabel = opts.confirmLabel || "Confirm";
   const onConfirm = typeof opts.onConfirm === "function" ? opts.onConfirm : () => {};
   let selected =
-    opts.initial && getCharacter(opts.initial).id === opts.initial
+    opts.initial && getCharacter(opts.initial).id === opts.initial && isAnglerOwned(opts.initial)
       ? opts.initial
       : DEFAULT_CHARACTER;
 
@@ -26,13 +29,15 @@ export function mountCharacterChooser(container, opts = {}) {
         <p class="cc-blurb"></p>
       </div>
       <div class="cc-grid" role="listbox" aria-label="Choose your character">
-        ${CHARACTERS.map(
-          (c) => `
-          <button type="button" class="cc-chip" role="option" data-id="${c.id}" aria-selected="false">
+        ${CHARACTERS.map((c) => {
+          const locked = !isAnglerOwned(c.id);
+          return `
+          <button type="button" class="cc-chip${locked ? " is-locked" : ""}" role="option" data-id="${c.id}" data-locked="${locked ? "1" : ""}" aria-selected="false"${locked ? ` title="Unlock in Shop → Anglers (${formatMoney(c.price)} $TIDE)"` : ""}>
             <span class="cc-chip-emoji">${c.emoji || "🎣"}</span>
             <span class="cc-chip-name">${c.name}</span>
-          </button>`
-        ).join("")}
+            ${locked ? `<span class="cc-chip-lock">🔒</span>` : ""}
+          </button>`;
+        }).join("")}
       </div>
       <button type="button" class="btn btn-primary cc-confirm"></button>
     </div>
@@ -61,6 +66,11 @@ export function mountCharacterChooser(container, opts = {}) {
 
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
+      if (chip.dataset.locked) {
+        const c = getCharacter(chip.dataset.id);
+        events.emit("toast", { msg: `Unlock ${c.name} in Shop → Anglers (${formatMoney(c.price)} $TIDE)`, kind: "warn" });
+        return;
+      }
       if (chip.dataset.id === selected) return;
       selected = chip.dataset.id;
       render();

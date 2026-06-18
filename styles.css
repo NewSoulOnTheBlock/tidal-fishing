@@ -1020,6 +1020,8 @@ kbd {
 }
 .sell-total { font-size: 1rem; font-weight: 700; }
 .shop-empty { text-align: center; color: var(--dim); padding: 50px 0; font-size: 0.95rem; }
+.shop-anglers-intro { color: var(--dim); font-size: 0.86rem; line-height: 1.4; margin: 2px 2px 12px; }
+.angler-emoji { font-size: 1.25rem; line-height: 1; }
 
 /* ---------------- journal ---------------- */
 

@@ -5,6 +5,7 @@ import { CONFIG } from "../data/config.js";
 import { S, events } from "../state/gameState.js";
 import { GEAR } from "../data/gearData.js";
 import { LOCATIONS } from "../data/locationData.js";
+import { getCharacter } from "../data/characters.js";
 import { FISH_BY_ID } from "../data/fishData.js";
 import { saveGame } from "../state/saveLoad.js";
 import { recordCatch as recordJournalCatch } from "../progression/journal.js";
@@ -382,4 +383,51 @@ export function grantLocationOnChain(loc, signature) {
   events.emit("toast", { msg: `${loc.name} unlocked on-chain!`, kind: "gold" });
   saveGame();
   return { ok: true };
+}
+
+// ---- Premium anglers (purchasable player bodies) --------------------------
+
+/** True if an angler can be selected: free base bodies always, premium once bought. */
+export function isAnglerOwned(id) {
+  const c = getCharacter(id);
+  if (!c?.premium) return true;
+  return (S.profile.anglersOwned || []).includes(c.id);
+}
+
+/** Spend in-game $TIDE to unlock a premium angler. */
+export function buyAngler(id) {
+  const c = getCharacter(id);
+  if (!c?.premium) return { ok: false, reason: "Unknown angler" };
+  if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
+  const price = c.price || 0;
+  if (S.profile.money < price) return { ok: false, reason: "Not enough $TIDE" };
+  S.profile.money -= price;
+  (S.profile.anglersOwned ??= []).push(c.id);
+  emitMoney(-price);
+  events.emit("angler", { id: c.id });
+  saveGame();
+  return { ok: true, item: c };
+}
+
+/** Grant a premium angler after a successful on-chain / SOL payment (no balance deduct). */
+export function grantAnglerOnChain(id, signature) {
+  const c = getCharacter(id);
+  if (!c?.premium) return { ok: false, reason: "Unknown angler" };
+  if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
+  (S.profile.anglersOwned ??= []).push(c.id);
+  S.onchain ??= { purchases: [] };
+  S.onchain.purchases.push({ kind: "angler", id: c.id, burned: c.price, signature, at: Date.now() });
+  events.emit("angler", { id: c.id });
+  saveGame();
+  return { ok: true, item: c };
+}
+
+/** Make an owned angler the active player body. */
+export function selectAngler(id) {
+  const c = getCharacter(id);
+  if (!isAnglerOwned(c.id)) return false;
+  S.profile.character = c.id;
+  events.emit("character", c.id);
+  saveGame();
+  return true;
 }

@@ -6,6 +6,7 @@ import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
 import { lookSwatch } from "../data/gearLooks.js";
 import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
+import { PREMIUM_ANGLERS, getCharacter } from "../data/characters.js";
 import * as economy from "../economy/economy.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight } from "../utils/utils.js";
@@ -48,12 +49,17 @@ export class ShopUI {
     this.moneyEl.textContent = formatMoney(S.profile.money);
     this.renderTabs();
     if (this.tab === "sell") this.renderSell();
+    else if (this.tab === "anglers") this.renderAnglers();
     else this.renderGear(this.tab);
   }
 
   renderTabs() {
     this.tabsEl.innerHTML = "";
-    const tabs = [...GEAR_CATS.map((c) => ({ key: c.key, label: c.label })), { key: "sell", label: `Sell (${S.inventory.length})` }];
+    const tabs = [
+      ...GEAR_CATS.map((c) => ({ key: c.key, label: c.label })),
+      { key: "anglers", label: "Anglers" },
+      { key: "sell", label: `Sell (${S.inventory.length})` },
+    ];
     for (const t of tabs) {
       const btn = document.createElement("button");
       btn.className = `tab-btn${this.tab === t.key ? " active" : ""}`;
@@ -221,6 +227,168 @@ export class ShopUI {
     });
     footer.appendChild(sellAllBtn);
     this.contentEl.appendChild(footer);
+  }
+
+  renderAnglers() {
+    this.contentEl.innerHTML = "";
+    const intro = document.createElement("div");
+    intro.className = "shop-anglers-intro";
+    intro.innerHTML = `Unlock animated anglers to fish as. Each is yours forever once bought.`;
+    this.contentEl.appendChild(intro);
+
+    const selected = S.profile.character;
+    PREMIUM_ANGLERS.forEach((c) => {
+      const owned = economy.isAnglerOwned(c.id);
+      const isSelected = selected === c.id;
+      const afford = S.profile.money >= c.price;
+
+      const row = document.createElement("div");
+      row.className = `shop-item${isSelected ? " equipped" : ""}${!owned ? " locked" : ""}`;
+      row.innerHTML = `
+        <div class="shop-item-info">
+          <div class="shop-item-name"><span class="angler-emoji">${c.emoji || "🎣"}</span>${c.name} <span class="tier-badge">ANGLER</span></div>
+          <div class="shop-item-blurb">${c.blurb || ""}</div>
+        </div>
+        <div class="shop-item-action"></div>
+      `;
+
+      const action = row.querySelector(".shop-item-action");
+      if (isSelected) {
+        action.innerHTML = `<span class="equipped-tag">Selected</span>`;
+      } else if (owned) {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.textContent = "Select";
+        btn.addEventListener("click", () => {
+          audio.play("click");
+          economy.selectAngler(c.id);
+          events.emit("toast", { msg: `Now fishing as ${c.name}`, kind: "success" });
+          this.render();
+        });
+        action.appendChild(btn);
+      } else {
+        const walletConnected = Boolean(currentPublicKey());
+        const solPayAvailable = isSolPayEnabled();
+        const tidePayAvailable = isOnChainPayEnabled();
+
+        if (walletConnected && (solPayAvailable || tidePayAvailable)) {
+          const paymentOptions = document.createElement("div");
+          paymentOptions.className = "payment-options";
+
+          const offChainBtn = document.createElement("button");
+          offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
+          offChainBtn.innerHTML = `
+            <span class="pay-label">Pay with $TIDE</span>
+            <span class="pay-amount">${formatMoney(c.price)}</span>
+          `;
+          if (afford) {
+            offChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain"));
+          } else {
+            offChainBtn.disabled = true;
+            offChainBtn.title = "Not enough $TIDE";
+          }
+          paymentOptions.appendChild(offChainBtn);
+
+          if (solPayAvailable) {
+            const solAmount = tideToSol(c.price);
+            const solBtn = document.createElement("button");
+            solBtn.className = "btn btn-sol";
+            solBtn.innerHTML = `
+              <span class="pay-label">Pay with SOL</span>
+              <span class="pay-amount">${formatSol(solAmount)}</span>
+            `;
+            solBtn.addEventListener("click", () => this.buyAngler(c.id, "sol", solAmount));
+            paymentOptions.appendChild(solBtn);
+          }
+
+          if (tidePayAvailable) {
+            const onChainBtn = document.createElement("button");
+            onChainBtn.className = "btn btn-tide";
+            onChainBtn.innerHTML = `
+              <span class="pay-label">Pay with $TIDE (on-chain)</span>
+              <span class="pay-amount">${formatMoney(c.price)}</span>
+            `;
+            onChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-onchain"));
+            paymentOptions.appendChild(onChainBtn);
+          }
+
+          action.appendChild(paymentOptions);
+        } else {
+          const btn = document.createElement("button");
+          btn.className = `btn ${afford ? "" : "btn-disabled"}`;
+          btn.textContent = afford ? `Buy ${formatMoney(c.price)}` : "Not enough $TIDE";
+          btn.disabled = !afford;
+          if (afford) {
+            btn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain"));
+          }
+          action.appendChild(btn);
+        }
+      }
+      this.contentEl.appendChild(row);
+    });
+  }
+
+  /**
+   * Buy a premium angler with the selected payment method, then auto-select it.
+   * @param {string} id - Angler/character id
+   * @param {string} method - 'tide-offchain', 'sol', or 'tide-onchain'
+   * @param {number} solAmount - SOL amount if method is 'sol'
+   */
+  async buyAngler(id, method, solAmount = 0) {
+    const c = getCharacter(id);
+
+    if (method === "tide-offchain") {
+      const res = economy.buyAngler(id);
+      if (res.ok) {
+        audio.play("buy");
+        economy.selectAngler(id);
+        events.emit("toast", { msg: `${c.name} unlocked — now fishing as ${c.name}!`, kind: "success" });
+      } else {
+        audio.play("error");
+        events.emit("toast", { msg: res.reason, kind: "warn" });
+      }
+      this.render();
+    } else if (method === "sol") {
+      try {
+        events.emit("toast", { msg: "Processing SOL payment...", kind: "info" });
+        const sig = await paySol(solAmount, { memo: `tidal:angler:${id}` });
+        economy.grantAnglerOnChain(id, sig);
+        economy.selectAngler(id);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `${c.name} unlocked with ${formatSol(solAmount)} · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] SOL angler payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "SOL payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+    } else if (method === "tide-onchain") {
+      try {
+        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        const sig = await payTide(c.price, { memo: `tidal:angler:${id}` });
+        economy.grantAnglerOnChain(id, sig);
+        economy.selectAngler(id);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `${c.name} unlocked with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] on-chain $TIDE angler payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+    }
   }
 
   /**

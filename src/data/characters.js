@@ -21,6 +21,7 @@ export const CHARACTERS = [
     emoji: "🤖",
     blurb: "Astromech angler. Beep-boop, big catches.",
     url: "/models/characters/r2d2.glb",
+    castSound: "/sfx/r2d2-cast.mp3",
     height: 1.3,
     yawDeg: 180,
     x: -0.12,
@@ -84,9 +85,47 @@ export const CHARACTERS = [
     y: 0,
     z: 0,
   },
+
+  // ---- Premium Anglers (purchasable in Shop → Anglers for $TIDE) ----------
+  // Animated VRM avatars that reuse the shared Mixamo fishing clips. They must
+  // be unlocked (price below) before they can be selected as the player body.
+  ...premiumAngler("shadow", "Shadow", "🦔", "The ultimate life form — now chasing the ultimate catch."),
+  ...premiumAngler("goku", "Goku", "🥋", "Powering up for an over-9000 lunker. Kamehame-haul!"),
+  ...premiumAngler("vegeta", "Vegeta", "🧤", "The Prince of all Anglers. His pride won't let one get away."),
+  ...premiumAngler("pikachu-rockstar", "Pikachu (Rock Star)", "⚡", "Electric riffs and electric hooksets."),
+  ...premiumAngler("pikachu-phd", "Pikachu (PhD)", "⚡", "A doctorate in ichthyology. Probably."),
+  ...premiumAngler("pikachu-libre", "Pikachu (Libre)", "⚡", "Masked luchador of the lake. ¡Olé!"),
+  ...premiumAngler("rick", "Rick Sanchez", "🧪", "Interdimensional genius — *burp* — the fish don't stand a chance."),
+  ...premiumAngler("luffy", "Luffy", "👒", "The straw-hatted captain. He's gonna be King of the Anglers!"),
 ];
 
 export const DEFAULT_CHARACTER = "r2d2";
+
+/** Build a premium animated-VRM angler entry that reuses the shared fishing clips. */
+function premiumAngler(id, name, emoji, blurb, extra = {}) {
+  return [
+    {
+      id,
+      name,
+      emoji,
+      blurb,
+      url: `/models/characters/${id}.vrm`,
+      vrm: true,
+      anims: { idle: "/anim/fishing-idle.fbx", cast: "/anim/fishing-cast.fbx" },
+      premium: true,
+      price: 250000,
+      height: 1.8,
+      yawDeg: 180,
+      x: 0,
+      y: 0,
+      z: 0,
+      ...extra,
+    },
+  ];
+}
+
+/** Premium anglers only (what the Shop → Anglers tab lists). */
+export const PREMIUM_ANGLERS = CHARACTERS.filter((c) => c.premium);
 
 const BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
 

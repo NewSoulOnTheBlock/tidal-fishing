@@ -64,6 +64,7 @@ export function createDefaultState() {
       bio: "",
       avatar: "default",
       character: "r2d2",
+      anglersOwned: [], // premium angler ids unlocked in Shop → Anglers
       tutorialSeen: false,
     },
     gear: {
