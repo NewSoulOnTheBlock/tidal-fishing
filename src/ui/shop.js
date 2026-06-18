@@ -290,7 +290,7 @@ export class ShopUI {
           paymentOptions.appendChild(offChainBtn);
 
           if (solPayAvailable) {
-            const solAmount = tideToSol(c.price);
+            const solAmount = c.solPrice ?? tideToSol(c.price);
             const solBtn = document.createElement("button");
             solBtn.className = "btn btn-sol";
             solBtn.innerHTML = `

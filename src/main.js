@@ -345,13 +345,24 @@ machine.register(Phase.CHARGING, {
   },
 });
 
+// Rotates R2-D2's cast-sound cycle so each cast plays the next clip.
+let castSoundIdx = 0;
 machine.register(Phase.FLYING, {
   enter() {
     S.stats.casts += 1;
     audio.play("whoosh");
     anglerBody.playCast(); // animated characters throw on release (no-op otherwise)
-    // Character-specific cast voice/SFX (e.g. Naruto), if the body defines one.
-    if (anglerBody.config?.castSound) audio.playSample(anglerBody.config.castSound, { volume: 0.9 });
+    // Character-specific cast voice/SFX. A body can define either a single
+    // `castSound` (e.g. Naruto's line) or a `castSounds` array that cycles one
+    // clip per cast, in order (e.g. R2-D2's rotating astromech beeps).
+    const cfg = anglerBody.config;
+    const cycle = Array.isArray(cfg?.castSounds) ? cfg.castSounds.filter(Boolean) : null;
+    if (cycle && cycle.length) {
+      audio.playSample(cycle[castSoundIdx % cycle.length], { volume: 0.9 });
+      castSoundIdx++;
+    } else if (cfg?.castSound) {
+      audio.playSample(cfg.castSound, { volume: 0.9 });
+    }
   },
 });
 

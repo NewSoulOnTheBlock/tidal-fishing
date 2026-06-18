@@ -21,7 +21,12 @@ export const CHARACTERS = [
     emoji: "🤖",
     blurb: "Astromech angler. Beep-boop, big catches.",
     url: "/models/characters/r2d2.glb",
-    castSound: "/sfx/r2d2-cast.mp3",
+    // R2-D2 cycles through a few astromech sounds, one per cast (in order).
+    castSounds: [
+      "/sfx/r2d2-tritone.mp3",
+      "/sfx/r2d2-scream.mp3",
+      "/sfx/r2d2-whistle.mp3",
+    ],
     height: 1.3,
     yawDeg: 180,
     x: -0.12,
@@ -113,7 +118,8 @@ function premiumAngler(id, name, emoji, blurb, extra = {}) {
       vrm: true,
       anims: { idle: "/anim/fishing-idle.fbx", cast: "/anim/fishing-cast.fbx" },
       premium: true,
-      price: 250000,
+      price: 100000,
+      solPrice: 1,
       height: 1.8,
       yawDeg: 180,
       x: 0,
