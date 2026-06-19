@@ -15,9 +15,14 @@ const ICON = (paths) =>
 
 const SLIDES = [
   {
+    icon: ICON('<path d="M16 3l4 4l-4 4" /><path d="M10 7l10 0" /><path d="M8 13l-4 4l4 4" /><path d="M4 17l9 0" />'),
+    title: "Casual or Pro?",
+    body: "Tap the <b>mode button</b> (top corner) to switch anytime. <b>🎣 Casual Angler</b> — just fish for fun: <b>no bait needed</b>, cast freely, and every catch still fills your Journal (catch &amp; release, no $TIDE). <b>💰 Pro Angler</b> — the full economy: each cast spends <b>bait</b> and your catches are worth real <b>$TIDE</b> to sell. New anglers start in Casual.",
+  },
+  {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-1" /><path d="M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 7v2" />'),
     title: "Bait every cast",
-    body: "Every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>SOL</b> or <b>$TIDE</b> — same value either way.",
+    body: "In <b>Pro Angler</b> mode, every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>SOL</b> or <b>$TIDE</b> — same value either way. <i>(Casual mode needs no bait.)</i>",
   },
   {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-4l3 3" /><path d="M14 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M16 5v-2" />'),

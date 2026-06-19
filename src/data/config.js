@@ -8,7 +8,7 @@ export const CONFIG = {
   water: { level: 0, size: 4000 },
 
   time: {
-    dayLengthSec: 480, // real seconds for a full 24h cycle
+    dayLengthSec: 1920, // real seconds for a full 24h cycle (4x slower than the original 480)
     startHour: 8.5,
   },
 

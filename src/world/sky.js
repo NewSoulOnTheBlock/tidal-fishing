@@ -139,14 +139,14 @@ export class SkySystem {
       moonDir.y = Math.abs(moonDir.y) * 0.7 + 0.25;
       this.sunColor.copy(this._moonBlue);
       this.sunLight.color.copy(this._moonBlue);
-      this.sunLight.intensity = 0.32 * (1 - cloud * 0.3);
+      this.sunLight.intensity = 0.62 * (1 - cloud * 0.3);
       this.sunLight.position.copy(moonDir).normalize().multiplyScalar(120);
     }
 
     this.hemiLight.color.copy(this._hemiSkyNight).lerp(this._hemiSkyDay, f);
     this.hemiLight.groundColor.copy(this._hemiGndNight).lerp(this._hemiGndDay, f);
-    this.hemiLight.intensity = lerp(0.22, 0.75, f) * (1 - cloud * 0.2);
-    this.ambient.intensity = lerp(0.06, 0.14, f);
+    this.hemiLight.intensity = lerp(0.4, 0.78, f) * (1 - cloud * 0.2);
+    this.ambient.intensity = lerp(0.14, 0.17, f);
 
     // fog: blend location palettes, tint warm at dawn/dusk, thicken at night/clouds
     this._fogDay.setHex(loc.fog.day);
@@ -156,7 +156,7 @@ export class SkySystem {
     this.scene.fog.color.copy(this._fogMix);
     this.scene.fog.density = loc.fog.density * (1 + (1 - f) * 0.55 + cloud * 0.35);
 
-    this.renderer.toneMappingExposure = lerp(0.3, 0.58, f);
+    this.renderer.toneMappingExposure = lerp(0.42, 0.58, f);
 
     this.stars.material.opacity = (1 - f) * (1 - cloud * 0.8) * 0.9;
 
