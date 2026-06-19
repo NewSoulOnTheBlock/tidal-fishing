@@ -9,6 +9,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { disposeObject3D } from "../core/disposal.js";
 
 export function createCharacterPreview(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -51,14 +52,9 @@ export function createCharacterPreview(container) {
     vrm = null;
     if (!current) return;
     turntable.remove(current.holder);
-    current.holder.traverse((o) => {
-      if (o.isMesh) {
-        o.geometry?.dispose?.();
-        const m = o.material;
-        if (Array.isArray(m)) m.forEach((x) => x?.dispose?.());
-        else m?.dispose?.();
-      }
-    });
+    // Deep dispose textures + skeletons too (not just geometry/material), else
+    // each VRM preview swap leaks the avatar's texture set.
+    disposeObject3D(current.holder);
     current = null;
   }
 
@@ -99,7 +95,10 @@ export function createCharacterPreview(container) {
     loader.load(
       url,
       (gltf) => {
-        if (token !== loadToken) return;
+        if (token !== loadToken) {
+          disposeObject3D(gltf.scene); // superseded — don't leak it
+          return;
+        }
         mount(gltf.scene);
       },
       undefined,
@@ -123,7 +122,10 @@ export function createCharacterPreview(container) {
       const vloader = new GLTFLoader();
       vloader.register((parser) => new VRMLoaderPlugin(parser));
       const gltf = await vloader.loadAsync(url);
-      if (token !== loadToken) return;
+      if (token !== loadToken) {
+        VRMUtils.deepDispose?.(gltf.scene); // superseded — free the loaded VRM
+        return;
+      }
 
       const loaded = gltf.userData?.vrm;
       if (!loaded) throw new Error("file contains no VRM data");
@@ -183,6 +185,7 @@ export function createCharacterPreview(container) {
       ro.disconnect();
       clearCurrent();
       renderer.dispose();
+      renderer.forceContextLoss?.(); // release the WebGL context (browsers cap ~16)
       renderer.domElement.remove();
     },
   };

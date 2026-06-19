@@ -129,6 +129,8 @@ class BirdFlock {
     );
     wingGeo.computeVertexNormals();
     const mat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+    this.wingGeo = wingGeo;
+    this.mat = mat;
     this.birds = [];
     const n = 5 + Math.floor(Math.random() * 4);
     for (let i = 0; i < n; i++) {
@@ -159,6 +161,7 @@ class BirdFlock {
     const k = this.t / this.dur;
     if (k >= 1) {
       this.scene.remove(this.group);
+      this.dispose();
       this.done = true;
       return;
     }
@@ -169,6 +172,15 @@ class BirdFlock {
       b.userData.l.rotation.z = a;
       b.userData.r.rotation.z = -a;
     }
+  }
+
+  // Geometry + material are shared by every bird in the flock; free them once
+  // when the flock leaves so repeated flyovers don't accumulate GPU buffers.
+  dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
+    this.wingGeo?.dispose();
+    this.mat?.dispose();
   }
 }
 

@@ -137,7 +137,10 @@ export class WeatherUI {
   }
 
   createLightning() {
-    setInterval(() => {
+    // Guard against stacking intervals: clearEffects() runs before each weather
+    // change, but double-check so we never run two lightning loops at once.
+    if (this.lightningInterval) return;
+    this.lightningInterval = setInterval(() => {
       if (Math.random() < 0.05) { // 5% chance per second
         const flash = document.createElement('div');
         flash.className = 'lightning-flash';
@@ -159,6 +162,13 @@ export class WeatherUI {
     if (this.rainAnimationId) {
       cancelAnimationFrame(this.rainAnimationId);
       this.rainAnimationId = null;
+    }
+
+    // Stop the lightning loop (otherwise every storm started a new 1s interval
+    // that ran forever, multiplying with each storm).
+    if (this.lightningInterval) {
+      clearInterval(this.lightningInterval);
+      this.lightningInterval = null;
     }
     
     // Remove overlays

@@ -14,6 +14,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { getCharacter, DEFAULT_CHARACTER } from "../data/characters.js";
+import { disposeObject3D } from "../core/disposal.js";
 
 const BASE = {
   height: 1.6, // world units, feet-to-head, after scaling
@@ -60,14 +61,11 @@ export function createAnglerBody(parent, character) {
   function clearModel() {
     if (!holder) return;
     norm.remove(holder);
-    holder.traverse((o) => {
-      if (o.isMesh) {
-        o.geometry?.dispose?.();
-        const m = o.material;
-        if (Array.isArray(m)) m.forEach((x) => x?.dispose?.());
-        else m?.dispose?.();
-      }
-    });
+    // Deep dispose: geometries, materials AND their textures (VRM avatars are
+    // texture-heavy — a plain material.dispose() would leak every texture) plus
+    // skinned-mesh skeletons. Without this, each character swap leaked the full
+    // model's GPU memory.
+    disposeObject3D(holder);
     holder = null;
   }
 
@@ -149,7 +147,10 @@ export function createAnglerBody(parent, character) {
     gltfLoader().load(
       cfg.url,
       (gltf) => {
-        if (token !== loadToken) return; // superseded by a newer load
+        if (token !== loadToken) {
+          disposeObject3D(gltf.scene); // superseded by a newer load — don't leak it
+          return;
+        }
         mountModel(gltf.scene);
       },
       undefined,
@@ -174,7 +175,12 @@ export function createAnglerBody(parent, character) {
       const vloader = new GLTFLoader();
       vloader.register((parser) => new VRMLoaderPlugin(parser));
       const gltf = await vloader.loadAsync(cfg.url);
-      if (token !== loadToken) return;
+      if (token !== loadToken) {
+        // Superseded while loading — deep-dispose the fully-loaded VRM so its
+        // (heavy) textures and skeleton don't leak.
+        VRMUtils.deepDispose?.(gltf.scene);
+        return;
+      }
 
       const loaded = gltf.userData?.vrm;
       if (!loaded) throw new Error("file contains no VRM data");

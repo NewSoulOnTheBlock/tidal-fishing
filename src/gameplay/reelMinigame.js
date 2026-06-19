@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { CONFIG } from "../data/config.js";
 import { events } from "../state/gameState.js";
 import { FISH_BY_ID } from "../data/fishData.js";
-import { createFishMesh } from "../fish/fishFactory.js";
+import { createFishMesh, disposeFishMesh } from "../fish/fishFactory.js";
 import { clamp, lerp, randRange } from "../utils/utils.js";
 
 const WATER_Y = CONFIG.water.level;
@@ -117,6 +117,7 @@ export class ReelFight {
     this.reeling = false;
     if (this.fishMesh) {
       this.scene.remove(this.fishMesh);
+      disposeFishMesh(this.fishMesh);
       this.fishMesh = null;
     }
   }

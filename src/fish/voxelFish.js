@@ -158,6 +158,32 @@ const MODELS = {
 // Decoded + normalised voxel data, cached per model key.
 const prepCache = new Map();
 
+// Per-model cube geometry (sized to the model's voxel scale) and a single
+// shared material, cached so every build (one per catch, per preview, per
+// ambient spawn) reuses the same GPU resources instead of allocating fresh
+// ones. Flagged userData.shared so fish-mesh disposal leaves them intact for
+// the next build. Only the per-instance InstancedMesh buffers are per-build.
+const geoCache = new Map();
+let voxelMat = null;
+
+function cubeGeo(key, voxScale) {
+  let g = geoCache.get(key);
+  if (!g) {
+    g = new THREE.BoxGeometry(voxScale, voxScale, voxScale);
+    g.userData.shared = true;
+    geoCache.set(key, g);
+  }
+  return g;
+}
+
+function sharedVoxelMat() {
+  if (!voxelMat) {
+    voxelMat = new THREE.MeshStandardMaterial({ roughness: 0.62, metalness: 0.05 });
+    voxelMat.userData.shared = true;
+  }
+  return voxelMat;
+}
+
 function decodeBase64(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -222,8 +248,8 @@ export function hasVoxelModel(key) {
 export function buildVoxelFish(key) {
   const { positions, colorIdx, count, voxScale, palette } = prepare(key);
 
-  const geo = new THREE.BoxGeometry(voxScale, voxScale, voxScale);
-  const mat = new THREE.MeshStandardMaterial({ roughness: 0.62, metalness: 0.05 });
+  const geo = cubeGeo(key, voxScale);
+  const mat = sharedVoxelMat();
   const mesh = new THREE.InstancedMesh(geo, mat, count);
 
   const m = new THREE.Matrix4();

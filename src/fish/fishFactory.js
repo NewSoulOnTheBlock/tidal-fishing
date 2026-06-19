@@ -172,3 +172,25 @@ function sharedMat(key, color) {
   }
   return basicMats.get(key);
 }
+
+/**
+ * Releases a fish group's per-build GPU resources. Procedural fish share cached
+ * geometry/materials (flagged userData.shared) so nothing is freed for them;
+ * voxel fish own a per-build InstancedMesh whose per-instance buffers ARE freed
+ * here. Safe (and a near no-op) to call on any createFishMesh() result; call it
+ * whenever a fish mesh is removed from the scene so instance buffers don't
+ * accumulate across catches.
+ */
+export function disposeFishMesh(obj) {
+  if (!obj) return;
+  obj.traverse((o) => {
+    if (o.isInstancedMesh) o.dispose();
+    const g = o.geometry;
+    if (g && !g.userData?.shared) g.dispose();
+    const m = o.material;
+    if (m) {
+      const list = Array.isArray(m) ? m : [m];
+      for (const mat of list) if (!mat.userData?.shared) mat.dispose();
+    }
+  });
+}

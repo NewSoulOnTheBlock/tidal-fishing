@@ -14,7 +14,8 @@ export class JournalUI {
 
   show() {
     if (!S.progressionJournal) return;
-    
+    if (this.panel) this.hide(); // never stack a second panel on repeat opens
+
     this.panel = document.createElement("div");
     this.panel.id = "journal-panel";
     this.panel.className = "modal-overlay";

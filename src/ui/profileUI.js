@@ -51,6 +51,13 @@ export class ProfileUI {
       return;
     }
 
+    // Guard against stacking panels: show() awaits the server before appending,
+    // so a second click during that window would otherwise append a 2nd panel.
+    // The synchronous flag closes that race; an already-open panel is replaced.
+    if (this._opening) return;
+    if (this.panel) this.hide();
+    this._opening = true;
+
     const walletAddress = publicKey.toString();
 
     // Local state is the source of truth (instant, offline-safe).
@@ -75,6 +82,7 @@ export class ProfileUI {
     this.panel.innerHTML = this.renderProfile();
     document.body.appendChild(this.panel);
     this.bindEvents();
+    this._opening = false;
   }
 
   /** Reconcile the local and server profiles into the most accurate view.
@@ -412,6 +420,8 @@ export class ProfileUI {
   }
 
   selectAvatar() {
+    // Replace any open avatar picker instead of stacking a second one.
+    this.panel.querySelector('.avatar-picker-modal:not(.character-picker-modal)')?.remove();
     // Create avatar picker modal
     const picker = document.createElement('div');
     picker.className = 'avatar-picker-modal';
@@ -453,7 +463,22 @@ export class ProfileUI {
     this.refresh();
   }
 
+  // Dispose and remove any open character picker (the live VRM preview it mounts
+  // owns a WebGL renderer + render loop, so it must be disposed, not just
+  // detached, or its GPU context leaks).
+  closeCharacterPicker() {
+    if (this._charChooser) {
+      try { this._charChooser.dispose(); } catch { /* already gone */ }
+      this._charChooser = null;
+    }
+    if (this._charPicker) {
+      this._charPicker.remove();
+      this._charPicker = null;
+    }
+  }
+
   selectCharacter() {
+    this.closeCharacterPicker(); // never stack two live previews
     const picker = document.createElement('div');
     picker.className = 'avatar-picker-modal character-picker-modal';
     picker.innerHTML = `
@@ -480,29 +505,32 @@ export class ProfileUI {
         }
         // Swap the live in-game body.
         events.emit('character', char.id);
-        chooser.dispose();
-        picker.remove();
+        this.closeCharacterPicker();
         events.emit('toast', { msg: `✅ Now fishing as ${char.name}!`, kind: 'success' });
       },
     });
+    // Track so refresh()/hide()/a repeat open can dispose the live preview.
+    this._charPicker = picker;
+    this._charChooser = chooser;
 
-    const cancel = () => {
-      chooser.dispose();
-      picker.remove();
-    };
-    picker.querySelector('.btn-cancel').addEventListener('click', cancel);
+    picker.querySelector('.btn-cancel').addEventListener('click', () => this.closeCharacterPicker());
     picker.addEventListener('click', (e) => {
-      if (e.target === picker) cancel();
+      if (e.target === picker) this.closeCharacterPicker();
     });
   }
 
   refresh() {
     if (!this.panel) return;
+    // refresh() blows away panel.innerHTML; dispose any open VRM preview first so
+    // its renderer/RAF aren't orphaned by the DOM wipe.
+    this.closeCharacterPicker();
     this.panel.innerHTML = this.renderProfile();
     this.bindEvents();
   }
 
   hide() {
+    this.closeCharacterPicker();
+    this._opening = false;
     if (this.panel) {
       this.panel.remove();
       this.panel = null;
