@@ -1,6 +1,6 @@
 // Service Worker for Tidal PWA
 // Bump VERSION on every deploy that must invalidate the PWA cache.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE_NAME = `tidal-${VERSION}`;
 const RUNTIME_CACHE = `tidal-runtime-${VERSION}`;
 
@@ -8,8 +8,7 @@ const RUNTIME_CACHE = `tidal-runtime-${VERSION}`;
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/favicon.svg',
-  '/background-music.mp3'
+  '/favicon.svg'
 ];
 
 // Install event - cache core assets

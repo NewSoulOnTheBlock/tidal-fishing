@@ -6,9 +6,11 @@ import { S, events } from "../state/gameState.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { shortAddress } from "../web3/solana.js";
 import { apiFetch } from "../utils/api.js";
+import { cachedGetJson } from "../utils/apiCache.js";
 import { getOnline, getHotSpotLabel } from "../web3/world.js";
 
 const POLL_MS = 4000;
+const POLL_MAX = 30000; // idle back-off ceiling
 const MAX_RENDER = 80;
 const MEDALS = ["🥇", "🥈", "🥉"];
 const EMOTES = ["🎣", "🐟", "👏", "🔥", "😂"];
@@ -26,6 +28,9 @@ export class ChatUI {
     this._footerSig = null;
     this.medals = new Map();   // wallet_address -> medal emoji (top 3 earners)
     this._pollCount = 0;
+    this._pollDelay = POLL_MS;  // adaptive: grows when chat is idle
+    this._emptyStreak = 0;
+    this._pollGen = 0;          // invalidates in-flight poll loops on stop
   }
 
   mount() {
@@ -64,7 +69,7 @@ export class ChatUI {
     // cache to avoid needless network churn; resume when it's shown again.
     this._onVisibility = () => {
       if (document.hidden) this.stopPolling();
-      else this.startPolling();
+      else { this._pollDelay = POLL_MS; this._emptyStreak = 0; this.startPolling(); }
     };
     document.addEventListener("visibilitychange", this._onVisibility);
     this._onPageHide = () => this.stopPolling();
@@ -75,13 +80,32 @@ export class ChatUI {
 
   startPolling() {
     if (this.pollTimer) return;
-    this.pollTimer = setInterval(() => this.poll(), POLL_MS);
+    const gen = ++this._pollGen;
+    const loop = async () => {
+      if (gen !== this._pollGen) return;
+      await this.poll();
+      if (gen !== this._pollGen) return; // stopped while polling
+      this.pollTimer = setTimeout(loop, this._pollDelay);
+    };
+    this.pollTimer = setTimeout(loop, this._pollDelay);
   }
 
   stopPolling() {
+    this._pollGen++; // invalidate any in-flight loop
     if (this.pollTimer) {
-      clearInterval(this.pollTimer);
+      clearTimeout(this.pollTimer);
       this.pollTimer = null;
+    }
+  }
+
+  // Adaptive cadence: poll fast (4s) when chat is active, back off toward 30s
+  // after several empty polls so an idle tab stops hammering the API.
+  _adjustPoll(gotNew) {
+    if (gotNew) {
+      this._emptyStreak = 0;
+      this._pollDelay = POLL_MS;
+    } else if (++this._emptyStreak >= 3) {
+      this._pollDelay = Math.min(this._pollDelay * 2, POLL_MAX);
     }
   }
 
@@ -134,6 +158,7 @@ export class ChatUI {
         msgs.forEach((m) => this.appendMessage(m));
         if (atBottom) this.scrollToBottom();
       }
+      this._adjustPoll(msgs.length > 0);
     } catch {
       /* transient network error — next tick retries */
     }
@@ -142,9 +167,7 @@ export class ChatUI {
   // Fetch the current top-3 earners so their names get a 🥇🥈🥉 in chat.
   async loadMedals() {
     try {
-      const res = await apiFetch("/api/leaderboard?limit=3");
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await cachedGetJson("/api/leaderboard?limit=3", 30000);
       const rows = data.leaderboard || [];
       const next = new Map();
       rows.slice(0, 3).forEach((r, i) => {
@@ -158,6 +181,7 @@ export class ChatUI {
 
   appendMessage(m) {
     if (this.seen.has(m.id)) return;
+    if (this.seen.size > 2000) this.seen.clear(); // bound growth; lastId still guards order
     this.seen.add(m.id);
     this.lastId = Math.max(this.lastId, m.id);
 

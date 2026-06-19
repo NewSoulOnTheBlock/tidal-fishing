@@ -8,7 +8,7 @@ export function createCore(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.55;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.setSize(window.innerWidth, window.innerHeight);
   container.appendChild(renderer.domElement);
 
@@ -28,7 +28,7 @@ export function createCore(container) {
   sunLight.position.set(40, 60, 20);
   sunLight.shadow.mapSize.set(1024, 1024);
   sunLight.shadow.camera.near = 1;
-  sunLight.shadow.camera.far = 220;
+  sunLight.shadow.camera.far = 120;
   sunLight.shadow.camera.left = -30;
   sunLight.shadow.camera.right = 30;
   sunLight.shadow.camera.top = 30;

@@ -98,11 +98,8 @@ class AudioManager {
     if (this.bgMusic && this.bgMusic.audio) {
       this.bgMusic.audio.pause();
       this.bgMusic.audio.currentTime = 0;
-      if (this.bgMusic.source) {
-        try {
-          this.bgMusic.source.disconnect();
-        } catch {}
-      }
+      try { this.bgMusic.source?.disconnect(); } catch {}
+      try { this.bgMusic.gainNode?.disconnect(); } catch {}
     }
     
     try {
@@ -178,6 +175,8 @@ class AudioManager {
     try {
       this.bgMusic.audio.pause();
       this.bgMusic.audio.currentTime = 0;
+      try { this.bgMusic.source?.disconnect(); } catch {}
+      try { this.bgMusic.gainNode?.disconnect(); } catch {}
       this.bgMusic = null;
     } catch {}
   }
@@ -419,11 +418,8 @@ class AudioManager {
     if (!this.ambience) return;
     for (const t of this.ambience.timers) clearTimeout(t);
     for (const n of this.ambience.nodes) {
-      try {
-        n.stop ? n.stop() : n.disconnect();
-      } catch {
-        /* ignore */
-      }
+      try { if (n.stop) n.stop(); } catch { /* ignore */ }
+      try { n.disconnect(); } catch { /* ignore */ }
     }
     this.ambience = null;
   }
@@ -457,7 +453,7 @@ class AudioManager {
       water.connect(lp).connect(wGain).connect(this.master);
       water.start();
       lfo.start();
-      amb.nodes.push(water, lfo);
+      amb.nodes.push(water, lfo, lp, wGain, lfoGain);
 
       // wind: looped noise through gentle bandpass
       const wind = this.ctx.createBufferSource();
@@ -472,7 +468,7 @@ class AudioManager {
       windGain.gain.value = 0.022 * profile.wind;
       wind.connect(bp).connect(windGain).connect(this.master);
       wind.start();
-      amb.nodes.push(wind);
+      amb.nodes.push(wind, bp, windGain);
 
       const scheduleWildlife = () => {
         if (this.ambience !== amb) return;

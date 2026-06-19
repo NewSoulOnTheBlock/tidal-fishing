@@ -19,7 +19,7 @@ import { S, events } from "../state/gameState.js";
 import * as economy from "../economy/economy.js";
 import { formatMoney } from "../utils/utils.js";
 
-const REFRESH_INTERVAL_MS = 25_000;
+const REFRESH_INTERVAL_MS = 60_000;
 
 export class WalletPanel {
   constructor() {
@@ -59,6 +59,10 @@ export class WalletPanel {
     });
 
     events.on("wallet:refresh", () => this.refreshBalances());
+    // Resume balance polling immediately when the tab becomes visible again
+    // (the interval is paused while hidden to avoid background RPC spam).
+    this._onVis = () => { if (!document.hidden) this.refreshBalances(); };
+    document.addEventListener("visibilitychange", this._onVis);
     // Re-render when the player's earned $TIDE changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
@@ -249,6 +253,11 @@ export class WalletPanel {
   async refreshBalances() {
     clearTimeout(this.refreshTimer);
     if (!this.account) return;
+    // Pause RPC polling while the tab is hidden; re-arm so it resumes on return.
+    if (document.hidden) {
+      this.refreshTimer = setTimeout(() => this.refreshBalances(), REFRESH_INTERVAL_MS);
+      return;
+    }
     const pubkey = safePubkey(this.account.address);
     if (!pubkey) return;
     const [sol, tide] = await Promise.all([fetchSolBalance(pubkey), fetchTideBalance(pubkey)]);

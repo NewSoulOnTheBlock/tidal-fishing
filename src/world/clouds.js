@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { randRange, clamp, lerp } from "../utils/utils.js";
 
 let cachedPuff = null;
+const OVERCAST_GREY = new THREE.Color(0x8893a0);
 
 // A single soft, lumpy cloud silhouette baked from overlapping radial blobs.
 function makePuffTexture(size = 256) {
@@ -88,7 +89,7 @@ export class CloudLayer {
     if (sunColor) this._dayCol.lerp(sunColor, 0.35 * (1 - dayFactor) + 0.18);
     this._tmp.lerp(this._dayCol, clamp(dayFactor, 0, 1));
     // overcast clouds go a touch greyer
-    this._tmp.lerp(new THREE.Color(0x8893a0), cloudFactor * 0.35);
+    this._tmp.lerp(OVERCAST_GREY, cloudFactor * 0.35);
 
     // a few wispy clouds even when "clear", a full deck when overcast
     const deck = lerp(0.18, 1.0, clamp(cloudFactor, 0, 1));

@@ -421,21 +421,51 @@ function getClientIP(req) {
          'unknown';
 }
 
+// --- In-memory perf caches -------------------------------------------------
+// checkBans runs on EVERY /api request (chat polling alone is 15+/min/client).
+// Cache the per-IP ban result for 5 min; the auto-ban + admin ban/unban paths
+// call clearBanCache(ip) so a new ban still takes effect immediately.
+const BAN_CACHE_TTL = 5 * 60 * 1000;
+const BAN_CACHE_MAX = 5000;
+const banCache = new Map(); // ip -> { t, banned, reason }
+function getCachedBan(ip) {
+  const e = banCache.get(ip);
+  if (e && Date.now() - e.t < BAN_CACHE_TTL) return e;
+  if (e) banCache.delete(ip);
+  return null;
+}
+function setCachedBan(ip, banned, reason) {
+  if (banCache.size >= BAN_CACHE_MAX) {
+    let drop = Math.ceil(BAN_CACHE_MAX * 0.1);
+    for (const k of banCache.keys()) { banCache.delete(k); if (--drop <= 0) break; }
+  }
+  banCache.set(ip, { t: Date.now(), banned, reason });
+}
+function clearBanCache(ip) { if (ip) banCache.delete(ip); else banCache.clear(); }
+
+// Route-level middleware to stamp a Cache-Control policy on a response.
+const cacheControl = (value) => (req, res, next) => { res.set('Cache-Control', value); next(); };
+
 // Ban check middleware
 async function checkBans(req, res, next) {
   const ip = getClientIP(req);
   const walletAddress = req.body.walletAddress || req.query.walletAddress;
   
   try {
-    // Check IP ban
-    const ipBan = await pool.query(
-      'SELECT reason FROM banned_ips WHERE ip_address = $1',
-      [ip]
-    );
-    if (ipBan.rows.length > 0) {
-      return res.status(403).json({ 
+    // Check IP ban (cached — this middleware runs on every /api request)
+    let ipEntry = getCachedBan(ip);
+    if (!ipEntry) {
+      const ipBan = await pool.query(
+        'SELECT reason FROM banned_ips WHERE ip_address = $1',
+        [ip]
+      );
+      setCachedBan(ip, ipBan.rows.length > 0, ipBan.rows[0]?.reason || 'Your IP has been banned');
+      ipEntry = getCachedBan(ip);
+    }
+    if (ipEntry?.banned) {
+      return res.status(403).json({
         error: 'Access denied',
-        reason: ipBan.rows[0].reason || 'Your IP has been banned',
+        reason: ipEntry.reason || 'Your IP has been banned',
         banned: true
       });
     }
@@ -514,6 +544,7 @@ async function noteCatchFlood(ip) {
         'INSERT INTO banned_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = $2',
         [ip, 'auto: catch endpoint flood']
       );
+      clearBanCache(ip); // force a re-check so the ban is enforced immediately
       console.warn(`[catch] AUTO-BANNED ip=${ip} (${e.n} rejects/min on catch endpoint)`);
     } catch (err) {
       console.error('[catch] auto-ban failed:', err.message);
@@ -564,17 +595,20 @@ const connection = new Connection(RPC_URL, 'confirmed');
 const skrResolver = makeSkrResolver(connection);
 
 // Helper functions
+const tokenProgramCache = new Map(); // mint base58 -> program PublicKey (a mint's program never changes)
 async function detectTokenProgram(mint) {
+  const key = mint.toBase58();
+  const cached = tokenProgramCache.get(key);
+  if (cached) return cached;
   // Check the mint account to determine if it's Token-2022 or classic
   const mintInfo = await connection.getAccountInfo(mint);
   if (!mintInfo) {
     throw new Error('Mint account not found');
   }
   // Token-2022 mints are owned by the Token-2022 program
-  if (mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID)) {
-    return TOKEN_2022_PROGRAM_ID;
-  }
-  return TOKEN_PROGRAM_ID;
+  const program = mintInfo.owner.equals(TOKEN_2022_PROGRAM_ID) ? TOKEN_2022_PROGRAM_ID : TOKEN_PROGRAM_ID;
+  tokenProgramCache.set(key, program);
+  return program;
 }
 
 async function getAssociatedTokenAddress(mint, owner, tokenProgram) {
@@ -619,7 +653,7 @@ function createTransferIx(source, dest, owner, amount, tokenProgram) {
 // Routes
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', cacheControl('no-store'), (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -630,7 +664,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Get treasury balance
-app.get('/api/treasury/balance', async (req, res) => {
+app.get('/api/treasury/balance', cacheControl('public, max-age=30'), async (req, res) => {
   try {
     if (!treasuryKeypair) {
       return res.status(503).json({ error: 'Treasury not configured' });
@@ -911,7 +945,7 @@ app.patch('/api/player/profile', writeLimiter, requireSession, async (req, res) 
 });
 
 // Get player profile (public view)
-app.get('/api/player/profile/:wallet', async (req, res) => {
+app.get('/api/player/profile/:wallet', cacheControl('no-store'), async (req, res) => {
   try {
     const { wallet } = req.params;
     
@@ -1267,11 +1301,28 @@ app.post('/api/player/catch', catchLimiter, requireSession, async (req, res) => 
 });
 
 // 4. Get leaderboard (top earners, recent catches feed, or per-species bests)
-app.get('/api/leaderboard', async (req, res) => {
+// 30s in-memory TTL cache — the daily board does a GROUP BY aggregate and is
+// hit by every client (leaderboard panel + chat medals) several times a minute.
+const LB_CACHE_TTL = 30_000;
+const lbCache = new Map(); // key -> { t, body }
+function lbCacheGet(key) {
+  const e = lbCache.get(key);
+  if (e && Date.now() - e.t < LB_CACHE_TTL) return e.body;
+  if (e) lbCache.delete(key);
+  return null;
+}
+function lbCacheSet(key, body) {
+  if (lbCache.size > 200) { const k = lbCache.keys().next().value; lbCache.delete(k); }
+  lbCache.set(key, { t: Date.now(), body });
+}
+app.get('/api/leaderboard', cacheControl('public, max-age=30'), async (req, res) => {
   const { type, species } = req.query;
   const limit = Math.min(parseInt(req.query.limit, 10) || 100, 100);
+  const cacheKey = `${type || 'daily'}:${species || ''}:${limit}`;
 
   try {
+    const cachedBody = lbCacheGet(cacheKey);
+    if (cachedBody) return res.json(cachedBody);
     // Recent catches feed — global, newest first.
     if (type === 'recent') {
       const result = await pool.query(
@@ -1284,7 +1335,9 @@ app.get('/api/leaderboard', async (req, res) => {
          LIMIT $1`,
         [limit]
       );
-      return res.json({ catches: result.rows });
+      const body = { catches: result.rows };
+      lbCacheSet(cacheKey, body);
+      return res.json(body);
     }
 
     // Biggest catches for a single species.
@@ -1303,7 +1356,9 @@ app.get('/api/leaderboard', async (req, res) => {
          LIMIT $2`,
         [species, limit]
       );
-      return res.json({ catches: result.rows });
+      const body = { catches: result.rows };
+      lbCacheSet(cacheKey, body);
+      return res.json(body);
     }
 
     // Default: DAILY leaderboard — ranks anglers by what they've earned TODAY,
@@ -1324,7 +1379,9 @@ app.get('/api/leaderboard', async (req, res) => {
        LIMIT $1`,
       [limit]
     );
-    res.json({ leaderboard: result.rows, period: 'daily' });
+    const body = { leaderboard: result.rows, period: 'daily' };
+    lbCacheSet(cacheKey, body);
+    res.json(body);
   } catch (error) {
     console.error('[leaderboard] Error:', error);
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
@@ -1358,7 +1415,7 @@ app.get('/api/widget', async (req, res) => {
 // 4b. Global troll box — fetch recent chat messages.
 // ?since=<id> returns only newer messages (for incremental polling);
 // otherwise returns the latest `limit` messages (oldest-first for appending).
-app.get('/api/chat', async (req, res) => {
+app.get('/api/chat', cacheControl('no-store'), async (req, res) => {
   const since = parseInt(req.query.since, 10);
   const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
   try {
@@ -1468,7 +1525,7 @@ app.post('/api/presence', (req, res) => {
 
 // 4e. World snapshot — online count, daily hot spot, and the catch of the day
 // (biggest catch in the last 24h). Read-only, public.
-app.get('/api/world', async (req, res) => {
+app.get('/api/world', cacheControl('public, max-age=10'), async (req, res) => {
   let catchOfDay = null;
   try {
     const r = await pool.query(
@@ -1500,7 +1557,7 @@ app.get('/api/world', async (req, res) => {
 // all-time count is cached briefly so opening the modal can't hammer the DB.
 let anglersTotalCache = { n: 0, at: 0 };
 const ANGLERS_TOTAL_TTL_MS = 30_000;
-app.get('/api/anglers/online', async (req, res) => {
+app.get('/api/anglers/online', cacheControl('public, max-age=10'), async (req, res) => {
   const online = onlineCount();
   const wallets = [...onlineWallets()].slice(0, 100);
 
@@ -1596,7 +1653,7 @@ app.post('/api/player/checkin', writeLimiter, requireSession, async (req, res) =
 });
 
 // 4g. Player rank + best catch — backs the /rank and /best chat slash-commands.
-app.get('/api/player/rank/:walletAddress', async (req, res) => {
+app.get('/api/player/rank/:walletAddress', cacheControl('no-store'), async (req, res) => {
   const wallet = req.params.walletAddress;
   try {
     const me = await pool.query(
@@ -1632,7 +1689,7 @@ app.get('/api/player/rank/:walletAddress', async (req, res) => {
 });
 
 // 5. Get player stats
-app.get('/api/player/stats/:walletAddress', async (req, res) => {
+app.get('/api/player/stats/:walletAddress', cacheControl('no-store'), async (req, res) => {
   try {
     const player = await pool.query(
       `SELECT p.*, 
@@ -1657,7 +1714,7 @@ app.get('/api/player/stats/:walletAddress', async (req, res) => {
 });
 
 // 6. Get player journal
-app.get('/api/player/journal/:walletAddress', async (req, res) => {
+app.get('/api/player/journal/:walletAddress', cacheControl('no-store'), async (req, res) => {
   try {
     const player = await pool.query(
       'SELECT id FROM players WHERE wallet_address = $1',
@@ -1793,6 +1850,7 @@ app.post('/api/admin/ban/ip', adminLimiter, async (req, res) => {
       'INSERT INTO banned_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = $2',
       [ipAddress, reason || 'Violation of terms']
     );
+    clearBanCache(ipAddress);
     console.log(`[admin] Banned IP: ${ipAddress}`);
     res.json({ success: true, message: `IP ${ipAddress} has been banned` });
   } catch (error) {
@@ -1829,6 +1887,7 @@ app.post('/api/admin/unban/ip', adminLimiter, async (req, res) => {
   
   try {
     await pool.query('DELETE FROM banned_ips WHERE ip_address = $1', [ipAddress]);
+    clearBanCache(ipAddress);
     console.log(`[admin] Unbanned IP: ${ipAddress}`);
     res.json({ success: true, message: `IP ${ipAddress} has been unbanned` });
   } catch (error) {

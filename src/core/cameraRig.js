@@ -6,6 +6,7 @@ import { CONFIG } from "../data/config.js";
 import { lerp, clamp } from "../utils/utils.js";
 
 const UP = new THREE.Vector3(0, 1, 0);
+const _camRight = new THREE.Vector3();
 
 export class CameraRig {
   constructor(camera) {
@@ -80,7 +81,7 @@ export class CameraRig {
     // play mode: behind and slightly right of the angler, facing the aim
     const yaw = this.aimYaw;
     this._dir.set(Math.sin(yaw), 0, -Math.cos(yaw));
-    const right = new THREE.Vector3(Math.cos(yaw), 0, Math.sin(yaw));
+    const right = _camRight.set(Math.cos(yaw), 0, Math.sin(yaw));
 
     this._desired
       .copy(this.anchor)

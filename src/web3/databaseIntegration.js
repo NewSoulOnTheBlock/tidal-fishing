@@ -151,6 +151,7 @@ function startAutoSave() {
   if (autoSaveInterval) return;
   
   autoSaveInterval = setInterval(async () => {
+    if (document.hidden) return; // skip background syncs (battery + API spam)
     if (isAuthenticated && !isSyncing) {
       await syncPlayerState();
     }
@@ -173,7 +174,7 @@ function stopAutoSave() {
 /**
  * Sync current player state to database
  */
-export async function syncPlayerState() {
+export async function syncPlayerState(opts = {}) {
   const publicKey = currentPublicKey();
   if (!publicKey) return;
 
@@ -182,9 +183,11 @@ export async function syncPlayerState() {
     return;
   }
 
-  // Don't sync more than once every 5 seconds (debounce rapid saves)
+  // Don't sync more than once every 5 seconds (debounce rapid saves).
+  // A coalesced forced sync (opts.force) bypasses the debounce so real state
+  // changes still persist promptly instead of being dropped.
   const now = Date.now();
-  if (now - lastSyncTime < 5000) {
+  if (!opts.force && now - lastSyncTime < 5000) {
     console.log("[db] Sync debounced (too soon since last sync)");
     return;
   }
@@ -252,17 +255,22 @@ export async function recordCatchToDB(fish, isPerfect = false) {
   }
 }
 
+let coalesceTimer = null;
+
 /**
- * Manual sync trigger (for major state changes)
+ * Manual sync trigger (for major state changes). Coalesces bursts of events
+ * (e.g. level-up + reward + purchase firing together) into a single forced sync.
  */
 export async function forceSyncNow() {
   if (!isAuthenticated) {
     console.log("[db] Not authenticated, skipping force sync");
     return;
   }
-  
-  console.log("[db] Force sync triggered");
-  await syncPlayerState();
+  if (coalesceTimer) return; // a sync is already scheduled for this burst
+  coalesceTimer = setTimeout(() => {
+    coalesceTimer = null;
+    if (isAuthenticated) syncPlayerState({ force: true });
+  }, 1200);
 }
 
 // Listen for level up events to force immediate sync

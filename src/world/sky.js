@@ -135,12 +135,13 @@ export class SkySystem {
       this.sunLight.intensity = lerp(0.15, 2.9, f) * (1 - cloud * 0.4);
       this.sunLight.position.copy(this.sunDir).multiplyScalar(120);
     } else {
-      const moonDir = this.sunDir.clone().multiplyScalar(-1);
-      moonDir.y = Math.abs(moonDir.y) * 0.7 + 0.25;
+      const moonPos = this.sunLight.position;
+      moonPos.copy(this.sunDir).multiplyScalar(-1);
+      moonPos.y = Math.abs(moonPos.y) * 0.7 + 0.25;
+      moonPos.normalize().multiplyScalar(120);
       this.sunColor.copy(this._moonBlue);
       this.sunLight.color.copy(this._moonBlue);
       this.sunLight.intensity = 0.62 * (1 - cloud * 0.3);
-      this.sunLight.position.copy(moonDir).normalize().multiplyScalar(120);
     }
 
     this.hemiLight.color.copy(this._hemiSkyNight).lerp(this._hemiSkyDay, f);

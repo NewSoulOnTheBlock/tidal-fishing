@@ -7,6 +7,7 @@ import { CONFIG } from "../data/config.js";
 
 let cachedNormals = null;
 let sparkleTex = null;
+const GLITTER_WHITE = new THREE.Color(0xffffff);
 
 function makeSparkleTexture() {
   if (sparkleTex) return sparkleTex;
@@ -88,7 +89,7 @@ class SunGlitter {
     // collective twinkle from a couple of phase-shifted sines
     const tw = 0.5 + 0.5 * Math.sin(t * 7.0);
     this.mat.opacity = vis * (0.45 + tw * 0.45);
-    if (sunColor) this.mat.color.copy(sunColor).lerp(new THREE.Color(0xffffff), 0.4);
+    if (sunColor) this.mat.color.copy(sunColor).lerp(GLITTER_WHITE, 0.4);
   }
 
   dispose() {

@@ -6,6 +6,7 @@ import { formatMoney } from "../utils/utils.js";
 import { shortAddress } from "../web3/solana.js";
 import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import { apiFetch } from "../utils/api.js";
+import { cachedGetJson } from "../utils/apiCache.js";
 import { createFishPreview } from "./fishPreview.js";
 
 export class LeaderboardUI {
@@ -105,9 +106,7 @@ export class LeaderboardUI {
 
     try {
       if (tab === "earnings") {
-        const response = await apiFetch("/api/leaderboard?limit=100");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await cachedGetJson("/api/leaderboard?limit=100", 20000);
         // Server returns { leaderboard: [...] } already ordered by earnings.
         // Rank isn't in the payload, so derive it from position.
         const entries = (data.leaderboard || []).map((entry, i) => ({
@@ -116,9 +115,7 @@ export class LeaderboardUI {
         }));
         content.innerHTML = this.renderEarnings(entries);
       } else if (tab === "recent") {
-        const response = await apiFetch("/api/leaderboard?type=recent&limit=50");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await cachedGetJson("/api/leaderboard?type=recent&limit=50", 20000);
         content.innerHTML = this.renderRecent(data.catches);
       } else if (tab === "species") {
         content.innerHTML = this.renderSpeciesSelector();
@@ -239,9 +236,7 @@ export class LeaderboardUI {
     content.innerHTML = '<div class="loading">Loading...</div>';
 
     try {
-      const response = await apiFetch(`/api/leaderboard?type=species&species=${speciesId}&limit=20`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
+      const data = await cachedGetJson(`/api/leaderboard?type=species&species=${speciesId}&limit=20`, 20000);
       const species = FISH_BY_ID[speciesId];
       const rarity = species?.rarity || '';
       const rmeta = RARITIES[rarity];

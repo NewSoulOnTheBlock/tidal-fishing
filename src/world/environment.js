@@ -3,7 +3,8 @@
 // The player always stands near the origin and casts toward -Z.
 
 import * as THREE from "three";
-import { disposeObject3D, randRange, pick } from "../utils/utils.js";
+import { randRange, pick } from "../utils/utils.js";
+import { disposeObject3D } from "../core/disposal.js";
 
 const WOOD = 0x6e5138;
 const WOOD_DARK = 0x4c3725;

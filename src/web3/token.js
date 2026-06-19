@@ -13,6 +13,10 @@ import { connection, TIDE_MINT } from "./solana.js";
 const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const TOKEN_2022_PROGRAM_ID = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 
+// A mint is owned by exactly one token program; cache the winner per mint so we
+// stop issuing two getParsedTokenAccountsByOwner calls on every balance refresh.
+const mintProgramCache = new Map(); // mint base58 -> owning program PublicKey
+
 /** Lamports balance of any address. Returns 0 on failure. */
 export async function fetchSolBalance(pubkey) {
   try {
@@ -32,11 +36,22 @@ export async function fetchTideBalance(pubkey) {
 /** Aggregate balance across all token accounts owned by `pubkey` for `mint`. */
 export async function fetchSplBalance(pubkey, mint) {
   try {
-    const [classic, t22] = await Promise.all([
-      connection.getParsedTokenAccountsByOwner(pubkey, { mint, programId: TOKEN_PROGRAM_ID }),
-      connection.getParsedTokenAccountsByOwner(pubkey, { mint, programId: TOKEN_2022_PROGRAM_ID }),
-    ]);
-    const accounts = [...classic.value, ...t22.value];
+    const mintKey = mint.toBase58 ? mint.toBase58() : String(mint);
+    const cachedProg = mintProgramCache.get(mintKey);
+    let accounts;
+    if (cachedProg) {
+      const r = await connection.getParsedTokenAccountsByOwner(pubkey, { mint, programId: cachedProg });
+      accounts = r.value;
+    } else {
+      const [classic, t22] = await Promise.all([
+        connection.getParsedTokenAccountsByOwner(pubkey, { mint, programId: TOKEN_PROGRAM_ID }),
+        connection.getParsedTokenAccountsByOwner(pubkey, { mint, programId: TOKEN_2022_PROGRAM_ID }),
+      ]);
+      // Cache the owning program on first positive hit (a mint never changes program).
+      if (classic.value.length) mintProgramCache.set(mintKey, TOKEN_PROGRAM_ID);
+      else if (t22.value.length) mintProgramCache.set(mintKey, TOKEN_2022_PROGRAM_ID);
+      accounts = [...classic.value, ...t22.value];
+    }
     if (accounts.length === 0) return { raw: 0n, ui: 0, decimals: 0 };
     
     // Deduplicate by account pubkey (some wallets/RPCs may return duplicates)

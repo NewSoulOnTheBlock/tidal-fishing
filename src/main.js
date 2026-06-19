@@ -956,6 +956,10 @@ const biteScreenPos = { x: 0, y: 0 };
 
 function tick() {
   requestAnimationFrame(tick);
+  // Pause all GPU/CPU frame work while the tab is backgrounded (save already
+  // fires on visibilitychange). Prevents battery drain from rendering + the
+  // water reflection RT + particle updates running unseen.
+  if (document.hidden) return;
   const dt = Math.min(clock3.getDelta(), 0.05);
   const phase = machine.current;
   const gameplay = isGameplayPhase(phase) && !paused;

@@ -141,7 +141,7 @@ export const CONFIG = {
   },
 
   quality: {
-    high: { pixelRatio: 2, shadows: true, waterTex: 1024 },
+    high: { pixelRatio: 2, shadows: true, waterTex: 512 },
     low: { pixelRatio: 1.25, shadows: false, waterTex: 512 },
   },
 

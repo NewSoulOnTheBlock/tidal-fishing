@@ -48,7 +48,7 @@ const GodRaysShader = {
     uniform vec3 tint;
     varying vec2 vUv;
 
-    const int SAMPLES = 48;
+    const int SAMPLES = 16;
 
     void main() {
       vec4 base = texture2D(tDiffuse, vUv);
@@ -140,6 +140,8 @@ const GradeShader = {
   `,
 };
 
+const WHITE = new THREE.Color(0xffffff);
+
 const QUALITY = {
   high: { bloom: 0, godrays: true, grain: 0.05 },
   low: { bloom: 0, godrays: false, grain: 0.03 },
@@ -153,6 +155,7 @@ export class PostFX {
     this.quality = QUALITY[quality] ? quality : "high";
     this.enabled = true;
     this._sun = new THREE.Vector3();
+    this._ndc = new THREE.Vector3();
 
     const size = renderer.getSize(new THREE.Vector2());
     const dpr = renderer.getPixelRatio();
@@ -217,7 +220,7 @@ export class PostFX {
     const gu = this.godrays.uniforms;
     // project the sun onto the screen
     this._sun.copy(sunDir).multiplyScalar(2000).add(this.camera.position);
-    const ndc = this._sun.clone().project(this.camera);
+    const ndc = this._ndc.copy(this._sun).project(this.camera);
     const onScreen =
       ndc.z < 1 && ndc.x > -1.35 && ndc.x < 1.35 && ndc.y > -1.35 && ndc.y < 1.35;
     gu.lightPos.value.set(ndc.x * 0.5 + 0.5, ndc.y * 0.5 + 0.5);
@@ -226,7 +229,7 @@ export class PostFX {
     // god rays kept to the barest hint of sun scatter — effectively off
     const target = Math.max(0, dayFactor) * Math.max(0, edgeFade) * 0.025;
     gu.intensity.value += (target - gu.intensity.value) * Math.min(1, dt * 3);
-    if (sunColor) gu.tint.value.copy(sunColor).lerp(new THREE.Color(0xffffff), 0.3);
+    if (sunColor) gu.tint.value.copy(sunColor).lerp(WHITE, 0.3);
 
     const grd = this.grade.uniforms;
     grd.time.value = performance.now() * 0.001;
