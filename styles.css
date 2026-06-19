@@ -185,6 +185,22 @@ kbd {
 .hud-btn:hover { background: rgba(80, 150, 200, 0.3); }
 .hud-btn:disabled { opacity: 0.35; cursor: default; }
 
+/* Mode toggle: clearly signals whether catches earn $TIDE. */
+.mode-btn { font-weight: 700; }
+.mode-btn.mode-casual {
+  color: #9fe3ff;
+  border-color: rgba(120, 200, 240, 0.55);
+  background: rgba(60, 130, 180, 0.22);
+}
+.mode-btn.mode-casual:hover { background: rgba(80, 160, 210, 0.35); }
+.mode-btn.mode-pro {
+  color: #ffe08a;
+  border-color: rgba(245, 200, 90, 0.7);
+  background: rgba(180, 140, 30, 0.28);
+  box-shadow: 0 0 10px rgba(245, 200, 90, 0.25);
+}
+.mode-btn.mode-pro:hover { background: rgba(210, 165, 40, 0.4); }
+
 .gear-chip {
   background: var(--glass); border: 1px solid var(--stroke); border-radius: 10px;
   padding: 8px 12px; display: flex; flex-direction: column; gap: 1px;
@@ -1136,6 +1152,7 @@ kbd {
 .catch-stat .cs-label { font-size: 0.62rem; letter-spacing: 0.14em; color: var(--dim); text-transform: uppercase; }
 .catch-stat .cs-value { font-size: 1.05rem; font-weight: 700; }
 .catch-value { font-size: 1.25rem; font-weight: 800; color: var(--gold); margin: 8px 0 16px; }
+.catch-value.catch-release { color: #9fe3ff; }
 .catch-xp { font-size: 0.8rem; color: var(--accent); margin-top: -12px; margin-bottom: 14px; }
 
 .confetti-bit {

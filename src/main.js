@@ -6,6 +6,7 @@ import { CONFIG } from "./data/config.js";
 import { LOCATION_BY_ID } from "./data/locationData.js";
 import { S, events, machine, Phase, isGameplayPhase } from "./state/gameState.js";
 import { loadGame, saveGame, resetSave, setWalletSlot } from "./state/saveLoad.js";
+import { isPro, toggleMode } from "./state/gameMode.js";
 import { audio } from "./audio/audioManager.js";
 import { createCore } from "./core/scene.js";
 import { GameClock } from "./core/time.js";
@@ -595,7 +596,7 @@ function pressDown() {
   audio.init();
   switch (machine.current) {
     case Phase.IDLE:
-      if (!economy.hasBait()) {
+      if (isPro() && !economy.hasBait()) {
         events.emit("toast", { msg: "Out of bait — grab some in the Shop.", kind: "bad" });
         machine.set(Phase.SHOP, { tab: "bait" });
         break;
@@ -618,13 +619,17 @@ function pressUp() {
   switch (machine.current) {
     case Phase.CHARGING: {
       const power = casting.endCharge();
-      // Mandatory: every cast spends one bait. If the player somehow ran dry
+      // Pro mode: every cast spends one bait. If the player somehow ran dry
       // between charge and release, abort the cast instead of fishing for free.
-      const used = economy.consumeBait();
-      if (!used) {
-        events.emit("toast", { msg: "Out of bait — grab some in the Shop.", kind: "bad" });
-        machine.set(Phase.IDLE);
-        break;
+      // Casual mode needs no bait — cast freely.
+      let used = null;
+      if (isPro()) {
+        used = economy.consumeBait();
+        if (!used) {
+          events.emit("toast", { msg: "Out of bait — grab some in the Shop.", kind: "bad" });
+          machine.set(Phase.IDLE);
+          break;
+        }
       }
       activeCastBait = used;
       const { origin, velocity } = casting.computeLaunch(power, economy.getStats().castMult);
@@ -869,6 +874,21 @@ document.getElementById("btn-pause").addEventListener("click", () => {
   setPaused(true);
 });
 document.getElementById("btn-controls").addEventListener("click", () => controlsUI.toggle());
+document.getElementById("btn-mode")?.addEventListener("click", () => {
+  audio.play("click");
+  const mode = toggleMode();
+  if (mode === "pro") {
+    events.emit("toast", {
+      msg: "Pro Angler — every cast needs bait, but your catches are worth real $TIDE.",
+      kind: "gold",
+    });
+  } else {
+    events.emit("toast", {
+      msg: "Casual Angler — fish freely, no bait needed. Catches are just for fun.",
+      kind: "info",
+    });
+  }
+});
 document.getElementById("menu-controls").addEventListener("click", () => controlsUI.show());
 document.getElementById("hud-bag").addEventListener("click", () => {
   if (machine.is(Phase.IDLE)) {

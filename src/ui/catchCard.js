@@ -63,7 +63,7 @@ export class CatchCard {
       rarityLabel: rarity.label,
       rarityColor: rarity.color,
       statsText: `${formatLength(fish.sizeCm)} • ${formatWeight(fish.weightKg)}`,
-      valueText: `Worth ${formatMoney(fish.value)}`,
+      valueText: flags.casual ? "Catch & release" : `Worth ${formatMoney(fish.value)}`,
     };
 
     const overlay = document.createElement("div");
@@ -74,7 +74,9 @@ export class CatchCard {
     else if (flags.isNew) ribbon = `<div class="catch-ribbon">NEW SPECIES!</div>`;
     else if (flags.isRecord) ribbon = `<div class="catch-ribbon record">NEW RECORD!</div>`;
 
-    const valueLine = flags.isJackpot
+    const valueLine = flags.casual
+      ? `<div class="catch-value catch-release">Catch &amp; release 🎣</div>`
+      : flags.isJackpot
       ? `<div class="catch-value catch-jackpot-value">+${formatMoney(fish.value)}<div class="catch-jackpot-sub">credited instantly</div></div>`
       : `<div class="catch-value">Worth ${formatMoney(fish.value)}</div>`;
 
@@ -91,7 +93,7 @@ export class CatchCard {
         ${valueLine}
         <div class="catch-xp">+${flags.xpGained} XP${flags.isNew ? " (first catch bonus)" : ""}</div>
         <div class="catch-actions">
-          <button class="btn btn-primary btn-big">${flags.isJackpot ? "I'm rich" : "Keep it"}</button>
+          <button class="btn btn-primary btn-big">${flags.isJackpot ? "I'm rich" : flags.casual ? "Release" : "Keep it"}</button>
           <button class="btn btn-share" title="Share your catch as a video">🎥 Share</button>
         </div>
       </div>

@@ -17,6 +17,7 @@ import { canCatch, recordCatchAntiBot, recordEarnings } from "../security/antiFa
 import { validateCatch, showBanMessage } from "../web3/catchValidation.js";
 import { isHotSpot } from "../web3/world.js";
 import { solToTideLive } from "../web3/priceConvert.js";
+import { isPro } from "../state/gameMode.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -122,56 +123,66 @@ export function addXp(amount) {
  *  NOW REQUIRES SERVER VALIDATION - prevents offline fishing.
  */
 export async function registerCatch(fish) {
+  // Casual Angler: pure-fun mode. Catches still fill the Journal and stats, but
+  // earn no $TIDE, skip server validation/anti-farming, and aren't added to the
+  // sellable bag (catch & release). Pro mode runs the full economy below.
+  const casual = !isPro();
+
   // Daily hot spot pays +10%. Apply BEFORE validation/credit so the bonus
   // propagates everywhere downstream (jackpot credit, inventory, journal, DB
   // record). The server raises its value ceiling for the hot
   // location by the same 10% so the boosted figure isn't clamped away.
-  if (isHotSpot(S.world.current) && Number.isFinite(fish.value) && fish.value > 0) {
+  if (!casual && isHotSpot(S.world.current) && Number.isFinite(fish.value) && fish.value > 0) {
     fish.value = Math.round(fish.value * 1.1);
     fish.hotSpotBonus = true;
   }
 
-  // SERVER VALIDATION CHECK (prevents offline fishing)
-  const validation = await validateCatch(fish.speciesId, fish.value);
-  if (!validation.allowed) {
-    console.warn("[economy] Catch blocked by server:", validation.error);
-    
-    if (validation.banned) {
-      showBanMessage(validation.error);
-    } else {
-      events.emit("toast", { msg: validation.error || "Catch validation failed", kind: "warn" });
+  if (!casual) {
+    // SERVER VALIDATION CHECK (prevents offline fishing)
+    const validation = await validateCatch(fish.speciesId, fish.value);
+    if (!validation.allowed) {
+      console.warn("[economy] Catch blocked by server:", validation.error);
+
+      if (validation.banned) {
+        showBanMessage(validation.error);
+      } else {
+        events.emit("toast", { msg: validation.error || "Catch validation failed", kind: "warn" });
+      }
+
+      return {
+        xpGained: 0,
+        levels: [],
+        moneyGained: 0,
+        isNew: false,
+        isRecord: false,
+        blocked: true,
+        serverBlocked: true,
+      };
     }
-    
-    return {
-      xpGained: 0,
-      levels: [],
-      moneyGained: 0,
-      isNew: false,
-      isRecord: false,
-      blocked: true,
-      serverBlocked: true,
-    };
+
+    // ANTI-FARMING CHECK
+    const catchCheck = canCatch();
+    if (!catchCheck.allowed) {
+      console.warn("[economy] Catch blocked by anti-farming:", catchCheck.reason);
+      events.emit("toast", { msg: catchCheck.reason, kind: "warn" });
+      return {
+        xpGained: 0,
+        levels: [],
+        moneyGained: 0,
+        isNew: false,
+        isRecord: false,
+        blocked: true,
+      };
+    }
+
+    // Record catch for anti-bot tracking
+    recordCatchAntiBot(fish, fish.isPerfect);
   }
-  
-  // ANTI-FARMING CHECK
-  const catchCheck = canCatch();
-  if (!catchCheck.allowed) {
-    console.warn("[economy] Catch blocked by anti-farming:", catchCheck.reason);
-    events.emit("toast", { msg: catchCheck.reason, kind: "warn" });
-    return {
-      xpGained: 0,
-      levels: [],
-      moneyGained: 0,
-      isNew: false,
-      isRecord: false,
-      blocked: true,
-    };
-  }
-  
-  // Record catch for anti-bot tracking
-  recordCatchAntiBot(fish, fish.isPerfect);
-  
-  const isJackpot = !!fish.jackpot;
+
+  // Casual catches are worth nothing and are released (not bagged).
+  if (casual) fish.value = 0;
+
+  const isJackpot = !casual && !!fish.jackpot;
 
   if (isJackpot) {
     // No inventory entry — auto-credit. This avoids ever having a 10M $TIDE
@@ -180,7 +191,7 @@ export async function registerCatch(fish) {
     S.profile.money += fish.value;
     S.stats.earned += fish.value;
     emitMoney(fish.value);
-  } else {
+  } else if (!casual) {
     S.inventory.push({
       speciesId: fish.speciesId,
       sizeCm: fish.sizeCm,
@@ -223,9 +234,10 @@ export async function registerCatch(fish) {
     recordJournalCatch(S.progressionJournal, fish.speciesId, fish.sizeCm, fish.weightKg, fish.value);
   }
   
-  // Record catch in database (async, best-effort)
+  // Record catch in database (async, best-effort). Casual catches carry no
+  // value and need no wallet, so they're never persisted server-side.
   const publicKey = currentPublicKey();
-  if (publicKey) {
+  if (!casual && publicKey) {
     recordCatchDB({
       walletAddress: publicKey.toString(),
       speciesId: fish.speciesId,
@@ -238,8 +250,9 @@ export async function registerCatch(fish) {
     }).catch(err => console.error('[economy] Failed to record catch to DB:', err));
   }
   
-  // Check achievements
-  if (S.achievements) {
+  // Check achievements. Skipped in Casual — achievement rewards pay $TIDE, which
+  // would leak value into the no-stakes mode.
+  if (!casual && S.achievements) {
     const stats = getGameStats();
     const newAchievements = checkAchievements(S.achievements, stats);
     if (newAchievements.length > 0) {
@@ -249,7 +262,7 @@ export async function registerCatch(fish) {
 
   events.emit("inventory");
   saveGame();
-  return { isNew, isRecord, xpGained, levels, isJackpot };
+  return { isNew, isRecord, xpGained, levels, isJackpot, casual };
 }
 
 export const inventoryValue = () =>

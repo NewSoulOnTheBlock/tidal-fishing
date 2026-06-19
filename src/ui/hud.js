@@ -3,6 +3,7 @@
 
 import { S, events, Phase } from "../state/gameState.js";
 import { xpToNext, getEquipped, inventoryValue, baitCount } from "../economy/economy.js";
+import { isPro, getMode } from "../state/gameMode.js";
 import { LOCATION_BY_ID } from "../data/locationData.js";
 import { CONFIG } from "../data/config.js";
 import { formatMoney, hourToClock, clamp } from "../utils/utils.js";
@@ -33,6 +34,7 @@ export class HUD {
     this.loc = $("hud-loc");
     this.rodChip = $("hud-rod");
     this.baitChip = $("hud-bait");
+    this.modeBtn = $("btn-mode");
     this.bag = $("hud-bag");
     this.prompt = $("hud-prompt");
     this.zone = $("hud-zone");
@@ -80,6 +82,7 @@ export class HUD {
     events.on("inventory", () => this.updateBag());
     events.on("gear", () => this.updateGear());
     events.on("bait", () => this.updateGear());
+    events.on("mode", () => this.updateMode());
     events.on("weather", ({ weather }) => {
       this.weather.textContent = weather === "cloudy" ? "Cloudy" : "Clear";
     });
@@ -112,6 +115,7 @@ export class HUD {
     this.updateGear();
     this.updateBag();
     this.updateLocation();
+    this.updateMode();
     this.weather.textContent = S.world.weather === "cloudy" ? "Cloudy" : "Clear";
   }
 
@@ -131,6 +135,21 @@ export class HUD {
     this.rodChip.querySelector(".gear-name").textContent = eq.rod.name;
     const remaining = baitCount();
     this.baitChip.querySelector(".gear-name").textContent = `${eq.bait.name} ×${remaining}`;
+    // Bait only matters in Pro mode — hide the chip entirely when Casual.
+    this.baitChip.classList.toggle("hidden", !isPro());
+  }
+
+  updateMode() {
+    if (!this.modeBtn) return;
+    const pro = isPro();
+    this.modeBtn.textContent = pro ? "💰 Pro" : "🎣 Casual";
+    this.modeBtn.classList.toggle("mode-pro", pro);
+    this.modeBtn.classList.toggle("mode-casual", !pro);
+    this.modeBtn.title = pro
+      ? "Pro Angler — bait required, catches worth $TIDE. Click to switch to Casual."
+      : "Casual Angler — fish freely for fun. Click to switch to Pro.";
+    // Keep the bait chip's visibility in sync with the active mode.
+    this.baitChip.classList.toggle("hidden", !pro);
   }
 
   updateBag() {
