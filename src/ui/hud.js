@@ -91,6 +91,9 @@ export class HUD {
       this.setPrompt(PROMPTS[to] ?? "");
       this.prompt.classList.toggle("urgent", to === Phase.BITE);
       const idle = to === Phase.IDLE;
+      // Mobile bottom nav hides itself while actively fishing (see styles.css);
+      // the buttons are disabled then anyway and would collide with the reel UI.
+      this.root.classList.toggle("phase-active", !idle);
       for (const b of this.buttons) b.disabled = !idle;
       if (to === Phase.IDLE) this.setZone(null);
       if (to !== Phase.CHARGING) this.showPower(false);

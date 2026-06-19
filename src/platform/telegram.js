@@ -64,10 +64,34 @@ export function tgSuggestedName() {
 }
 
 // Haptic feedback. `kind` accepts impact styles (light/medium/heavy/rigid/soft),
-// notification types (success/warning/error), or "select".
+// notification types (success/warning/error), or "select". Inside Telegram it
+// uses the native HapticFeedback API; in a normal browser it falls back to the
+// Vibration API (Android Chrome/Firefox; iOS Safari has no support and no-ops).
+const VIBE_MS = {
+  light: 10,
+  medium: 18,
+  heavy: 32,
+  rigid: 26,
+  soft: 14,
+  select: 8,
+  success: [12, 40, 22],
+  warning: [22, 26, 22],
+  error: [38, 44, 38],
+};
+
 export function tgHaptic(kind = "light") {
   const wa = WA();
-  if (!wa?.HapticFeedback) return;
+  if (!wa?.HapticFeedback) {
+    // Web fallback so the PWA / mobile browser still buzzes on the key beats.
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function" && !document.hidden) {
+        navigator.vibrate(VIBE_MS[kind] ?? 12);
+      }
+    } catch {
+      /* vibration blocked or unsupported — ignore */
+    }
+    return;
+  }
   const h = wa.HapticFeedback;
   tryWA(() => {
     switch (kind) {

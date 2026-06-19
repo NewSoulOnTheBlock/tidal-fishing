@@ -10,6 +10,8 @@ import { audio } from "../audio/audioManager.js";
 export class JournalUI {
   constructor() {
     this.panel = null;
+    this._filter = "all";
+    this._search = "";
   }
 
   show() {
@@ -62,6 +64,10 @@ export class JournalUI {
           </div>
         ` : ''}
         
+        <div class="journal-search">
+          <input type="search" class="journal-search-input" placeholder="🔍 Search species…" aria-label="Search species" />
+        </div>
+
         <div class="journal-filters">
           <button class="filter-btn active" data-filter="all">All</button>
           <button class="filter-btn" data-filter="caught">Caught</button>
@@ -88,6 +94,7 @@ export class JournalUI {
     return `
       <div class="journal-card ${hasCaught ? 'caught' : 'uncaught'}" 
            data-rarity="${sp.rarity}"
+           data-name="${hasCaught ? sp.name.toLowerCase().replace(/"/g, '') : ''}"
            style="--rarity-color: ${rarity.color}">
         ${hasCaught ? `
           <div class="card-image" style="background: linear-gradient(135deg, ${rarity.color}22, ${rarity.color}44)">
@@ -119,9 +126,20 @@ export class JournalUI {
   }
 
   bindEvents() {
+    this._filter = "all";
+    this._search = "";
+
     const closeBtn = this.panel.querySelector('.btn-close');
     closeBtn.addEventListener('click', () => this.hide());
-    
+
+    const searchInput = this.panel.querySelector('.journal-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        this._search = searchInput.value.trim().toLowerCase();
+        this.applyFilters();
+      });
+    }
+
     this.panel.addEventListener('click', (e) => {
       if (e.target === this.panel) this.hide();
       
@@ -140,19 +158,23 @@ export class JournalUI {
       if (e.target.classList.contains('filter-btn')) {
         this.panel.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
-        this.applyFilter(e.target.dataset.filter);
+        this._filter = e.target.dataset.filter;
+        this.applyFilters();
       }
     });
   }
 
-  applyFilter(filter) {
+  applyFilters() {
+    const filter = this._filter || "all";
+    const search = this._search || "";
     const cards = this.panel.querySelectorAll('.journal-card');
     cards.forEach(card => {
-      const show = filter === 'all' ||
+      const matchesFilter = filter === 'all' ||
                    (filter === 'caught' && card.classList.contains('caught')) ||
                    (filter === 'uncaught' && card.classList.contains('uncaught')) ||
                    (card.dataset.rarity === filter);
-      card.style.display = show ? 'block' : 'none';
+      const matchesSearch = !search || (card.dataset.name && card.dataset.name.includes(search));
+      card.style.display = (matchesFilter && matchesSearch) ? 'block' : 'none';
     });
   }
 

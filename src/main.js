@@ -80,22 +80,25 @@ S.progressionJournal = initJournal(S);
 S.achievements = initAchievements(S);
 S.weather = initWeather(S);
 
-// Telegram-only polish (no-ops in a normal browser): haptic feedback on the key
-// fishing beats, plus a native Back button that closes the full-screen menus.
-if (isTelegram()) {
-  events.on("bite:start", () => tgHaptic("medium"));
-  events.on("bite:hooked", ({ isPerfect } = {}) =>
-    tgHaptic(isPerfect ? "success" : "heavy")
-  );
-  events.on("fight:dodge", () => tgHaptic("light"));
-  events.on("fight:run", () => tgHaptic("medium"));
-  events.on("fight:heaveready", () => tgHaptic("heavy"));
-  events.on("fight:nearsnap", () => tgHaptic("warning"));
-  events.on("fight:save", () => tgHaptic("success"));
-  events.on("fight:snap", () => tgHaptic("error"));
-  events.on("fight:landed", () => tgHaptic("success"));
-  events.on("fight:escape", () => tgHaptic("error"));
+// Haptic feedback on the key fishing beats. tgHaptic uses Telegram's native
+// HapticFeedback inside the Mini App and falls back to the web Vibration API
+// (Android Chrome/Firefox) in a normal browser / installed PWA, so phones buzz
+// on every platform. No-ops on hardware without a vibration motor (e.g. iOS).
+events.on("bite:start", () => tgHaptic("medium"));
+events.on("bite:hooked", ({ isPerfect } = {}) =>
+  tgHaptic(isPerfect ? "success" : "heavy")
+);
+events.on("fight:dodge", () => tgHaptic("light"));
+events.on("fight:run", () => tgHaptic("medium"));
+events.on("fight:heaveready", () => tgHaptic("heavy"));
+events.on("fight:nearsnap", () => tgHaptic("warning"));
+events.on("fight:save", () => tgHaptic("success"));
+events.on("fight:snap", () => tgHaptic("error"));
+events.on("fight:landed", () => tgHaptic("success"));
+events.on("fight:escape", () => tgHaptic("error"));
 
+// Telegram-only polish: a native Back button that closes the full-screen menus.
+if (isTelegram()) {
   const SCREEN_PHASES = new Set([Phase.SHOP, Phase.JOURNAL, Phase.MAP]);
   events.on("phase", ({ to }) => {
     tgSetBackButton(SCREEN_PHASES.has(to), handleEscape);

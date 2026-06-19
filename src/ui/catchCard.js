@@ -1,7 +1,7 @@
 // The celebratory catch-result card: species, size, weight, rarity, value,
 // NEW/RECORD ribbons and confetti for special catches.
 
-import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
+import { FISH_BY_ID, FISH_SPECIES, RARITIES } from "../data/fishData.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight, randRange } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
@@ -15,6 +15,7 @@ import {
   catchTweetText,
 } from "./catchShare.js";
 import { events } from "../state/gameState.js";
+import { S } from "../state/gameState.js";
 import html2canvas from "html2canvas";
 
 const CONFETTI_COLORS = ["#5fd4ff", "#ffc857", "#62d98b", "#c08bff", "#ff8da3"];
@@ -92,6 +93,7 @@ export class CatchCard {
         </div>
         ${valueLine}
         <div class="catch-xp">+${flags.xpGained} XP${flags.isNew ? " (first catch bonus)" : ""}</div>
+        <div class="catch-collection">📖 ${S.journal ? Object.keys(S.journal).length : 0} / ${FISH_SPECIES.length} species collected</div>
         <div class="catch-actions">
           <button class="btn btn-primary btn-big">${flags.isJackpot ? "I'm rich" : flags.casual ? "Release" : "Keep it"}</button>
           <button class="btn btn-share" title="Share your catch as a video">🎥 Share</button>

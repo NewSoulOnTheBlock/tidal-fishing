@@ -2035,3 +2035,82 @@ kbd {
 .tg .hud-topright,
 .tg .hud-bottomright,
 .tg #wallet-mount { margin-right: var(--tg-safe-right, 0px); }
+
+/* ============================================================
+   TIDAL — Catch reveal collection-progress line
+   ============================================================ */
+.catch-collection {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(234, 246, 255, 0.72);
+}
+
+/* ============================================================
+   TIDAL — Journal search box
+   ============================================================ */
+.journal-search { margin: 0 0 10px; }
+.journal-search-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(95, 212, 255, 0.25);
+  background: rgba(8, 20, 30, 0.6);
+  color: #eaf6ff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+}
+.journal-search-input:focus {
+  border-color: rgba(95, 212, 255, 0.6);
+  box-shadow: 0 0 0 2px rgba(95, 212, 255, 0.15);
+}
+.journal-search-input::placeholder { color: rgba(234, 246, 255, 0.4); }
+
+/* ============================================================
+   TIDAL — Mobile thumb-zone navigation
+   On phones the primary nav leaves the crowded top-right corner and becomes a
+   bottom bar within thumb reach for one-handed play. It hides while actively
+   fishing so it never collides with the power meter / reel overlay, and the
+   glanceable chips + prompt float just above it. Appended last so it wins over
+   the earlier mobile breakpoints by source order (all single-class selectors).
+   ============================================================ */
+@media (max-width: 768px) {
+  .hud-buttons {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    margin: 0;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 7px 10px calc(7px + env(safe-area-inset-bottom, 0px));
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background: linear-gradient(to top, rgba(3, 10, 18, 0.85), rgba(3, 10, 18, 0));
+    z-index: 40;
+  }
+  .hud-buttons::-webkit-scrollbar { display: none; }
+  .hud-buttons .hud-btn {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 9px 14px;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  /* Disabled and out of the way during an active cast/fight. */
+  #hud.phase-active .hud-buttons { display: none; }
+
+  /* Lift the bag chip + prompts above the bottom nav bar. */
+  .hud-bottomright { bottom: 66px; }
+  .prompt { bottom: 128px; }
+  .zone-hint { bottom: 166px; }
+}
+
+/* Telegram safe-area for the fixed bottom nav bar (mobile only). */
+.tg .hud-buttons { padding-bottom: calc(7px + var(--tg-safe-bottom, 0px)); }
