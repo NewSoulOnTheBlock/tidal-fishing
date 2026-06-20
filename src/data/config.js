@@ -107,7 +107,7 @@ export const CONFIG = {
     xpBase: 350,
     xpPow: 1.4, // xp to next level = round(xpBase * level^xpPow)
     newSpeciesXpMult: 2,
-    startMoney: 0,
+    startMoney: 2000, // ~5 Basic Grubs so a fresh f2p player can buy bait with $TIDE and start the loop
     earnMultiplier: 10, // global scale on all fish $TIDE value (100x'd from 0.1)
   },
 
