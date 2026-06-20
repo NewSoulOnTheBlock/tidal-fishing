@@ -14,13 +14,14 @@ export const SERVER_CAPS = {
   perMin: 12,
   perHour: 250,
   perDay: 1200,
-  earnHour: 8_000,
-  earnDay: 40_000,
+  earnHour: 800_000,
+  earnDay: 4_000_000,
   // Rarity plausibility caps. Tuned far ABOVE legitimate play, with extra
   // headroom now that premium consumable bait can legitimately raise a fast
   // angler's legendary rate, but still well below automation that claims a rare
-  // fish every catch. Earnings caps ($8k/hr, $40k/day) remain the real money
-  // backstop, and the reachability gate independently rejects impossible species.
+  // fish every catch. Earnings caps ($800k/hr, $4M/day — scaled with the 100x
+  // payout multiplier) remain the real money backstop, and the reachability
+  // gate independently rejects impossible species.
   legendaryHour: 60,
   legendaryDay: 300,
   jackpotDay: 8,

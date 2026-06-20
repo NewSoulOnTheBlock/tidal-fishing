@@ -108,7 +108,7 @@ export const CONFIG = {
     xpPow: 1.4, // xp to next level = round(xpBase * level^xpPow)
     newSpeciesXpMult: 2,
     startMoney: 0,
-    earnMultiplier: 0.1, // global scale on all fish $TIDE value (treasury protection)
+    earnMultiplier: 10, // global scale on all fish $TIDE value (100x'd from 0.1)
   },
 
   weather: {
