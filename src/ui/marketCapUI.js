@@ -9,6 +9,11 @@ import { TIDE_MINT_ADDRESS, fetchTideMarket, formatUsdCompact, formatUsdPrice } 
 const REFRESH_MS = 60_000;
 const DEXSCREENER_PAGE = `https://dexscreener.com/solana/${TIDE_MINT_ADDRESS}`;
 
+// Live market data (DexScreener pill + link) is OFF until a new $TIDE contract
+// is configured. While off, the pill shows a neutral "---" placeholder and does
+// not fetch or link out. Flip back to true once the new mint is set.
+const MARKET_DATA_ENABLED = false;
+
 export class MarketCapUI {
   constructor() {
     this.mcap = null;
@@ -18,18 +23,27 @@ export class MarketCapUI {
 
   init() {
     this.mcap = document.querySelector("#menu-marketcap");
+    if (!this.mcap) return;
 
-    if (this.mcap) {
-      this.mcap.href = DEXSCREENER_PAGE;
-      this.refresh();
-      // Refresh whenever the tab becomes visible again, plus a steady interval.
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible") this.refresh();
-      });
-      this.timer = setInterval(() => {
-        if (document.visibilityState === "visible") this.refresh();
-      }, REFRESH_MS);
+    if (!MARKET_DATA_ENABLED) {
+      // DexScreener data is turned off — show a neutral placeholder, no link.
+      this.mcap.removeAttribute("href");
+      this.mcap.removeAttribute("target");
+      this.mcap.removeAttribute("title");
+      this.mcap.textContent = "---";
+      this.mcap.classList.remove("hidden");
+      return;
     }
+
+    this.mcap.href = DEXSCREENER_PAGE;
+    this.refresh();
+    // Refresh whenever the tab becomes visible again, plus a steady interval.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") this.refresh();
+    });
+    this.timer = setInterval(() => {
+      if (document.visibilityState === "visible") this.refresh();
+    }, REFRESH_MS);
   }
 
   async refresh() {
