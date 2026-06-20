@@ -16,7 +16,7 @@ Set these in Vercel Dashboard (Project Settings → Environment Variables):
 
 ### 2. **VITE_TIDE_MINT** (Already set in code)
    - **Description**: $TIDE token contract address
-   - **Value**: `7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump`
+   - **Value**: `CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump`
    - **Environment**: Production, Preview, Development
    - ℹ️ Already hardcoded in `src/web3/solana.js`, but can be overridden
 
@@ -107,7 +107,7 @@ Frontend shows success toast
 ```bash
 # Set env vars in .env.local
 TIDAL_TREASURY_SECRET=<your_key>
-VITE_TIDE_MINT=7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
+VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
 VITE_SOLANA_RPC_URL=<optional_rpc>
 
 # Start dev server

@@ -23,7 +23,7 @@ In Render dashboard, add these:
 
 ```
 TIDAL_TREASURY_SECRET=auyRzxYNj3K5zEXg92BLueo4jVqwsNfXBCvWZc5WqJynyLC5MUUUT8cn49NWifTsFwBjr9DW4GTtH6MUPU65Lht
-VITE_TIDE_MINT=7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
+VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
 VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=021f44ec-4a1a-4d35-ab8a-f7263ea0f2dd
 CORS_ORIGIN=https://tidalfishing.fun
 ```

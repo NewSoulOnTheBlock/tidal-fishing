@@ -2,7 +2,7 @@
 
 ## $TIDE Token Contract
 ```
-7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
+CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
 ```
 
 ## Treasury Wallet Address
@@ -40,7 +40,7 @@ The $TIDE token mint and treasury wallet are configured in `src/web3/solana.js`:
 // $TIDE Token Contract Address
 export const TIDE_MINT = parsePubkeyOrNull(
   import.meta.env.VITE_TIDE_MINT || 
-  "7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump"
+  "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump"
 );
 
 // Treasury Wallet Address
@@ -101,9 +101,9 @@ Client shows success toast with tx link
 ## Treasury Monitoring
 
 **$TIDE Token Contract:**
-- Solscan: https://solscan.io/token/7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
-- Solana Explorer: https://explorer.solana.com/address/7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
-- DexScreener: https://dexscreener.com/solana/7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
+- Solscan: https://solscan.io/token/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+- Solana Explorer: https://explorer.solana.com/address/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+- DexScreener: https://dexscreener.com/solana/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
 
 **Treasury Wallet Balance:**
 - Solscan: https://solscan.io/account/CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror

@@ -13,7 +13,7 @@ Simple Express server for handling $TIDE withdrawals and other Solana transactio
 2. **Set Environment Variables**
    ```
    TIDAL_TREASURY_SECRET=<your_treasury_private_key_base58>
-   VITE_TIDE_MINT=7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump
+   VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
    VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
    PORT=3000
    CORS_ORIGIN=https://tidalfishing.fun

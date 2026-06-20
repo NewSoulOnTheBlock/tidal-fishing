@@ -141,7 +141,7 @@ initDatabase();
 
 // Environment variables
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
-const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || '7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump';
+const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || 'CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump';
 const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || '';
 const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);

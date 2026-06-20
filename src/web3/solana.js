@@ -18,7 +18,7 @@ export const EXPLORER_BASE = "https://solscan.io";
 // token + cNFT trees are deployed. For now we expose a single source of truth.
 //
 // Override via env (VITE_TIDE_MINT, VITE_GEAR_COLLECTION) for staging tests.
-const RAW_TIDE_MINT = import.meta.env.VITE_TIDE_MINT || "7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump";
+const RAW_TIDE_MINT = import.meta.env.VITE_TIDE_MINT || "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump";
 const RAW_GEAR_COLLECTION = import.meta.env.VITE_GEAR_COLLECTION || "";
 const RAW_CATCH_TREE = import.meta.env.VITE_CATCH_TREE || "";
 

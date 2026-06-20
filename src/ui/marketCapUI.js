@@ -1,6 +1,7 @@
-// Title-screen dashboard meta: the live $TIDE market cap pill.
+// Title-screen dashboard meta: live $TIDE market cap pill + the contract-address
+// footer (with copy button and explorer/DexScreener links).
 //
-// It lives on the main menu (#screen-menu) — the landing "dashboard" players
+// Both live on the main menu (#screen-menu) — the landing "dashboard" players
 // see before/after a session. The market cap auto-refreshes while the menu is
 // visible and pauses when the tab is hidden to avoid needless polling.
 
@@ -8,11 +9,29 @@ import { TIDE_MINT_ADDRESS, fetchTideMarket, formatUsdCompact, formatUsdPrice } 
 
 const REFRESH_MS = 60_000;
 const DEXSCREENER_PAGE = `https://dexscreener.com/solana/${TIDE_MINT_ADDRESS}`;
+const SOLSCAN_TOKEN = `https://solscan.io/token/${TIDE_MINT_ADDRESS}`;
 
-// Live market data (DexScreener pill + link) is OFF until a new $TIDE contract
-// is configured. While off, the pill shows a neutral "---" placeholder and does
-// not fetch or link out. Flip back to true once the new mint is set.
-const MARKET_DATA_ENABLED = false;
+// Local short-address helper (avoids importing web3/solana.js, which would pull
+// the @solana/web3.js + wallet-standard graph into this lightweight UI module).
+function shortAddr(s, head = 6, tail = 6) {
+  if (!s) return "—";
+  if (s.length <= head + tail + 1) return s;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
+}
+
+// Minimal toast that reuses the existing #toasts container + .toast styles.
+// Kept dependency-free so this lazy widget shares no module with the main entry
+// chunk (which would otherwise drag the wallet adapter graph in eagerly).
+function flashToast(msg, kind = "success") {
+  const host = document.getElementById("toasts");
+  if (!host) return;
+  const el = document.createElement("div");
+  el.className = `toast toast-${kind}`;
+  el.textContent = msg;
+  host.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+  while (host.children.length > 4) host.firstChild.remove();
+}
 
 export class MarketCapUI {
   constructor() {
@@ -23,27 +42,19 @@ export class MarketCapUI {
 
   init() {
     this.mcap = document.querySelector("#menu-marketcap");
-    if (!this.mcap) return;
+    this.setupFooter();
 
-    if (!MARKET_DATA_ENABLED) {
-      // DexScreener data is turned off — show a neutral placeholder, no link.
-      this.mcap.removeAttribute("href");
-      this.mcap.removeAttribute("target");
-      this.mcap.removeAttribute("title");
-      this.mcap.textContent = "---";
-      this.mcap.classList.remove("hidden");
-      return;
+    if (this.mcap) {
+      this.mcap.href = DEXSCREENER_PAGE;
+      this.refresh();
+      // Refresh whenever the tab becomes visible again, plus a steady interval.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") this.refresh();
+      });
+      this.timer = setInterval(() => {
+        if (document.visibilityState === "visible") this.refresh();
+      }, REFRESH_MS);
     }
-
-    this.mcap.href = DEXSCREENER_PAGE;
-    this.refresh();
-    // Refresh whenever the tab becomes visible again, plus a steady interval.
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") this.refresh();
-    });
-    this.timer = setInterval(() => {
-      if (document.visibilityState === "visible") this.refresh();
-    }, REFRESH_MS);
   }
 
   async refresh() {
@@ -60,8 +71,12 @@ export class MarketCapUI {
   render(m) {
     if (!this.mcap) return;
     if (!m || !Number.isFinite(m.marketCap)) {
-      // Leave any previously rendered value in place; only hide if we never had one.
-      if (!this.mcap.dataset.loaded) this.mcap.classList.add("hidden");
+      // No market data yet (e.g. token not yet live / no trading pairs): show a
+      // neutral "---" placeholder rather than hiding, so the pill is never blank.
+      if (!this.mcap.dataset.loaded) {
+        this.mcap.textContent = "---";
+        this.mcap.classList.remove("hidden");
+      }
       return;
     }
 
@@ -81,5 +96,50 @@ export class MarketCapUI {
     this.mcap.title = `Live on DexScreener · ${price} per $TIDE`;
     this.mcap.dataset.loaded = "1";
     this.mcap.classList.remove("hidden");
+  }
+
+  setupFooter() {
+    const addrEl = document.querySelector("#ca-address");
+    const copyBtn = document.querySelector("#ca-copy");
+    const dexLink = document.querySelector("#ca-dexscreener");
+    const scanLink = document.querySelector("#ca-solscan");
+
+    if (!TIDE_MINT_ADDRESS) return;
+
+    if (addrEl) {
+      addrEl.textContent = shortAddr(TIDE_MINT_ADDRESS, 6, 6);
+      addrEl.title = TIDE_MINT_ADDRESS;
+    }
+    if (dexLink) dexLink.href = DEXSCREENER_PAGE;
+    if (scanLink) scanLink.href = SOLSCAN_TOKEN;
+
+    if (copyBtn) {
+      copyBtn.addEventListener("click", () => this.copyAddress());
+    }
+    // Tapping the address itself also copies.
+    if (addrEl) {
+      addrEl.style.cursor = "pointer";
+      addrEl.addEventListener("click", () => this.copyAddress());
+    }
+  }
+
+  async copyAddress() {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(TIDE_MINT_ADDRESS);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = TIDE_MINT_ADDRESS;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+      flashToast("📋 Contract address copied", "success");
+    } catch {
+      flashToast("Couldn't copy — long-press to select", "warn");
+    }
   }
 }

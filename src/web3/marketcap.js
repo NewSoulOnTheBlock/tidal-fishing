@@ -11,7 +11,7 @@
 // avoids perturbing Rollup's wallet-chunk tree-shaking for a tiny price widget.
 
 export const TIDE_MINT_ADDRESS =
-  import.meta.env.VITE_TIDE_MINT || "7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump";
+  import.meta.env.VITE_TIDE_MINT || "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump";
 
 const DEXSCREENER_URL = `https://api.dexscreener.com/latest/dex/tokens/${TIDE_MINT_ADDRESS}`;
 const JUPITER_URL = `https://lite-api.jup.ag/price/v3?ids=${TIDE_MINT_ADDRESS}`;
