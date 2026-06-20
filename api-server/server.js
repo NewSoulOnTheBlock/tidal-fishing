@@ -141,7 +141,13 @@ initDatabase();
 
 // Environment variables
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
-const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || 'CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump';
+// $TIDE mint. The relaunched pump.fun mint is authoritative. A stale env value
+// pinned to the OLD (defunct) mint is ignored so the on-chain payout always uses
+// the new token; any OTHER env value (e.g. a staging mint) is still respected.
+const TIDE_MINT_NEW = 'CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump';
+const TIDE_MINT_OLD = '7sXmXJEKLRQ3ZJ68g6fdsJMV2R9fXDbem1nS2d9apump';
+const _envMint = (process.env.VITE_TIDE_MINT || '').trim();
+const TIDE_MINT_STR = (_envMint && _envMint !== TIDE_MINT_OLD) ? _envMint : TIDE_MINT_NEW;
 const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || '';
 const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);
@@ -660,6 +666,9 @@ app.get('/api/health', cacheControl('no-store'), (req, res) => {
     timestamp: new Date().toISOString(),
     treasury: treasuryKeypair ? treasuryKeypair.publicKey.toBase58() : 'not configured',
     tideMint: TIDE_MINT_STR,
+    mintSource: (_envMint && _envMint !== TIDE_MINT_OLD) ? 'env' : 'default',
+    build: 'tide-mint-v2',
+    tideDecimals: TIDE_DECIMALS,
     rpcUrl: RPC_URL.replace(/api-key=[^&]+/, 'api-key=***'),
   });
 });
