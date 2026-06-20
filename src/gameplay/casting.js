@@ -26,6 +26,7 @@ export class CastingSystem {
     this.lineTension = 0;
     this.lineTarget = null;
     this.flickT = 1; // >= 1 means the cast flick animation is finished
+    this._lingerT = 0; // countdown that fades the aim ring/trajectory out after a cast
     this.swayT = 0;
     this.bend = 0;
     this.bendTarget = 0;
@@ -294,6 +295,9 @@ export class CastingSystem {
   endCharge() {
     this.charging = false;
     this.flickT = 0;
+    // Let the aim ring + trajectory linger at the release landing point and
+    // fade out, instead of snapping off the instant the cast leaves the rod.
+    this._lingerT = CONFIG.cast.previewLinger || 0;
     return this.power;
   }
 
@@ -348,12 +352,26 @@ export class CastingSystem {
     this.scene.add(this.previewRing);
   }
 
-  updatePreview(visible) {
+  updatePreview(dt, visible) {
     if (!visible) {
+      // After a cast, hold the ring + trajectory at the release landing point
+      // and fade them out over CONFIG.cast.previewLinger seconds.
+      if (this._lingerT > 0) {
+        this._lingerT = Math.max(0, this._lingerT - dt);
+        const dur = CONFIG.cast.previewLinger || 1;
+        const k = this._lingerT / dur; // 1 -> 0
+        this.previewMat.opacity = 0.7 * k;
+        this.previewRing.material.opacity = 0.6 * k;
+        const shown = this._lingerT > 0;
+        this.preview.visible = shown;
+        this.previewRing.visible = shown;
+        return;
+      }
       this.preview.visible = false;
       this.previewRing.visible = false;
       return;
     }
+    this._lingerT = 0; // aiming again — cancel any pending fade
     const power = this.charging ? this.power : 0.5;
     const { origin, velocity } = this.computeLaunch(power, this.castMult);
     const pos = origin.clone();
@@ -486,7 +504,7 @@ export class CastingSystem {
       this._reelSpool.rotation.y += this._reelSpin * dt;
     }
 
-    this.updatePreview(!!opts.previewVisible);
+    this.updatePreview(dt, !!opts.previewVisible);
     this.updateLine();
   }
 

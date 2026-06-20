@@ -27,6 +27,7 @@ export const CONFIG = {
     gravity: 9.8,
     aimMaxYawDeg: 58,
     powerCurve: 1.12, // distance = min + (max-min) * power^curve
+    previewLinger: 1.2, // seconds the aim ring + trajectory fade out after release
   },
 
   bite: {
