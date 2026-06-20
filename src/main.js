@@ -1149,6 +1149,8 @@ onWalletChange(({ account }) => {
   // Owner/dev wallets get everything unlocked (gear, anglers, locations, bait).
   const isDev = economy.applyDevUnlocks(addr);
   if (isDev) saveGame();
+  // Comped wallets get all characters + maps (no gear/bait/dev flag).
+  const comped = !isDev && economy.applyCompUnlocks(addr);
   applySettings();
   travelTo(S.world.current, true);
   gclock.hours = S.world.hour;
@@ -1158,6 +1160,8 @@ onWalletChange(({ account }) => {
     if (addr) {
       if (isDev) {
         hud.toast("Owner wallet — everything unlocked ⚓", "gold");
+      } else if (comped) {
+        hud.toast("All characters & maps unlocked 🎉", "gold");
       } else {
         hud.toast(had ? `Loaded save for ${shortAddress(addr)}` : `New save bound to ${shortAddress(addr)}`, "success");
       }

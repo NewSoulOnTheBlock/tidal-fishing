@@ -579,6 +579,33 @@ export function isDevWallet(addr) {
   return !!addr && DEV_WALLETS.has(String(addr));
 }
 
+/** Wallets comped all characters + maps (all premium anglers + every location),
+ *  WITHOUT the full dev treatment — no all-gear, no infinite bait, no
+ *  devUnlimited flag. Granted on wallet connect; merges into the existing save. */
+export const COMP_WALLETS = new Set([
+  "7fa16sdEU7PmpmZ9oAqHNyUJCKsVzuVeYBMBe1VCfm7Z",
+]);
+
+export function isCompWallet(addr) {
+  return !!addr && COMP_WALLETS.has(String(addr));
+}
+
+/** Grant a comped wallet every premium angler + every location. Idempotent and
+ *  non-destructive (merges, never clobbers existing unlocks/progress). Returns
+ *  true when the wallet is comped so the caller can toast. */
+export function applyCompUnlocks(addr) {
+  if (!isCompWallet(addr)) return false;
+  const anglers = new Set(S.profile.anglersOwned || []);
+  for (const c of PREMIUM_ANGLERS) anglers.add(c.id);
+  S.profile.anglersOwned = [...anglers];
+  const locs = new Set(S.world.unlocked || []);
+  for (const l of LOCATIONS) locs.add(l.id);
+  S.world.unlocked = [...locs];
+  events.emit("gear");
+  saveGame();
+  return true;
+}
+
 /** Grant a dev/owner wallet everything: all gear owned, all premium anglers,
  *  every location unlocked, and unlimited bait. Non-dev wallets clear the
  *  unlimited flag. Idempotent. */
