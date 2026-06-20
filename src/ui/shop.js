@@ -343,6 +343,20 @@ export class ShopUI {
         paymentOptions.appendChild(solBtn);
       }
 
+      // Pay with on-chain wallet $TIDE (transfer to treasury). Same value as the
+      // off-chain button, but spends the real token instead of earned in-game
+      // $TIDE — so a player can stock bait straight from their wallet holdings.
+      if (walletConnected && isOnChainPayEnabled()) {
+        const onChainTideBtn = document.createElement("button");
+        onChainTideBtn.className = "btn btn-tide";
+        onChainTideBtn.innerHTML = `
+          <span class="pay-label">Buy ×${qty} · $TIDE (on-chain)</span>
+          <span class="pay-amount">${formatMoney(tideCost)}</span>
+        `;
+        onChainTideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-onchain", 0, tideCost));
+        paymentOptions.appendChild(onChainTideBtn);
+      }
+
       action.appendChild(paymentOptions);
       this.contentEl.appendChild(row);
     });
@@ -774,7 +788,7 @@ export class ShopUI {
    * Buy bait with the selected payment method.
    * @param {string} id - Bait id
    * @param {number} qty - Quantity to buy
-   * @param {string} method - 'tide-offchain' or 'sol'
+   * @param {string} method - 'tide-offchain', 'sol', or 'tide-onchain'
    * @param {number} solAmount - SOL amount if method is 'sol'
    */
   async buyBaitWith(id, qty, method, solAmount = 0, tideCost = 0) {
@@ -808,6 +822,25 @@ export class ShopUI {
         console.error("[tidal] SOL bait payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "SOL payment failed", kind: "warn" });
+      } finally {
+        this.render();
+      }
+    } else if (method === "tide-onchain") {
+      try {
+        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        const sig = await payTide(tideCost, { memo: `tidal:bait:${id}:${qty}` });
+        economy.grantBaitOnChain(id, qty, sig);
+        audio.play("buy");
+        events.emit("toast", {
+          msg: `Bought ×${qty} ${b.name} with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          kind: "gold",
+          href: explorerTxUrl(sig),
+        });
+        events.emit("wallet:refresh");
+      } catch (e) {
+        console.error("[tidal] on-chain $TIDE bait payment failed", e);
+        audio.play("error");
+        events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {
         this.render();
       }
