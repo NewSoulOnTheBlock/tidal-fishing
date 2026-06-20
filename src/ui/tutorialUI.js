@@ -22,7 +22,7 @@ const SLIDES = [
   {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-1" /><path d="M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 7v2" />'),
     title: "Bait every cast",
-    body: "In <b>Pro Angler</b> mode, every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with a little. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Pay with <b>$TIDE</b> you earn from fishing, or with <b>SOL</b>. <i>(Casual mode needs no bait.)</i>",
+    body: "In <b>Pro Angler</b> mode, every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>SOL</b> or <b>$TIDE</b> — same value either way. <i>(Casual mode needs no bait.)</i>",
   },
   {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-4l3 3" /><path d="M14 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M16 5v-2" />'),

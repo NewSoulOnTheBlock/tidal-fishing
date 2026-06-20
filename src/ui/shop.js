@@ -111,10 +111,9 @@ export class ShopUI {
   renderGear(catKey) {
     this.contentEl.innerHTML = "";
     // Option-A pricing: each item is anchored to a SOL price and its $TIDE cost is
-    // the LIVE Jupiter SOL-equivalent, so paying in $TIDE always costs the same value
-    // as the SOL price. (Bait is the exception — it uses a fixed cheap $TIDE price so
-    // the core loop stays f2p.) Ensure a rate is loaded; re-render once it arrives so
-    // prices reflect the live market instead of the cold-start fallback.
+    // the LIVE Jupiter SOL-equivalent (same model as bait), so paying in $TIDE always
+    // costs the same value as the SOL price. Ensure a rate is loaded; re-render once
+    // it arrives so prices reflect the live market instead of the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
     refreshRate().then(() => {
       if (this.tab === catKey && !rateWasLoaded && isRateLoaded()) this.render();
@@ -263,11 +262,20 @@ export class ShopUI {
     const walletConnected = Boolean(currentPublicKey());
     const solPayAvailable = isSolPayEnabled();
 
+    // $TIDE bait prices are the LIVE SOL-equivalent (Jupiter rate) so paying in
+    // $TIDE always costs the same value as paying the SOL price. Ensure we have a
+    // rate; if it loads while this tab is open, re-render so prices reflect the
+    // live market instead of the cold-start fallback.
+    const rateWasLoaded = isRateLoaded();
+    refreshRate().then(() => {
+      if (this.tab === "bait" && !rateWasLoaded && isRateLoaded()) this.render();
+    });
+
     BAITS.forEach((b) => {
       const count = economy.baitCount(b.id);
       const isActive = selected === b.id;
       const solCost = Number((b.solPrice * qty).toFixed(4));
-      const tideCost = b.tidePrice * qty;
+      const tideCost = solToTideLive(solCost);
       const afford = S.profile.money >= tideCost;
 
       const row = document.createElement("div");
