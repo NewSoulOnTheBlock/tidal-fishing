@@ -27,7 +27,6 @@ export const CONFIG = {
     gravity: 9.8,
     aimMaxYawDeg: 58,
     powerCurve: 1.12, // distance = min + (max-min) * power^curve
-    previewLinger: 1.2, // seconds the aim ring + trajectory fade out after release
   },
 
   bite: {
@@ -125,7 +124,7 @@ export const CONFIG = {
     maxSpots: 3,
     radius: 3.6, // m: how close the bobber must land to count as "in the spot"
     spawnEvery: [5, 11], // seconds between spawn attempts while a slot is free
-    ttl: [16, 28], // seconds a spot lives before drifting away
+    ttl: [34, 56], // seconds a spot lives before drifting away
     fade: 1.1, // seconds to fade in/out
     driftSpeed: 0.32, // m/s lateral drift
     biteMult: 1.85, // remaining bite wait is divided by this inside a spot
