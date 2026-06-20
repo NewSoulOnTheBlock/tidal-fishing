@@ -77,6 +77,17 @@ export class WalletPanel {
     window.addEventListener("resize", () => this.syncHudOffset());
   }
 
+  /**
+   * Show or hide the entire shared #wallet-mount slot. Used to keep the floating
+   * wallet card out of the full-screen panel overlays (shop / map / journal),
+   * where it sat above the panel header and intercepted clicks on the Close
+   * button. It stays visible in the menu and the gameplay HUD.
+   */
+  setMountHidden(hidden) {
+    const mount = document.getElementById("wallet-mount");
+    if (mount) mount.classList.toggle("wallet-mount-hidden", Boolean(hidden));
+  }
+
   render() {
     if (this.account) {
       const addr = this.account.address;

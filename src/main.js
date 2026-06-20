@@ -97,9 +97,13 @@ events.on("fight:snap", () => tgHaptic("error"));
 events.on("fight:landed", () => tgHaptic("success"));
 events.on("fight:escape", () => tgHaptic("error"));
 
+// Full-screen panel phases (shop / map / journal) render their own overlay with
+// a Close button. The floating wallet mount is hidden for these so it can't sit
+// above the panel header and swallow clicks on Close — it stays in the menu + HUD.
+const SCREEN_PHASES = new Set([Phase.SHOP, Phase.JOURNAL, Phase.MAP]);
+
 // Telegram-only polish: a native Back button that closes the full-screen menus.
 if (isTelegram()) {
-  const SCREEN_PHASES = new Set([Phase.SHOP, Phase.JOURNAL, Phase.MAP]);
   events.on("phase", ({ to }) => {
     tgSetBackButton(SCREEN_PHASES.has(to), handleEscape);
   });
@@ -172,6 +176,9 @@ const feedingSpots = new FeedingSpots(scene, effects);
 const hud = new HUD();
 const catchCard = new CatchCard();
 const walletPanel = new WalletPanel();
+// Hide the floating wallet card while a full-screen panel (shop/map/journal) is
+// open so it can't overlap that panel's Close button; show it everywhere else.
+events.on("phase", ({ to }) => walletPanel.setMountHidden(SCREEN_PHASES.has(to)));
 const shopUI = new ShopUI(() => machine.set(Phase.IDLE));
 const journalUI = new JournalUI(() => machine.set(Phase.IDLE));
 const mapUI = new MapUI(
