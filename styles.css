@@ -1081,6 +1081,84 @@ kbd {
 .bait-qty-row .tab-btn { padding: 4px 12px; font-size: 0.82rem; }
 .angler-emoji { font-size: 1.25rem; line-height: 1; }
 
+/* ---------------- Lucky Catch raffle ---------------- */
+
+.lucky-loading { text-align: center; color: var(--dim); padding: 40px 0; font-size: 0.95rem; }
+.lucky-wrap { display: flex; flex-direction: column; gap: 12px; }
+.lucky-header {
+  display: flex; align-items: stretch; justify-content: space-between; gap: 14px;
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.12), rgba(95, 212, 255, 0.08));
+  border: 1px solid rgba(255, 200, 87, 0.35); border-radius: 14px; padding: 14px 16px;
+}
+.lucky-prize { flex: 1; min-width: 0; }
+.lucky-prize-label {
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold);
+}
+.lucky-prize-name { font-size: 1.25rem; font-weight: 800; margin: 2px 0 4px; }
+.lucky-prize-sub { font-size: 0.78rem; color: var(--dim); line-height: 1.4; }
+.lucky-clock {
+  flex-shrink: 0; text-align: center; align-self: center;
+  background: rgba(0, 0, 0, 0.25); border: 1px solid var(--stroke); border-radius: 12px; padding: 8px 14px;
+}
+.lucky-clock-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim);
+}
+.lucky-clock-time {
+  font-size: 1.4rem; font-weight: 800; color: var(--accent);
+  font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+}
+.lucky-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.lucky-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--stroke); border-radius: 10px; padding: 10px 6px;
+}
+.lucky-stat .ls-num { font-size: 1.2rem; font-weight: 800; color: var(--gold); }
+.lucky-stat .ls-lbl { font-size: 0.68rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+.lucky-section-title {
+  font-size: 0.74rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); margin: 6px 2px 0;
+}
+.lucky-fish-list { display: flex; flex-direction: column; gap: 7px; }
+.lucky-fish-row {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--stroke);
+  border-radius: 10px; padding: 8px 12px;
+}
+.lucky-fish-row .fish-mini {
+  width: 58px; height: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.lucky-fish-row .fish-mini .fish-svg, .lucky-fish-row .fish-mini .fish-img {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+}
+.lucky-fish-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lucky-fish-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lucky-fish-meta { font-size: 0.74rem; color: var(--dim); }
+.lucky-fish-tickets {
+  font-weight: 800; color: var(--gold); font-size: 0.92rem; min-width: 70px; text-align: right;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lucky-exchange-btn { flex-shrink: 0; padding: 7px 14px; font-size: 0.84rem; }
+.lucky-winners { display: flex; flex-direction: column; gap: 6px; }
+.lucky-winner-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--stroke);
+  border-radius: 9px; padding: 7px 12px; font-size: 0.84rem;
+}
+.lucky-winner-row .lw-who { font-weight: 700; }
+.lucky-winner-row .lw-prize { color: var(--dim); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lucky-reveal {
+  text-align: center; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.18), rgba(255, 120, 200, 0.12));
+  border: 1px solid rgba(255, 200, 87, 0.5);
+  animation: lucky-pop 0.5s ease;
+}
+.lucky-reveal-burst { font-size: 2rem; animation: lucky-bounce 1.4s ease-in-out infinite; }
+.lucky-reveal-title { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.lucky-reveal-prize { font-size: 1.3rem; font-weight: 800; margin: 4px 0; }
+.lucky-reveal-sub { font-size: 0.8rem; color: var(--dim); }
+@keyframes lucky-pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes lucky-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
 /* ---------------- journal ---------------- */
 
 .journal-stats { color: var(--dim); font-size: 0.85rem; }

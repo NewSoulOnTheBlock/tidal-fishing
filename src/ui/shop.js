@@ -17,8 +17,27 @@ import { isSolPayEnabled, paySol, tideToSol, formatSol } from "../web3/solPaymen
 import { solToTideLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
 import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 import { currentPublicKey } from "../web3/wallet.js";
+import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets } from "../web3/raffle.js";
 
 const $ = (id) => document.getElementById(id);
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatRemaining(ms) {
+  if (!Number.isFinite(ms) || ms <= 0) return "Closing…";
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
 
 export class ShopUI {
   constructor(onClose) {
@@ -48,15 +67,18 @@ export class ShopUI {
   }
 
   close() {
+    this._clearRaffleTimer();
     this.screen.classList.add("hidden");
   }
 
   render() {
     this.moneyEl.textContent = formatMoney(S.profile.money);
+    if (this.tab !== "raffle") this._clearRaffleTimer();
     this.renderTabs();
     if (this.tab === "sell") this.renderSell();
     else if (this.tab === "anglers") this.renderAnglers();
     else if (this.tab === "bait") this.renderBait();
+    else if (this.tab === "raffle") this.renderLuckyCatch();
     else this.renderGear(this.tab);
   }
 
@@ -66,6 +88,7 @@ export class ShopUI {
       ...GEAR_CATS.map((c) => ({ key: c.key, label: c.label })),
       { key: "bait", label: "Bait" },
       { key: "anglers", label: "Anglers" },
+      { key: "raffle", label: "🎟️ Lucky Catch" },
       { key: "sell", label: `Sell (${S.inventory.length})` },
     ];
     for (const t of tabs) {
@@ -368,6 +391,182 @@ export class ShopUI {
     });
     footer.appendChild(sellAllBtn);
     this.contentEl.appendChild(footer);
+  }
+
+  _clearRaffleTimer() {
+    if (this._raffleTimer) {
+      clearInterval(this._raffleTimer);
+      this._raffleTimer = null;
+    }
+  }
+
+  _startCountdown(endMs) {
+    this._clearRaffleTimer();
+    const tick = () => {
+      const el = document.getElementById("lucky-countdown");
+      if (!el || this.tab !== "raffle" || this.screen.classList.contains("hidden")) {
+        this._clearRaffleTimer();
+        return;
+      }
+      el.textContent = formatRemaining(endMs - Date.now());
+    };
+    tick();
+    this._raffleTimer = setInterval(tick, 1000);
+  }
+
+  // "Lucky Catch": exchange caught fish for weighted raffle tickets. Every 24h a
+  // winner is auto-picked server-side and an admin fulfills the Collector Crypt
+  // gacha NFT prize. All ticket math is server-authoritative; this only displays
+  // server data and posts exchange requests.
+  async renderLuckyCatch() {
+    this._clearRaffleTimer();
+    const el = this.contentEl;
+    el.innerHTML = `<div class="lucky-loading">Loading the Lucky Catch raffle…</div>`;
+
+    const wallet = currentPublicKey();
+    let current = null;
+    let user = null;
+    let history = [];
+    try {
+      [current, user, history] = await Promise.all([
+        getCurrentRaffle(wallet),
+        wallet ? getUserRaffle(wallet).catch(() => null) : Promise.resolve(null),
+        getRaffleHistory(6).catch(() => []),
+      ]);
+    } catch (e) {
+      if (this.tab === "raffle") {
+        el.innerHTML = `<div class="shop-empty">The Lucky Catch raffle is taking a nap.<br/>${escapeHtml(e.message || "Try again shortly.")}</div>`;
+      }
+      return;
+    }
+    if (this.tab !== "raffle" || this.screen.classList.contains("hidden")) return;
+
+    const tickets = Number(user?.tickets ?? current.userTickets ?? 0);
+    const total = Number(current.totalTickets ?? 0);
+    const chance = total > 0 ? (tickets / total) * 100 : 0;
+    const inv = Array.isArray(user?.inventory) ? user.inventory : [];
+    const wins = Array.isArray(user?.wins) ? user.wins : [];
+    const machineName = current.machine?.name || "Mystery Pack";
+
+    const parts = [];
+    parts.push(`<div class="lucky-wrap">`);
+
+    // Header: prize + live countdown.
+    parts.push(`
+      <div class="lucky-header">
+        <div class="lucky-prize">
+          <div class="lucky-prize-label">Today's Gacha Prize</div>
+          <div class="lucky-prize-name">🎁 ${escapeHtml(machineName)}</div>
+          <div class="lucky-prize-sub">A real NFT pulled live from Collector Crypt — awarded to one weighted winner.</div>
+        </div>
+        <div class="lucky-clock">
+          <div class="lucky-clock-label">Draw in</div>
+          <div id="lucky-countdown" class="lucky-clock-time">${formatRemaining(current.timeRemainingMs)}</div>
+        </div>
+      </div>`);
+
+    // Stats: your tickets / total / win chance.
+    parts.push(`
+      <div class="lucky-stats">
+        <div class="lucky-stat"><span class="ls-num">${tickets.toLocaleString()}</span><span class="ls-lbl">Your Tickets</span></div>
+        <div class="lucky-stat"><span class="ls-num">${total.toLocaleString()}</span><span class="ls-lbl">Total Tickets</span></div>
+        <div class="lucky-stat"><span class="ls-num">${chance >= 10 ? chance.toFixed(0) : chance.toFixed(1)}%</span><span class="ls-lbl">Win Chance</span></div>
+      </div>`);
+
+    // Prize reveal if this player has already won a past raffle.
+    const prizeWin = wins.find((w) => w.prize && (w.prize.metadata || w.prize.nftId));
+    if (prizeWin) {
+      const pname = prizeWin.prize.metadata?.name || prizeWin.prize.nftId || "your NFT prize";
+      const claimTxt = prizeWin.status === "completed"
+        ? "Delivered to your wallet 🎉"
+        : "Prize is being prepared — it'll arrive in your wallet soon.";
+      parts.push(`
+        <div class="lucky-reveal">
+          <div class="lucky-reveal-burst">🎉</div>
+          <div class="lucky-reveal-title">You won the raffle!</div>
+          <div class="lucky-reveal-prize">${escapeHtml(pname)}</div>
+          <div class="lucky-reveal-sub">${escapeHtml(claimTxt)}</div>
+        </div>`);
+    }
+
+    // Exchange inventory.
+    parts.push(`<div class="lucky-section-title">Exchange fish for tickets</div>`);
+    if (!wallet) {
+      parts.push(`<div class="shop-empty">Connect your wallet to exchange fish for raffle tickets.</div>`);
+    } else if (inv.length === 0) {
+      parts.push(`<div class="shop-empty">No fresh catches to exchange.<br/>Land some fish, then trade them here — bigger &amp; rarer = more tickets.</div>`);
+    } else {
+      parts.push(`<div class="lucky-fish-list">`);
+      for (const item of inv) {
+        const sp = FISH_BY_ID[item.speciesId];
+        const rarity = RARITIES[item.rarity];
+        const name = sp ? sp.name : "Mystery catch";
+        const color = rarity ? rarity.color : "var(--text-secondary, #9bb0c0)";
+        const rarityLabel = rarity ? rarity.label : (item.rarity || "");
+        const art = sp ? fishSVG(sp.look) : "🐟";
+        const meta = `${escapeHtml(rarityLabel)} · ${formatLength(item.sizeCm)} · ${formatWeight(item.weightKg)}`;
+        parts.push(`
+          <div class="lucky-fish-row">
+            <div class="fish-mini">${art}</div>
+            <div class="lucky-fish-info">
+              <span class="lucky-fish-name" style="color:${color}">${escapeHtml(name)}</span>
+              <span class="lucky-fish-meta">${meta}</span>
+            </div>
+            <div class="lucky-fish-tickets" title="Raffle tickets">🎟️ ${Number(item.tickets || 0).toLocaleString()}</div>
+            <button class="btn btn-buy lucky-exchange-btn" data-fish="${item.fishId}">Exchange</button>
+          </div>`);
+      }
+      parts.push(`</div>`);
+    }
+
+    // Recent winners.
+    parts.push(`<div class="lucky-section-title">Recent winners</div>`);
+    const settled = history.filter((r) => r.winnerWallet);
+    if (settled.length === 0) {
+      parts.push(`<div class="shop-empty">No past raffles yet — you could be the first winner!</div>`);
+    } else {
+      parts.push(`<div class="lucky-winners">`);
+      for (const r of settled) {
+        const who = r.winnerUsername || (r.winnerWallet ? shortAddress(r.winnerWallet) : "—");
+        const prize = r.prize?.metadata?.name || r.prize?.nftId || r.machine?.name || "NFT prize";
+        parts.push(`
+          <div class="lucky-winner-row">
+            <span class="lw-who">🏆 ${escapeHtml(who)}</span>
+            <span class="lw-prize">${escapeHtml(prize)}</span>
+          </div>`);
+      }
+      parts.push(`</div>`);
+    }
+
+    parts.push(`</div>`); // .lucky-wrap
+    el.innerHTML = parts.join("");
+
+    // Wire exchange buttons.
+    el.querySelectorAll(".lucky-exchange-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const fishId = Number(btn.dataset.fish);
+        if (!fishId) return;
+        btn.disabled = true;
+        const prev = btn.textContent;
+        btn.textContent = "…";
+        try {
+          const r = await exchangeFishForTickets(wallet, fishId);
+          audio.play("sell");
+          events.emit("toast", {
+            msg: `+${Number(r.ticketsAwarded).toLocaleString()} tickets! You now hold ${Number(r.userTickets).toLocaleString()}.`,
+            kind: "gold",
+          });
+          if (this.tab === "raffle") this.renderLuckyCatch();
+        } catch (e) {
+          btn.disabled = false;
+          btn.textContent = prev;
+          events.emit("toast", { msg: e.message || "Exchange failed", kind: "warn" });
+        }
+      });
+    });
+
+    // Live countdown (anchored to server-reported remaining time, skew-proof).
+    this._startCountdown(Date.now() + Math.max(0, Number(current.timeRemainingMs) || 0));
   }
 
   renderAnglers() {

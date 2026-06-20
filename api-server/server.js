@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { evaluateCatch } from './catchRules.js';
 import { makeSkrResolver } from './skrNames.js';
+import { installRaffleSystem } from './raffle/routes.js';
 
 dotenv.config();
 
@@ -1916,4 +1917,24 @@ app.get('/api/admin/bans', adminLimiter, async (req, res) => {
     console.error('[admin] List bans error:', error);
     res.status(500).json({ error: 'Failed to list bans' });
   }
+});
+
+// ============================================================================
+// 24-HOUR FISH RAFFLE → GACHA PRIZE SYSTEM
+// Players exchange caught fish (their server-recorded catches) for weighted
+// raffle tickets; every 24h a winner is auto-selected and an admin manually
+// fulfills the Collector Crypt gacha prize (treasury pays USDC, NFT → winner).
+// Self-contained in ./raffle/* — this wires it into the app + Solana infra.
+// ============================================================================
+installRaffleSystem({
+  app,
+  pool,
+  connection,
+  treasuryKeypair,
+  requireSession,
+  adminKeyValid,
+  writeLimiter,
+  cacheControl,
+  announce: (msg, kind) => { insertSystemChat(msg, kind).catch(() => {}); },
+  logger: console,
 });
