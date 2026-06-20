@@ -893,6 +893,33 @@ document.getElementById("btn-mode")?.addEventListener("click", () => {
   }
 });
 document.getElementById("menu-controls").addEventListener("click", () => controlsUI.show());
+
+// Mobile hamburger: the HUD nav buttons collapse into a top-right menu that
+// opens/closes from this toggle (see .menu-toggle / #hud-menu.open in styles.css).
+const _btnMenu = document.getElementById("btn-menu");
+const _hudMenu = document.getElementById("hud-menu");
+if (_btnMenu && _hudMenu) {
+  const setMenuOpen = (open) => {
+    _hudMenu.classList.toggle("open", open);
+    _btnMenu.classList.toggle("active", open);
+    _btnMenu.setAttribute("aria-expanded", open ? "true" : "false");
+  };
+  _btnMenu.addEventListener("click", (e) => {
+    e.stopPropagation();
+    audio.play("click");
+    setMenuOpen(!_hudMenu.classList.contains("open"));
+  });
+  // Picking any item dismisses the menu.
+  _hudMenu.addEventListener("click", (e) => {
+    if (e.target.closest(".hud-btn")) setMenuOpen(false);
+  });
+  // Tapping anywhere else closes it.
+  document.addEventListener("click", (e) => {
+    if (!_hudMenu.classList.contains("open")) return;
+    if (_btnMenu.contains(e.target) || _hudMenu.contains(e.target)) return;
+    setMenuOpen(false);
+  });
+}
 document.getElementById("hud-bag").addEventListener("click", () => {
   if (machine.is(Phase.IDLE)) {
     audio.play("click");

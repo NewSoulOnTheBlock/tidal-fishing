@@ -185,6 +185,35 @@ kbd {
 .hud-btn:hover { background: rgba(80, 150, 200, 0.3); }
 .hud-btn:disabled { opacity: 0.35; cursor: default; }
 
+/* Hamburger toggle — hidden on desktop (the button row shows inline); becomes
+   the primary nav affordance on mobile (see the max-width:768px block below). */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: rgba(8, 22, 33, 0.72);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+.menu-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: #eaf7ff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.menu-toggle.active span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.menu-toggle.active span:nth-child(2) { opacity: 0; }
+.menu-toggle.active span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
 /* Mode toggle: clearly signals whether catches earn $TIDE. */
 .mode-btn { font-weight: 700; }
 .mode-btn.mode-casual {
@@ -425,10 +454,13 @@ kbd {
     font-size: 13px;
   }
 
-  /* Wallet panel - compact mobile version */
+  /* Wallet panel - compact mobile version. Moves to the left column (under the
+     level card) so the top-right corner is clear for the hamburger + its
+     drop-down menu, matching the clean mobile layout. */
   #wallet-mount {
-    top: 4px !important;
-    right: 4px !important;
+    top: 72px !important;
+    left: 4px !important;
+    right: auto !important;
     min-width: 100px !important;
   }
 
@@ -2070,47 +2102,80 @@ kbd {
 .journal-search-input::placeholder { color: rgba(234, 246, 255, 0.4); }
 
 /* ============================================================
-   TIDAL — Mobile thumb-zone navigation
-   On phones the primary nav leaves the crowded top-right corner and becomes a
-   bottom bar within thumb reach for one-handed play. It hides while actively
-   fishing so it never collides with the power meter / reel overlay, and the
-   glanceable chips + prompt float just above it. Appended last so it wins over
-   the earlier mobile breakpoints by source order (all single-class selectors).
+   TIDAL — Mobile hamburger navigation
+   On phones the primary nav collapses into a single hamburger toggle pinned to
+   the top-right corner; tapping it drops the menu items down as a card. This
+   keeps the play area clear (UI out of the casting/reel zone) and matches the
+   clean mobile layout. Appended last so it wins over the earlier mobile
+   breakpoints by source order.
    ============================================================ */
 @media (max-width: 768px) {
+  /* Show the hamburger, pinned to the top-right corner. */
+  .menu-toggle {
+    display: flex;
+    position: fixed;
+    top: calc(6px + env(safe-area-inset-top, 0px));
+    right: 6px;
+    z-index: 160;
+  }
+
+  /* Clock + location card sits directly under the hamburger on the right,
+     decoupled from the wallet panel (which now lives on the left). */
+  .hud-topright {
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  /* The button row becomes a drop-down card anchored under the hamburger,
+     hidden until #hud-menu gets .open (toggled by main.js). */
   .hud-buttons {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    right: 6px;
+    left: auto;
+    bottom: auto;
+    width: auto;
+    min-width: 170px;
+    max-width: 64vw;
     margin: 0;
+    flex-direction: column;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    align-items: stretch;
     gap: 6px;
-    padding: 7px 10px calc(7px + env(safe-area-inset-bottom, 0px));
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    background: linear-gradient(to top, rgba(3, 10, 18, 0.85), rgba(3, 10, 18, 0));
-    z-index: 40;
+    padding: 8px;
+    background: rgba(6, 16, 26, 0.94);
+    border: 1px solid var(--stroke);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+    overflow: visible;
+    z-index: 159;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top right;
+    pointer-events: none;
+    transition: opacity 0.16s ease, transform 0.16s ease;
   }
-  .hud-buttons::-webkit-scrollbar { display: none; }
+  .hud-buttons.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
   .hud-buttons .hud-btn {
     flex: 0 0 auto;
+    width: 100%;
     min-height: 44px;
-    padding: 9px 14px;
-    font-size: 0.8rem;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.85rem;
     border-radius: 10px;
   }
-  /* Disabled and out of the way during an active cast/fight. */
-  #hud.phase-active .hud-buttons { display: none; }
 
-  /* Lift the bag chip + prompts above the bottom nav bar. */
-  .hud-bottomright { bottom: 66px; }
-  .prompt { bottom: 128px; }
-  .zone-hint { bottom: 166px; }
+  /* Keep menu access out of the way during an active cast/fight (matches the
+     prior behaviour where nav hid while fishing). */
+  #hud.phase-active .menu-toggle,
+  #hud.phase-active .hud-buttons { display: none !important; }
 }
 
-/* Telegram safe-area for the fixed bottom nav bar (mobile only). */
-.tg .hud-buttons { padding-bottom: calc(7px + var(--tg-safe-bottom, 0px)); }
+/* Telegram safe-area for the fixed hamburger toggle (mobile only). */
+.tg .menu-toggle { top: calc(6px + var(--tg-safe-top, 0px)); }
