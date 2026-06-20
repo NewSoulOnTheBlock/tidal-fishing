@@ -126,6 +126,10 @@ export const CHARACTERS = [
     ],
   }),
   ...premiumAngler("zelda", "Zelda", "👑", "Princess of Hyrule. Wisdom guides every perfect cast."),
+  ...premiumAngler("daphne", "Daphne", "💜", "The Scooby gang's glamour sleuth — on the case of the missing lunker."),
+  ...premiumAngler("velma", "Velma", "👓", "Jinkies! Where there's a clue, there's a catch."),
+  ...premiumAngler("bender", "Bender", "🤖", "Bite my shiny metal lure! Reeling 'em in with pure attitude."),
+  ...premiumAngler("cj", "CJ", "🚲", "Grove Street's finest. Ah, here we go again — straight to the big catch."),
 ];
 
 export const DEFAULT_CHARACTER = "r2d2";
