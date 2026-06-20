@@ -55,6 +55,7 @@ export class RaffleService {
       usdcMint: config.usdcMint || MAINNET_USDC,
       autoFulfill: Boolean(config.autoFulfill),
       openTimeoutMs: Number(config.openTimeoutMs) || 90_000,
+      packFishCost: Number(config.packFishCost) || 1000,
     };
     this._machineCache = { at: 0, machine: null };
   }
@@ -125,6 +126,28 @@ export class RaffleService {
       );
       CREATE INDEX IF NOT EXISTS idx_gacha_claims_raffle ON gacha_prize_claims(raffle_id);
       CREATE INDEX IF NOT EXISTS idx_gacha_claims_status ON gacha_prize_claims(status);
+
+      CREATE TABLE IF NOT EXISTS gacha_pack_purchases (
+        id SERIAL PRIMARY KEY,
+        player_id INTEGER REFERENCES players(id) ON DELETE SET NULL,
+        wallet_address VARCHAR(44) NOT NULL,
+        pack_type VARCHAR(48) NOT NULL,
+        pack_price INTEGER NOT NULL,
+        fish_spent INTEGER NOT NULL,
+        fish_ids JSONB NOT NULL,
+        api_memo VARCHAR(120),
+        purchase_signature VARCHAR(120),
+        nft_id VARCHAR(96),
+        mint_address VARCHAR(96),
+        prize_rarity VARCHAR(20),
+        metadata JSONB,
+        status VARCHAR(24) NOT NULL DEFAULT 'purchasing',
+        error TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        completed_at TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_pack_purchases_wallet ON gacha_pack_purchases(wallet_address);
+      CREATE INDEX IF NOT EXISTS idx_pack_purchases_status ON gacha_pack_purchases(status);
     `;
     await this.pool.query(ddl);
     // Mark the existing catch history as exchangeable inventory. Idempotent.
@@ -355,7 +378,7 @@ export class RaffleService {
     const playerId = p.rows[0].id;
     const raffle = await this.ensureActiveRaffle();
 
-    const [entriesRes, invRes, winsRes, ticketRes] = await Promise.all([
+    const [entriesRes, invRes, winsRes, ticketRes, fishCountRes] = await Promise.all([
       this.pool.query(
         `SELECT id, fish_id, species_id, rarity, weight_kg, size_cm, tickets_awarded, created_at
          FROM raffle_entries WHERE raffle_id = $1 AND player_id = $2 ORDER BY id DESC`,
@@ -379,15 +402,28 @@ export class RaffleService {
         'SELECT COALESCE(SUM(tickets_awarded),0)::bigint AS t FROM raffle_entries WHERE raffle_id = $1 AND player_id = $2',
         [raffle.id, playerId]
       ),
+      this.pool.query(
+        'SELECT COUNT(*)::int AS n FROM catches WHERE player_id = $1 AND exchanged_for_raffle = FALSE',
+        [playerId]
+      ),
     ]);
 
     const tickets = Number(ticketRes.rows[0].t);
     const total = Number(raffle.total_tickets) || 0;
+    const availableFish = Number(fishCountRes.rows[0].n) || 0;
     return {
       raffleId: raffle.id,
       tickets,
       winChance: total > 0 ? tickets / total : 0,
       totalTickets: total,
+      availableFish,
+      pack: {
+        fishCost: this.config.packFishCost,
+        packType: this.config.defaultPackType,
+        packName: this.config.defaultPackName,
+        price: this.config.defaultPackPrice,
+        available: Boolean(this.gacha?.configured),
+      },
       entries: entriesRes.rows.map((e) => ({
         fishId: e.fish_id,
         speciesId: e.species_id,
@@ -660,6 +696,205 @@ export class RaffleService {
       // Re-throw so the admin sees the cause; raffle stays awaiting_fulfillment (retryable).
       throw (e.status ? e : httpError(502, 'FULFILL_FAILED', msg));
     }
+  }
+
+  // ==========================================================================
+  // GACHA PACKS — buy a $50 mystery pack with caught fish (treasury-funded)
+  // ==========================================================================
+
+  /**
+   * Spend `packFishCost` (default 1000) caught fish to buy a mystery gacha pack.
+   * The TREASURY pays the USDC; the NFT is routed straight to the player's wallet
+   * via altPlayerAddress. Fish are server-verified, locked, and consumed exactly
+   * once (resume-safe): we only refund the fish if we fail BEFORE any pack was
+   * generated (no USDC spent). Once a pack memo is persisted the purchase is left
+   * 'pending_delivery' for a safe retry rather than refunding (money may be spent).
+   * @param {{walletAddress:string, packType?:string}} args
+   */
+  async buyPackWithFish({ walletAddress, packType } = {}) {
+    if (!walletAddress) throw httpError(400, 'BAD_INPUT', 'walletAddress required');
+    const pack = packType || this.config.defaultPackType;
+    const price = this.config.defaultPackPrice;
+    const need = this.config.packFishCost;
+
+    // --- Preflight: never consume fish if we plainly can't fulfill. ----------
+    if (!this.gacha?.configured) {
+      throw httpError(503, 'GACHA_UNCONFIGURED', 'Mystery packs are not available yet (gacha API key not set).');
+    }
+    if (!this.treasury) throw httpError(503, 'NO_TREASURY', 'Treasury keypair not configured');
+    const usdc = await this._treasuryUsdcDollars();
+    if (usdc !== null && usdc < price) {
+      throw httpError(402, 'TREASURY_USDC_LOW', 'The prize vault is being refilled — try again shortly.');
+    }
+
+    const playerRes = await this.pool.query('SELECT id FROM players WHERE wallet_address = $1', [walletAddress]);
+    if (!playerRes.rows.length) throw httpError(404, 'NO_PLAYER', 'Player not found');
+    const playerId = playerRes.rows[0].id;
+
+    // --- Reserve + consume exactly `need` fish in one transaction. -----------
+    const client = await this.pool.connect();
+    let purchase;
+    try {
+      await client.query('BEGIN');
+      const pick = await client.query(
+        `SELECT id FROM catches
+         WHERE player_id = $1 AND exchanged_for_raffle = FALSE
+         ORDER BY value ASC, caught_at ASC
+         LIMIT $2 FOR UPDATE SKIP LOCKED`,
+        [playerId, need]
+      );
+      if (pick.rows.length < need) {
+        await client.query('ROLLBACK');
+        throw httpError(409, 'NOT_ENOUGH_FISH', `You need ${need} fish to buy a pack — you only have ${pick.rows.length} unspent.`);
+      }
+      const fishIds = pick.rows.map((r) => r.id);
+      await client.query(
+        'UPDATE catches SET exchanged_for_raffle = TRUE, exchanged_at = NOW() WHERE id = ANY($1::int[])',
+        [fishIds]
+      );
+      const ins = await client.query(
+        `INSERT INTO gacha_pack_purchases (player_id, wallet_address, pack_type, pack_price, fish_spent, fish_ids, status)
+         VALUES ($1,$2,$3,$4,$5,$6,'purchasing') RETURNING *`,
+        [playerId, walletAddress, pack, price, need, JSON.stringify(fishIds)]
+      );
+      purchase = ins.rows[0];
+      await client.query('COMMIT');
+    } catch (e) {
+      try { await client.query('ROLLBACK'); } catch { /* already rolled back */ }
+      throw e;
+    } finally {
+      client.release();
+    }
+
+    this.log.log(`[pack] ${walletAddress} spent ${need} fish on a ${pack} pack (purchase #${purchase.id})`);
+    return this._fulfillPackPurchase(purchase);
+  }
+
+  /**
+   * Treasury-funded buy+open for a single gacha_pack_purchases row. Resume-safe:
+   * persists the memo BEFORE submit so a crash can't double-spend, and refunds
+   * the player's fish only when failure happens before any pack was generated.
+   * @returns {Promise<{ok:true, pending?:boolean, purchaseId:number, fishSpent:number, prize?:object, message?:string}>}
+   */
+  async _fulfillPackPurchase(purchase) {
+    const purchaseId = purchase.id;
+    const wallet = purchase.wallet_address;
+    const packType = purchase.pack_type || this.config.defaultPackType;
+    const fishIds = Array.isArray(purchase.fish_ids) ? purchase.fish_ids : JSON.parse(purchase.fish_ids || '[]');
+
+    try {
+      await this.pool.query('UPDATE gacha_pack_purchases SET error = NULL WHERE id = $1', [purchaseId]);
+
+      // RESUME-SAFE: if a memo already exists we NEVER re-buy (openPack is idempotent).
+      let memo = purchase.api_memo || null;
+      let submitSignature = purchase.purchase_signature || null;
+      if (!memo) {
+        const gen = await this.gacha.generatePack({
+          playerAddress: this.treasury.publicKey.toBase58(),
+          altPlayerAddress: wallet,
+          packType,
+          turbo: false,
+        });
+        memo = gen.memo;
+        // Persist the memo BEFORE submitting — a retry resumes on this exact memo.
+        await this.pool.query('UPDATE gacha_pack_purchases SET api_memo = $2 WHERE id = $1', [purchaseId, memo]);
+        const signed = this._signGachaTx(gen.transaction);
+        const submit = await this.gacha.submitTransaction(signed);
+        submitSignature = submit.signature || null;
+        await this.pool.query(
+          "UPDATE gacha_pack_purchases SET purchase_signature = $2, status = 'opening' WHERE id = $1",
+          [purchaseId, submitSignature]
+        );
+      } else {
+        this.log.log(`[pack] #${purchaseId} resuming on existing memo ${memo} (no re-purchase)`);
+        await this.pool.query("UPDATE gacha_pack_purchases SET status = 'opening' WHERE id = $1", [purchaseId]);
+      }
+
+      const opened = await this._openWithRetry(memo);
+      const meta = opened.nftWon?.content?.metadata || opened.nftWon || null;
+      await this.pool.query(
+        `UPDATE gacha_pack_purchases SET status = 'complete', completed_at = NOW(),
+           nft_id = $2, mint_address = $3, prize_rarity = $4, metadata = $5
+         WHERE id = $1`,
+        [purchaseId, opened.nft_address || null, opened.nft_address || null, opened.rarity || null, meta ? JSON.stringify(meta) : null]
+      );
+
+      this.log.log(`[pack] #${purchaseId} DELIVERED — ${opened.rarity || '?'} NFT ${opened.nft_address} -> ${wallet}`);
+      if (this.announce) {
+        const who = `${wallet.slice(0, 4)}…${wallet.slice(-4)}`;
+        const name = meta?.name || 'a mystery card';
+        this.announce(`🎰 ${who} cracked a mystery pack with ${purchase.fish_spent} fish and pulled ${name} (${opened.rarity || 'card'})!`, 'rare');
+      }
+      return {
+        ok: true,
+        purchaseId,
+        fishSpent: purchase.fish_spent,
+        prize: { nftId: opened.nft_address, mint: opened.nft_address, rarity: opened.rarity, metadata: meta },
+      };
+    } catch (e) {
+      const msg = String(e?.message || e).slice(0, 500);
+      // Did we generate a pack? Re-read so a crash between submit and here is seen.
+      const cur = await this.pool.query('SELECT api_memo FROM gacha_pack_purchases WHERE id = $1', [purchaseId]);
+      const hasMemo = Boolean(cur.rows[0]?.api_memo);
+      if (!hasMemo) {
+        // No USDC spent → REFUND the fish so the player isn't charged for nothing.
+        await this.pool.query(
+          'UPDATE catches SET exchanged_for_raffle = FALSE, exchanged_at = NULL WHERE id = ANY($1::int[])',
+          [fishIds]
+        );
+        await this.pool.query("UPDATE gacha_pack_purchases SET status = 'refunded', error = $2 WHERE id = $1", [purchaseId, msg]);
+        this.log.error(`[pack] #${purchaseId} FAILED before purchase — refunded ${fishIds.length} fish:`, msg);
+        throw (e.status ? e : httpError(502, 'PACK_FAILED', msg));
+      }
+      // A pack WAS purchased (USDC may be spent). Keep it for retry; do NOT refund.
+      await this.pool.query("UPDATE gacha_pack_purchases SET status = 'pending_delivery', error = $2 WHERE id = $1", [purchaseId, msg]);
+      this.log.error(`[pack] #${purchaseId} purchased but delivery PENDING:`, msg);
+      return {
+        ok: true,
+        pending: true,
+        purchaseId,
+        fishSpent: purchase.fish_spent,
+        message: 'Your pack was purchased — the NFT will arrive in your wallet shortly.',
+      };
+    }
+  }
+
+  /** Pack purchases that paid but haven't delivered the NFT yet (admin view). */
+  async listPendingPackDeliveries() {
+    const res = await this.pool.query(
+      `SELECT id, wallet_address, pack_type, fish_spent, api_memo, purchase_signature, status, error, created_at
+       FROM gacha_pack_purchases WHERE status IN ('pending_delivery','opening','purchasing')
+       ORDER BY id ASC`
+    );
+    return res.rows.map((r) => ({
+      purchaseId: r.id,
+      wallet: r.wallet_address,
+      packType: r.pack_type,
+      fishSpent: r.fish_spent,
+      memo: r.api_memo,
+      signature: r.purchase_signature,
+      status: r.status,
+      error: r.error,
+      createdAt: r.created_at,
+    }));
+  }
+
+  /** Resume delivery of a purchased-but-undelivered pack (no new fish spent). */
+  async retryPackDelivery(purchaseId) {
+    const res = await this.pool.query('SELECT * FROM gacha_pack_purchases WHERE id = $1', [purchaseId]);
+    if (!res.rows.length) throw httpError(404, 'NO_PURCHASE', 'Pack purchase not found');
+    const purchase = res.rows[0];
+    if (purchase.status === 'complete') {
+      return {
+        ok: true,
+        alreadyDelivered: true,
+        purchaseId,
+        prize: { nftId: purchase.nft_id, mint: purchase.mint_address, rarity: purchase.prize_rarity, metadata: purchase.metadata },
+      };
+    }
+    if (!this.gacha?.configured) throw httpError(503, 'GACHA_UNCONFIGURED', 'Gacha API key not configured');
+    if (!this.treasury) throw httpError(503, 'NO_TREASURY', 'Treasury keypair not configured');
+    return this._fulfillPackPurchase(purchase);
   }
 
   // ==========================================================================

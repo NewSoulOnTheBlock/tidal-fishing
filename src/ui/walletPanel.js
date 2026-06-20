@@ -21,6 +21,11 @@ import { formatMoney } from "../utils/utils.js";
 
 const REFRESH_INTERVAL_MS = 60_000;
 
+// Players must HOLD this much $TIDE in their connected wallet before the
+// earned-$TIDE withdraw faucet unlocks. Enforced on the withdraw tap (splash
+// popup when unmet); the disclaimer also shows on the wallet-connect screen.
+const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $TIDE
+
 export class WalletPanel {
   constructor() {
     this.root = document.getElementById("wallet-panel");
@@ -41,7 +46,8 @@ export class WalletPanel {
     this.modal = null;
     this.refreshTimer = null;
     this.account = null;
-    this.lastTideBalance = 0; // Track on-chain balance for hold requirement
+    this.lastTideBalanceUi = 0; // on-chain $TIDE (UI units) for the hold gate
+    this._splash = null;        // active withdraw-locked splash, if any
     this._lastHudTop = 0;     // cached --hud-topright-top to avoid redundant writes
 
     this.render();
@@ -76,36 +82,16 @@ export class WalletPanel {
       const addr = this.account.address;
       const earned = Math.floor(S.profile.money);
       const mintConfigured = !!TIDE_MINT;
-      
-      // Check on-chain $TIDE balance against the hold requirement.
-      const tideBalance = this.lastTideBalance || 0;
-      const MIN_HOLD_REQUIREMENT = 1_000_000; // 1 million $TIDE
-      const meetsHoldRequirement = tideBalance >= MIN_HOLD_REQUIREMENT;
-      
-      const canWithdraw = mintConfigured && earned > 0 && !this.withdrawing && meetsHoldRequirement;
 
+      // Compact withdraw button only — no permanent disclaimer (that lives on the
+      // connect screen now). The 1M-$TIDE hold gate is enforced on tap via a
+      // splash popup so the HUD stays small.
       let withdrawHtml = "";
-      if (earned > 0 || mintConfigured) {
-        const label = !mintConfigured
-          ? "Withdraw soon™"
-          : this.withdrawing
-            ? "Withdrawing…"
-            : !meetsHoldRequirement
-              ? `Hold 1M $TIDE to Withdraw`
-              : `Withdraw ${formatMoney(earned)}`;
-        const subnote = !mintConfigured
-          ? `Withdrawals activate once $TIDE goes live`
-          : !meetsHoldRequirement
-            ? `You need ${formatTokens(MIN_HOLD_REQUIREMENT - tideBalance, 6)} more $TIDE to unlock withdrawals`
-            : earned === 0
-              ? `Fish to earn $TIDE`
-              : `Pulls earned $TIDE from the Tidal treasury`;
-        withdrawHtml = `
-          <div class="wallet-withdraw">
-            <button class="btn btn-withdraw" data-withdraw ${canWithdraw ? "" : "disabled"} title="${subnote}">${label}</button>
-            <div class="wallet-withdraw-sub">${subnote}</div>
-          </div>
-        `;
+      if (mintConfigured && earned > 0) {
+        const label = this.withdrawing ? "Withdrawing…" : `Withdraw ${formatMoney(earned)}`;
+        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
+      } else if (!mintConfigured && earned > 0) {
+        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $TIDE goes live">Withdraw soon™</button>`;
       }
 
       this.root.innerHTML = `
@@ -122,8 +108,8 @@ export class WalletPanel {
       `;
       this.root.querySelector(".wallet-disconnect").addEventListener("click", () => disconnect());
       const wBtn = this.root.querySelector("[data-withdraw]");
-      if (wBtn && canWithdraw) {
-        wBtn.addEventListener("click", () => this.doWithdraw(earned));
+      if (wBtn && !wBtn.disabled) {
+        wBtn.addEventListener("click", () => this.handleWithdrawClick(earned));
       }
     } else {
       this.root.innerHTML = `
@@ -183,6 +169,47 @@ export class WalletPanel {
     }
   }
 
+  /**
+   * Withdraw tap handler. Enforces the 1,000,000-$TIDE wallet-hold requirement:
+   * if the connected wallet holds less, a splash popup explains it instead of
+   * starting a withdraw. Otherwise the withdraw proceeds.
+   */
+  handleWithdrawClick(amount) {
+    if (this.withdrawing) return;
+    const tideUi = this.lastTideBalanceUi || 0;
+    if (tideUi < MIN_HOLD_REQUIREMENT) {
+      this.showWithdrawSplash(tideUi);
+      return;
+    }
+    this.doWithdraw(amount);
+  }
+
+  /** Splash popup explaining the hold-to-withdraw requirement (shown when unmet). */
+  showWithdrawSplash(tideUi) {
+    if (this._splash) return;
+    const remaining = Math.max(0, MIN_HOLD_REQUIREMENT - tideUi);
+    const splash = document.createElement("div");
+    splash.className = "screen withdraw-splash";
+    splash.innerHTML = `
+      <div class="panel panel-narrow withdraw-splash-panel">
+        <div class="withdraw-splash-icon">💧🔒</div>
+        <h2 class="panel-title">Withdrawals Locked</h2>
+        <p class="withdraw-splash-text">Hold <strong>${MIN_HOLD_REQUIREMENT.toLocaleString()} $TIDE</strong> in your connected wallet to unlock withdrawals of your earned $TIDE.</p>
+        <div class="withdraw-splash-stats">
+          <div class="ws-stat"><span class="ws-num">${formatTokens(tideUi, 0, 0)}</span><span class="ws-lbl">You hold</span></div>
+          <div class="ws-stat"><span class="ws-num">${formatTokens(remaining, 0, 0)}</span><span class="ws-lbl">More needed</span></div>
+        </div>
+        <p class="withdraw-splash-sub">Your earned $TIDE is safe — keep fishing and stacking. Withdrawals open the moment your wallet crosses the threshold.</p>
+        <button class="btn btn-primary withdraw-splash-close">Got it</button>
+      </div>
+    `;
+    const close = () => { splash.remove(); this._splash = null; };
+    splash.addEventListener("click", (ev) => { if (ev.target === splash) close(); });
+    splash.querySelector(".withdraw-splash-close").addEventListener("click", close);
+    document.getElementById("app").appendChild(splash);
+    this._splash = splash;
+  }
+
   openModal() {
     if (this.modal) return;
     const wallets = listWallets();
@@ -218,6 +245,7 @@ export class WalletPanel {
       <div class="panel panel-narrow wallet-pick-panel">
         <h2 class="panel-title">Connect a Solana Wallet</h2>
         <p class="wallet-warn">Mainnet — your transactions are real. Tidal will never ask you to sign anything you didn't initiate.</p>
+        <p class="wallet-withdraw-note">💧 Withdrawals of earned $TIDE unlock once you <strong>hold ${MIN_HOLD_REQUIREMENT.toLocaleString()} $TIDE</strong> in your wallet.</p>
         <div class="wallet-pick-list">${list}</div>
         <button class="btn wallet-pick-cancel">Cancel</button>
       </div>
@@ -267,8 +295,8 @@ export class WalletPanel {
     if (solEl) solEl.textContent = formatSol(sol);
     if (tideEl) tideEl.textContent = tide ? formatTokens(tide.raw, tide.decimals) : "—";
     
-    // Store balance for hold requirement check
-    this.lastTideBalance = tide ? tide.raw : 0;
+    // Store balance (UI units) for the hold-to-withdraw gate.
+    this.lastTideBalanceUi = tide ? tide.ui : 0;
     
     this.refreshTimer = setTimeout(() => this.refreshBalances(), REFRESH_INTERVAL_MS);
   }

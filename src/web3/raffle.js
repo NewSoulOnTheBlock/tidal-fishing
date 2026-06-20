@@ -55,3 +55,21 @@ export async function exchangeFishForTickets(walletAddress, fishId) {
   });
   return jsonOrThrow(res, 'Exchange failed');
 }
+
+/**
+ * Spend fish (default 1000) for a treasury-funded $50 mystery gacha pack. The
+ * server consumes the fish, the treasury pays the USDC, and the NFT is routed to
+ * this wallet. Returns the prize (or a pending flag if delivery is still settling).
+ * @returns {Promise<{ok:boolean, pending?:boolean, fishSpent:number, prize?:object, message?:string}>}
+ */
+export async function buyPackWithFish(walletAddress, packType = undefined) {
+  const res = await apiFetch('/api/raffle/buy-pack', {
+    method: 'POST',
+    auth: true,
+    interactive: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walletAddress, packType }),
+    timeoutMs: 120000,
+  });
+  return jsonOrThrow(res, 'Pack purchase failed');
+}

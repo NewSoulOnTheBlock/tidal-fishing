@@ -68,6 +68,7 @@ export function installRaffleSystem(deps) {
       defaultPackPrice: Number(process.env.RAFFLE_DEFAULT_PACK_PRICE) || 50,
       usdcMint: process.env.USDC_MINT || 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       autoFulfill: String(process.env.RAFFLE_AUTO_FULFILL || 'false').toLowerCase() === 'true',
+      packFishCost: Number(process.env.RAFFLE_PACK_FISH_COST) || 1000,
     },
   });
 
@@ -121,6 +122,16 @@ export function installRaffleSystem(deps) {
     } catch (e) { sendErr(res, e); }
   });
 
+  // Spend fish (default 1000) for a treasury-funded mystery gacha pack; NFT to wallet.
+  app.post('/api/raffle/buy-pack', writeLimiter, requireSession, async (req, res) => {
+    try {
+      const walletAddress = req.authWallet || req.body?.walletAddress;
+      if (!walletAddress) return res.status(401).json({ error: 'Sign in to buy a pack', code: 'SESSION_REQUIRED' });
+      const out = await service.buyPackWithFish({ walletAddress, packType: req.body?.packType });
+      res.json(out);
+    } catch (e) { sendErr(res, e, 400); }
+  });
+
   // ===========================================================================
   // ADMIN / SERVER-ONLY
   // ===========================================================================
@@ -151,6 +162,26 @@ export function installRaffleSystem(deps) {
     }
     try {
       res.json(await service.fulfillRaffle(raffleId));
+    } catch (e) { sendErr(res, e, 502); }
+  });
+
+  // Pack purchases that paid USDC but haven't delivered the NFT (need a retry).
+  app.get('/api/raffle/admin/pending-packs', async (req, res) => {
+    if (!adminAuthed(req)) return res.status(401).json({ error: 'Unauthorized', code: 'ADMIN_REQUIRED' });
+    try {
+      res.json({ pending: await service.listPendingPackDeliveries() });
+    } catch (e) { sendErr(res, e); }
+  });
+
+  // Resume delivery of a purchased-but-undelivered pack (no new fish spent).
+  app.post('/api/raffle/retry-pack', async (req, res) => {
+    if (!adminAuthed(req)) return res.status(401).json({ error: 'Unauthorized', code: 'ADMIN_REQUIRED' });
+    const purchaseId = Math.floor(Number(req.body?.purchaseId));
+    if (!Number.isFinite(purchaseId) || purchaseId <= 0) {
+      return res.status(400).json({ error: 'purchaseId required', code: 'BAD_INPUT' });
+    }
+    try {
+      res.json(await service.retryPackDelivery(purchaseId));
     } catch (e) { sendErr(res, e, 502); }
   });
 

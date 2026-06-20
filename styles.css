@@ -1159,6 +1159,42 @@ kbd {
 @keyframes lucky-pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes lucky-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
+/* $50 mystery-pack-for-fish card */
+.lucky-pack-card {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(120, 90, 255, 0.16), rgba(255, 120, 200, 0.10));
+  border: 1px solid rgba(160, 130, 255, 0.45); border-radius: 14px; padding: 12px 14px;
+}
+.lucky-pack-card.ready { border-color: rgba(255, 200, 87, 0.6); box-shadow: 0 0 0 1px rgba(255, 200, 87, 0.25) inset; }
+.lucky-pack-art { font-size: 2.2rem; flex-shrink: 0; }
+.lucky-pack-card.ready .lucky-pack-art { animation: lucky-bounce 1.4s ease-in-out infinite; }
+.lucky-pack-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.lucky-pack-title { font-weight: 800; font-size: 1.02rem; }
+.lucky-pack-sub { font-size: 0.76rem; color: var(--dim); line-height: 1.35; }
+.lucky-pack-progress { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.lucky-pack-bar { flex: 1; height: 7px; border-radius: 5px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.lucky-pack-bar span { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.3s ease; }
+.lucky-pack-count { font-size: 0.72rem; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lucky-pack-btn { flex-shrink: 0; padding: 9px 16px; font-size: 0.86rem; }
+
+/* mystery-pack reveal overlay */
+.pack-reveal-overlay {
+  position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 10, 20, 0.82); backdrop-filter: blur(6px); padding: 20px; animation: lucky-pop 0.3s ease;
+}
+.pack-reveal-card {
+  text-align: center; max-width: 360px; width: 100%; padding: 24px 20px; border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255, 200, 87, 0.18), rgba(255, 120, 200, 0.14));
+  border: 1px solid rgba(255, 200, 87, 0.55); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.pack-reveal-burst { font-size: 2.6rem; animation: lucky-bounce 1.4s ease-in-out infinite; }
+.pack-reveal-title { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-top: 4px; }
+.pack-reveal-img { width: 180px; height: 180px; object-fit: contain; margin: 12px auto; border-radius: 12px; }
+.pack-reveal-art { font-size: 4rem; margin: 12px 0; }
+.pack-reveal-name { font-size: 1.35rem; font-weight: 800; margin: 4px 0; }
+.pack-reveal-rarity { font-size: 0.82rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+.pack-reveal-sub { font-size: 0.8rem; color: var(--dim); margin: 6px 0 14px; }
+
 /* ---------------- journal ---------------- */
 
 .journal-stats { color: var(--dim); font-size: 0.85rem; }
@@ -1520,6 +1556,41 @@ kbd {
   font-size: 0.66rem; color: var(--dim); text-align: center;
   letter-spacing: 0.04em;
 }
+/* compact withdraw button for the slimmed-down wallet HUD */
+.btn-withdraw-compact {
+  margin-top: 4px; padding: 6px 12px; font-size: 0.8rem;
+  box-shadow: 0 4px 14px rgba(106, 214, 164, 0.22);
+}
+/* withdraw disclaimer on the wallet-connect (login) screen */
+.wallet-withdraw-note {
+  font-size: 0.76rem; color: var(--accent);
+  background: rgba(132, 220, 255, 0.08);
+  border: 1px solid rgba(132, 220, 255, 0.22);
+  border-radius: 8px; padding: 8px 12px; margin: 0 0 14px;
+  line-height: 1.4;
+}
+/* withdraw-locked splash popup */
+.withdraw-splash {
+  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; z-index: 9200;
+  background: rgba(2, 8, 14, 0.78); backdrop-filter: blur(7px);
+  animation: lucky-pop 0.3s ease; padding: 20px;
+}
+.withdraw-splash-panel { max-width: 380px; width: 100%; text-align: center; }
+.withdraw-splash-icon { font-size: 2.6rem; }
+.withdraw-splash-text { font-size: 0.95rem; line-height: 1.45; margin: 6px 0 4px; }
+.withdraw-splash-text strong { color: var(--gold); }
+.withdraw-splash-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0;
+}
+.withdraw-splash-stats .ws-stat {
+  display: flex; flex-direction: column; gap: 2px; padding: 10px 6px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--stroke); border-radius: 10px;
+}
+.withdraw-splash-stats .ws-num { font-size: 1.15rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.withdraw-splash-stats .ws-lbl { font-size: 0.66rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
+.withdraw-splash-sub { font-size: 0.78rem; color: var(--dim); line-height: 1.4; margin: 0 0 16px; }
+.withdraw-splash-close { width: 100%; }
 
 /* ============================================================
    Powered by The Church of the Smoking Chicken Fish 🔥🐔🐟

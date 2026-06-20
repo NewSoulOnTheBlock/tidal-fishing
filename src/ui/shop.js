@@ -17,9 +17,13 @@ import { isSolPayEnabled, paySol, tideToSol, formatSol } from "../web3/solPaymen
 import { solToTideLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
 import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 import { currentPublicKey } from "../web3/wallet.js";
-import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets } from "../web3/raffle.js";
+import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets, buyPackWithFish } from "../web3/raffle.js";
 
 const $ = (id) => document.getElementById(id);
+
+// Half of every SOL bait purchase is routed to this address; the rest goes to
+// the treasury. (Set on owner request.)
+const BAIT_SOL_SPLIT_ADDRESS = "31qQLYJxoo8rXT3HfUPmZAeT5mvsERHqBhG2VypueDLz";
 
 function escapeHtml(s) {
   return String(s ?? "")
@@ -106,12 +110,22 @@ export class ShopUI {
 
   renderGear(catKey) {
     this.contentEl.innerHTML = "";
+    // Option-A pricing: each item is anchored to a SOL price and its $TIDE cost is
+    // the LIVE Jupiter SOL-equivalent (same model as bait), so paying in $TIDE always
+    // costs the same value as the SOL price. Ensure a rate is loaded; re-render once
+    // it arrives so prices reflect the live market instead of the cold-start fallback.
+    const rateWasLoaded = isRateLoaded();
+    refreshRate().then(() => {
+      if (this.tab === catKey && !rateWasLoaded && isRateLoaded()) this.render();
+    });
     const equippedIdx = S.gear.equipped[catKey];
     GEAR[catKey].forEach((item, idx) => {
       const owned = S.gear.owned[catKey].includes(idx);
       const equipped = equippedIdx === idx;
       const levelOk = S.profile.level >= item.level;
-      const afford = S.profile.money >= item.price;
+      const solAmount = item.solPrice ?? tideToSol(item.price);
+      const tideCost = solToTideLive(solAmount);
+      const afford = S.profile.money >= tideCost;
 
       const row = document.createElement("div");
       row.className = `shop-item${equipped ? " equipped" : ""}${!owned && !levelOk ? " locked" : ""}`;
@@ -162,10 +176,10 @@ export class ShopUI {
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
             <span class="pay-label">Pay with $TIDE</span>
-            <span class="pay-amount">${formatMoney(item.price)}</span>
+            <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
-            offChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain'));
+            offChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
             offChainBtn.title = "Not enough $TIDE";
@@ -174,14 +188,13 @@ export class ShopUI {
           
           // SOL button
           if (solPayAvailable) {
-            const solAmount = tideToSol(item.price);
             const solBtn = document.createElement("button");
             solBtn.className = "btn btn-sol";
             solBtn.innerHTML = `
               <span class="pay-label">Pay with SOL</span>
               <span class="pay-amount">${formatSol(solAmount)}</span>
             `;
-            solBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'sol', solAmount));
+            solBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'sol', solAmount, tideCost));
             paymentOptions.appendChild(solBtn);
           }
           
@@ -191,9 +204,9 @@ export class ShopUI {
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
               <span class="pay-label">Pay with $TIDE (on-chain)</span>
-              <span class="pay-amount">${formatMoney(item.price)}</span>
+              <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
-            onChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-onchain'));
+            onChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-onchain', solAmount, tideCost));
             paymentOptions.appendChild(onChainBtn);
           }
           
@@ -202,10 +215,10 @@ export class ShopUI {
           // No wallet connected - standard buy button
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(item.price)}` : "Not enough $TIDE";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDE";
           btn.disabled = !afford;
           if (afford) {
-            btn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain'));
+            btn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
           }
           action.appendChild(btn);
         }
@@ -448,6 +461,14 @@ export class ShopUI {
     const wins = Array.isArray(user?.wins) ? user.wins : [];
     const machineName = current.machine?.name || "Mystery Pack";
 
+    // "$50 mystery pack for fish" — treasury-funded instant gacha (separate from the raffle).
+    const packInfo = user?.pack || null;
+    const packCost = Number(packInfo?.fishCost) || 1000;
+    const availableFish = Number(user?.availableFish ?? inv.length) || 0;
+    const packAvailable = Boolean(packInfo?.available);
+    const canBuyPack = Boolean(wallet) && packAvailable && availableFish >= packCost;
+    const packPct = Math.min(100, Math.round((availableFish / packCost) * 100));
+
     const parts = [];
     parts.push(`<div class="lucky-wrap">`);
 
@@ -472,6 +493,28 @@ export class ShopUI {
         <div class="lucky-stat"><span class="ls-num">${total.toLocaleString()}</span><span class="ls-lbl">Total Tickets</span></div>
         <div class="lucky-stat"><span class="ls-num">${chance >= 10 ? chance.toFixed(0) : chance.toFixed(1)}%</span><span class="ls-lbl">Win Chance</span></div>
       </div>`);
+
+    // Instant $50 mystery pack — pay with fish, treasury covers the USDC, NFT to wallet.
+    {
+      let packBtnLabel;
+      if (!wallet) packBtnLabel = "Connect wallet";
+      else if (!packAvailable) packBtnLabel = "Coming soon";
+      else if (availableFish < packCost) packBtnLabel = `Need ${(packCost - availableFish).toLocaleString()} more fish`;
+      else packBtnLabel = `Open pack — ${packCost.toLocaleString()} fish`;
+      parts.push(`
+        <div class="lucky-pack-card${canBuyPack ? " ready" : ""}">
+          <div class="lucky-pack-art">🎰</div>
+          <div class="lucky-pack-body">
+            <div class="lucky-pack-title">$50 Mystery Pack</div>
+            <div class="lucky-pack-sub">Skip the wait — crack a Collector Crypt pack instantly for ${packCost.toLocaleString()} fish. A real NFT drops straight into your wallet.</div>
+            <div class="lucky-pack-progress">
+              <div class="lucky-pack-bar"><span style="width:${packPct}%"></span></div>
+              <div class="lucky-pack-count">${availableFish.toLocaleString()} / ${packCost.toLocaleString()} fish</div>
+            </div>
+          </div>
+          <button class="btn btn-buy lucky-pack-btn" ${canBuyPack ? "" : "disabled"}>${escapeHtml(packBtnLabel)}</button>
+        </div>`);
+    }
 
     // Prize reveal if this player has already won a past raffle.
     const prizeWin = wins.find((w) => w.prize && (w.prize.metadata || w.prize.nftId));
@@ -567,6 +610,57 @@ export class ShopUI {
 
     // Live countdown (anchored to server-reported remaining time, skew-proof).
     this._startCountdown(Date.now() + Math.max(0, Number(current.timeRemainingMs) || 0));
+
+    // Wire the $50 mystery-pack buy button (spend fish → treasury-funded NFT).
+    const packBtn = el.querySelector(".lucky-pack-btn");
+    if (packBtn && !packBtn.disabled) {
+      packBtn.addEventListener("click", async () => {
+        packBtn.disabled = true;
+        const prev = packBtn.textContent;
+        packBtn.textContent = "Opening pack…";
+        events.emit("toast", { msg: "Cracking your mystery pack…", kind: "info" });
+        try {
+          const r = await buyPackWithFish(wallet);
+          if (r?.pending) {
+            events.emit("toast", { msg: r.message || "Pack purchased — your NFT is on the way!", kind: "gold" });
+          } else {
+            audio.play("sell");
+            const name = r?.prize?.metadata?.name || "a mystery NFT";
+            const rarity = r?.prize?.rarity || "";
+            this._showPackReveal(r?.prize);
+            events.emit("toast", { msg: `🎉 You pulled ${name}${rarity ? ` (${rarity})` : ""}!`, kind: "gold" });
+          }
+          if (this.tab === "raffle") this.renderLuckyCatch();
+        } catch (e) {
+          packBtn.disabled = false;
+          packBtn.textContent = prev;
+          events.emit("toast", { msg: e.message || "Pack purchase failed", kind: "warn" });
+        }
+      });
+    }
+  }
+
+  /** Full-screen reveal overlay for a freshly opened mystery pack. */
+  _showPackReveal(prize) {
+    const name = prize?.metadata?.name || prize?.nftId || "Mystery NFT";
+    const rarity = prize?.rarity || "";
+    const img = prize?.metadata?.image || prize?.metadata?.content?.links?.image || null;
+    const overlay = document.createElement("div");
+    overlay.className = "pack-reveal-overlay";
+    overlay.innerHTML = `
+      <div class="pack-reveal-card">
+        <div class="pack-reveal-burst">🎉</div>
+        <div class="pack-reveal-title">Pack opened!</div>
+        ${img ? `<img class="pack-reveal-img" src="${escapeHtml(img)}" alt="${escapeHtml(name)}"/>` : `<div class="pack-reveal-art">🃏</div>`}
+        <div class="pack-reveal-name">${escapeHtml(name)}</div>
+        ${rarity ? `<div class="pack-reveal-rarity">${escapeHtml(rarity)}</div>` : ""}
+        <div class="pack-reveal-sub">Delivered to your wallet.</div>
+        <button class="btn btn-primary pack-reveal-close">Nice!</button>
+      </div>`;
+    const close = () => overlay.remove();
+    overlay.addEventListener("click", (ev) => { if (ev.target === overlay) close(); });
+    overlay.querySelector(".pack-reveal-close")?.addEventListener("click", close);
+    document.body.appendChild(overlay);
   }
 
   renderAnglers() {
@@ -576,11 +670,20 @@ export class ShopUI {
     intro.innerHTML = `Unlock animated anglers to fish as. Each is yours forever once bought.`;
     this.contentEl.appendChild(intro);
 
+    // Option-A pricing: $TIDE cost is the LIVE Jupiter SOL-equivalent of each angler's
+    // SOL price. Re-render once the rate loads so prices leave the cold-start fallback.
+    const rateWasLoaded = isRateLoaded();
+    refreshRate().then(() => {
+      if (this.tab === "anglers" && !rateWasLoaded && isRateLoaded()) this.render();
+    });
+
     const selected = S.profile.character;
     PREMIUM_ANGLERS.forEach((c) => {
       const owned = economy.isAnglerOwned(c.id);
       const isSelected = selected === c.id;
-      const afford = S.profile.money >= c.price;
+      const solAmount = c.solPrice ?? tideToSol(c.price);
+      const tideCost = solToTideLive(solAmount);
+      const afford = S.profile.money >= tideCost;
 
       const row = document.createElement("div");
       row.className = `shop-item${isSelected ? " equipped" : ""}${!owned ? " locked" : ""}`;
@@ -619,10 +722,10 @@ export class ShopUI {
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
             <span class="pay-label">Pay with $TIDE</span>
-            <span class="pay-amount">${formatMoney(c.price)}</span>
+            <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
-            offChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain"));
+            offChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
             offChainBtn.title = "Not enough $TIDE";
@@ -630,14 +733,13 @@ export class ShopUI {
           paymentOptions.appendChild(offChainBtn);
 
           if (solPayAvailable) {
-            const solAmount = c.solPrice ?? tideToSol(c.price);
             const solBtn = document.createElement("button");
             solBtn.className = "btn btn-sol";
             solBtn.innerHTML = `
               <span class="pay-label">Pay with SOL</span>
               <span class="pay-amount">${formatSol(solAmount)}</span>
             `;
-            solBtn.addEventListener("click", () => this.buyAngler(c.id, "sol", solAmount));
+            solBtn.addEventListener("click", () => this.buyAngler(c.id, "sol", solAmount, tideCost));
             paymentOptions.appendChild(solBtn);
           }
 
@@ -646,9 +748,9 @@ export class ShopUI {
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
               <span class="pay-label">Pay with $TIDE (on-chain)</span>
-              <span class="pay-amount">${formatMoney(c.price)}</span>
+              <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
-            onChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-onchain"));
+            onChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-onchain", solAmount, tideCost));
             paymentOptions.appendChild(onChainBtn);
           }
 
@@ -656,10 +758,10 @@ export class ShopUI {
         } else {
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(c.price)}` : "Not enough $TIDE";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDE";
           btn.disabled = !afford;
           if (afford) {
-            btn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain"));
+            btn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
           }
           action.appendChild(btn);
         }
@@ -690,7 +792,10 @@ export class ShopUI {
     } else if (method === "sol") {
       try {
         events.emit("toast", { msg: "Processing SOL payment...", kind: "info" });
-        const sig = await paySol(solAmount, { memo: `tidal:bait:${id}:${qty}` });
+        const sig = await paySol(solAmount, {
+          memo: `tidal:bait:${id}:${qty}`,
+          split: { to: BAIT_SOL_SPLIT_ADDRESS, ratio: 0.5 },
+        });
         economy.grantBaitOnChain(id, qty, sig);
         audio.play("buy");
         events.emit("toast", {
@@ -715,11 +820,11 @@ export class ShopUI {
    * @param {string} method - 'tide-offchain', 'sol', or 'tide-onchain'
    * @param {number} solAmount - SOL amount if method is 'sol'
    */
-  async buyAngler(id, method, solAmount = 0) {
+  async buyAngler(id, method, solAmount = 0, tideCost = 0) {
     const c = getCharacter(id);
 
     if (method === "tide-offchain") {
-      const res = economy.buyAngler(id);
+      const res = economy.buyAngler(id, tideCost);
       if (res.ok) {
         audio.play("buy");
         economy.selectAngler(id);
@@ -752,7 +857,7 @@ export class ShopUI {
     } else if (method === "tide-onchain") {
       try {
         events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
-        const sig = await payTide(c.price, { memo: `tidal:angler:${id}` });
+        const sig = await payTide(tideCost, { memo: `tidal:angler:${id}` });
         economy.grantAnglerOnChain(id, sig);
         economy.selectAngler(id);
         audio.play("buy");
@@ -779,12 +884,12 @@ export class ShopUI {
    * @param {string} method - Payment method: 'tide-offchain', 'sol', or 'tide-onchain'
    * @param {number} solAmount - SOL amount if method is 'sol'
    */
-  async buyGear(catKey, idx, method, solAmount = 0) {
+  async buyGear(catKey, idx, method, solAmount = 0, tideCost = 0) {
     const item = GEAR[catKey][idx];
     
     if (method === 'tide-offchain') {
       // Standard off-chain $TIDE purchase
-      const res = economy.buyGear(catKey, idx);
+      const res = economy.buyGear(catKey, idx, tideCost);
       if (res.ok) {
         audio.play("buy");
         events.emit("toast", { msg: `${item.name} purchased with $TIDE`, kind: "success" });
@@ -821,7 +926,7 @@ export class ShopUI {
       // On-chain $TIDE payment (treasury transfer)
       try {
         events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
-        const sig = await payTide(item.price, { memo: `tidal:gear:${catKey}:${idx}` });
+        const sig = await payTide(tideCost, { memo: `tidal:gear:${catKey}:${idx}` });
         
         economy.grantGearOnChain(catKey, idx, sig);
         audio.play("buy");

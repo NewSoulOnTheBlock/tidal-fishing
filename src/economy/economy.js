@@ -293,19 +293,21 @@ export function sellAll() {
   return total;
 }
 
-export function buyGear(catKey, index) {
+export function buyGear(catKey, index, costOverride = null) {
   const item = GEAR[catKey]?.[index];
   if (!item) return { ok: false, reason: "Unknown item" };
   if (S.gear.owned[catKey].includes(index)) return { ok: false, reason: "Already owned" };
   if (S.profile.level < item.level) return { ok: false, reason: `Requires level ${item.level}` };
-  if (S.profile.money < item.price) return { ok: false, reason: "Not enough $TIDE" };
-  S.profile.money -= item.price;
+  // Option-A pricing: the live $TIDE cost (Jupiter SOL-equivalent) is passed in.
+  const cost = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : item.price;
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDE" };
+  S.profile.money -= cost;
   S.gear.owned[catKey].push(index);
   S.gear.equipped[catKey] = index; // auto-equip new purchases
-  emitMoney(-item.price);
+  emitMoney(-cost);
   events.emit("gear");
   saveGame();
-  return { ok: true, item };
+  return { ok: true, item, cost };
 }
 
 /**
@@ -412,11 +414,12 @@ export function isAnglerOwned(id) {
 }
 
 /** Spend in-game $TIDE to unlock a premium angler. */
-export function buyAngler(id) {
+export function buyAngler(id, costOverride = null) {
   const c = getCharacter(id);
   if (!c?.premium) return { ok: false, reason: "Unknown angler" };
   if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
-  const price = c.price || 0;
+  // Option-A pricing: the live $TIDE cost (Jupiter SOL-equivalent) is passed in.
+  const price = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : (c.price || 0);
   if (S.profile.money < price) return { ok: false, reason: "Not enough $TIDE" };
   S.profile.money -= price;
   (S.profile.anglersOwned ??= []).push(c.id);

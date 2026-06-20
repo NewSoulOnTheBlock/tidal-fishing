@@ -43,12 +43,17 @@ export function getConversionRate() {
 }
 
 /**
- * Transfer SOL from connected wallet to treasury wallet
- * @param {number} solAmount - Amount in SOL (e.g., 0.001)
- * @param {Object} options - { memo?: string }
+ * Transfer SOL from connected wallet to the treasury wallet, optionally splitting
+ * a portion to a second recipient.
+ * @param {number} solAmount - Total amount in SOL (e.g., 0.001)
+ * @param {Object} options
+ * @param {string} [options.memo]
+ * @param {{to: (PublicKey|string), ratio?: number}} [options.split] - Send
+ *   `ratio` (0..1, default 0.5) of the total to `to`; the remainder goes to the
+ *   treasury. The payer is still debited the same total `solAmount`.
  * @returns {Promise<string>} Transaction signature
  */
-export async function paySol(solAmount, { memo } = {}) {
+export async function paySol(solAmount, { memo, split } = {}) {
   if (!TIDE_TREASURY) {
     throw new Error("Treasury wallet not configured");
   }
@@ -73,15 +78,41 @@ export async function paySol(solAmount, { memo } = {}) {
   
   // Set compute budget
   ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }));
-  
-  // Transfer instruction
-  ixs.push(
-    SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: TIDE_TREASURY,
-      lamports: Number(lamports),
-    })
-  );
+
+  // Optionally split a portion to a second recipient; the remainder (and the
+  // full amount when there's no split) goes to the treasury. Total debited from
+  // the payer is unchanged.
+  let splitLamports = 0n;
+  let splitKey = null;
+  if (split && split.to) {
+    splitKey = split.to instanceof PublicKey ? split.to : new PublicKey(split.to);
+    const ratio = Number.isFinite(split.ratio) ? Math.min(1, Math.max(0, split.ratio)) : 0.5;
+    splitLamports = BigInt(Math.floor(Number(lamports) * ratio));
+    if (splitKey.equals(TIDE_TREASURY)) { splitKey = null; splitLamports = 0n; } // no-op self-split
+  }
+  const treasuryLamports = lamports - splitLamports;
+
+  // Transfer the treasury portion (the full amount when there's no split).
+  if (treasuryLamports > 0n) {
+    ixs.push(
+      SystemProgram.transfer({
+        fromPubkey: payer,
+        toPubkey: TIDE_TREASURY,
+        lamports: Number(treasuryLamports),
+      })
+    );
+  }
+
+  // Transfer the split portion to the secondary recipient.
+  if (splitKey && splitLamports > 0n) {
+    ixs.push(
+      SystemProgram.transfer({
+        fromPubkey: payer,
+        toPubkey: splitKey,
+        lamports: Number(splitLamports),
+      })
+    );
+  }
   
   // Add memo if provided
   if (memo) {
