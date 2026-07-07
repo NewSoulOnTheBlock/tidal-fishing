@@ -78,11 +78,15 @@ export default async function handler(req, res) {
       redirect: "manual",
     });
 
-    const body = Buffer.from(await upstream.arrayBuffer());
+    const contentType = upstream.headers.get("content-type") || "";
     const headers = responseHeaders(upstream.headers);
     res.status(upstream.status);
     for (const [key, value] of Object.entries(headers)) res.setHeader(key, value);
-    res.send(body);
+    if (contentType.includes("application/json") || contentType.startsWith("text/")) {
+      res.send(await upstream.text());
+    } else {
+      res.send(Buffer.from(await upstream.arrayBuffer()));
+    }
   } catch (error) {
     console.error("[backend-proxy] request failed:", error?.message || error);
     res.status(502).json({ error: "Backend proxy failed", code: "BACKEND_PROXY_FAILED" });
