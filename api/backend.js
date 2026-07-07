@@ -29,6 +29,7 @@ function isAllowedOrigin(origin) {
     if (FIXED_ALLOWED_ORIGINS.has(origin)) return true;
     return hostname.endsWith(".ipfs.w3s.link") ||
       hostname.endsWith(".ipfs.dweb.link") ||
+      hostname.endsWith(".ipfs.inbrowser.link") ||
       hostname.endsWith(".ipfs.cf-ipfs.com") ||
       hostname === "ipfs.io" ||
       hostname === "cloudflare-ipfs.com";
