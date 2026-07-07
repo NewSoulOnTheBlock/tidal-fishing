@@ -74,7 +74,7 @@ export function mountCharacterChooser(container, opts = {}) {
       // them inside the chooser can stall low-end/mobile browsers and make the
       // overlay feel frozen. Use a lightweight in-canvas stand-in here; the real
       // avatar still loads when the user confirms the selection in the game.
-      if (c.vrm) preview.setPlaceholder({ yawDeg: c.yawDeg });
+      if (c.vrm || c.fbx) preview.setPlaceholder({ yawDeg: c.yawDeg });
       else preview.setModel(c.url, { yawDeg: c.yawDeg });
     }
   }

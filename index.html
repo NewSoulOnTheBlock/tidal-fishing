@@ -53,6 +53,7 @@
           <div class="xp-bar"><div id="hud-xpfill" class="xp-fill"></div></div>
         </div>
         <div id="hud-xptext" class="xp-text">0 / 70 XP</div>
+        <button id="hud-withdraw" class="hud-withdraw-btn" type="button" disabled>Withdraw</button>
       </div>
     </div>
 
@@ -72,6 +73,7 @@
         <button id="btn-map" class="hud-btn" title="Map (M)">Map</button>
         <button id="btn-shop" class="hud-btn" title="Shop (B)">Shop</button>
         <button id="btn-journal" class="hud-btn" title="Journal (J)">Journal</button>
+        <button id="btn-quests" class="hud-btn" title="Daily Quests (Q)">Quests</button>
         <button id="btn-profile" class="hud-btn" title="Profile (P)">Profile</button>
         <button id="btn-controls" class="hud-btn" title="Controls (?)">⌨️ Keys</button>
         <button id="btn-mode" class="hud-btn mode-btn" title="Switch between Casual and Pro Angler">🎣 Casual</button>
@@ -156,6 +158,9 @@
           <a id="ca-dexscreener" class="ca-link" href="#" target="_blank" rel="noopener">DexScreener ↗</a>
           <a id="ca-solscan" class="ca-link" href="#" target="_blank" rel="noopener">Solscan ↗</a>
         </div>
+        <a class="club-members-link" href="/club/club-members-only-presentation.pdf" target="_blank" rel="noopener" aria-label="Open the Club members only presentation">
+          Club members only
+        </a>
       </footer>
     </div>
   </div>
@@ -253,6 +258,17 @@
         <button id="map-close" class="btn btn-close">Close</button>
       </div>
       <div id="map-grid" class="map-grid"></div>
+    </div>
+  </div>
+
+  <div id="screen-quests" class="screen hidden" role="dialog" aria-modal="true" aria-labelledby="quests-title">
+    <div class="panel panel-wide quests-panel">
+      <div class="panel-head">
+        <h2 id="quests-title" class="panel-title">Daily Quests</h2>
+        <span class="journal-stats">7 completed days = 1 free character</span>
+        <button id="quests-close" class="btn btn-close">Close</button>
+      </div>
+      <div id="quests-content" class="quests-content"></div>
     </div>
   </div>
 

@@ -18,6 +18,7 @@ import { validateCatch, showBanMessage } from "../web3/catchValidation.js";
 import { isHotSpot } from "../web3/world.js";
 import { solToTideLive } from "../web3/priceConvert.js";
 import { isPro } from "../state/gameMode.js";
+import { recordQuestEvent } from "../progression/dailyQuests.js";
 
 export const xpToNext = (level) => Math.round(CONFIG.economy.xpBase * Math.pow(level, CONFIG.economy.xpPow));
 
@@ -89,6 +90,7 @@ function emitXp(gained = 0) {
 
 /** Adds XP, processes any level-ups and announces newly available unlocks. */
 export function addXp(amount) {
+  recordQuestEvent("xp", amount);
   S.profile.xp += amount;
   let levels = 0;
   while (S.profile.xp >= xpToNext(S.profile.level)) {
@@ -197,6 +199,11 @@ export async function registerCatch(fish) {
       sizeCm: fish.sizeCm,
       weightKg: fish.weightKg,
       value: fish.value,
+      baitId: fish.baitId || null,
+      baitName: fish.baitName || null,
+      baitTier: fish.baitTier || null,
+      baitSettlement: fish.baitSettlement || null,
+      baitSolPrice: fish.baitSolPrice || null,
     });
   }
 
@@ -221,6 +228,7 @@ export async function registerCatch(fish) {
   }
 
   S.stats.catches += 1;
+  recordQuestEvent("catch", 1);
   if (fish.sizeCm > S.stats.bestSize) {
     S.stats.bestSize = fish.sizeCm;
     S.stats.bestSpecies = fish.speciesId;
@@ -275,6 +283,7 @@ export function sellFishAt(index) {
   S.inventory.splice(index, 1);
   S.profile.money += value;
   S.stats.earned += value;
+  recordQuestEvent("sell", 1);
   emitMoney(value);
   events.emit("inventory");
   saveGame();
@@ -284,9 +293,11 @@ export function sellFishAt(index) {
 export function sellAll() {
   const total = inventoryValue();
   if (total <= 0) return 0;
+  const count = S.inventory.length;
   S.inventory.length = 0;
   S.profile.money += total;
   S.stats.earned += total;
+  recordQuestEvent("sell", count);
   emitMoney(total);
   events.emit("inventory");
   saveGame();
@@ -442,6 +453,19 @@ export function grantAnglerOnChain(id, signature) {
   return { ok: true, item: c };
 }
 
+/** Grant a premium angler from the 7-day daily-quest reward (no $SBF award/cost). */
+export function grantAnglerFromQuest(id) {
+  const c = getCharacter(id);
+  if (!c?.premium) return { ok: false, reason: "Unknown angler" };
+  if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
+  (S.profile.anglersOwned ??= []).push(c.id);
+  S.profile.character = c.id;
+  events.emit("angler", { id: c.id, source: "daily-quests" });
+  events.emit("character", c.id);
+  saveGame();
+  return { ok: true, item: c };
+}
+
 /** Make an owned angler the active player body. */
 export function selectAngler(id) {
   const c = getCharacter(id);
@@ -453,10 +477,10 @@ export function selectAngler(id) {
 }
 
 // ---- Bait (consumable inventory) ------------------------------------------
-// Bait is no longer permanent gear — it is a per-cast consumable. ONE bait is
-// spent on every cast. The selected bait drives bite speed AND the rarity-odds
-// roll (see fish/spawning.js). Cheaper baits catch mostly common fish; pricier
-// baits raise the odds of rare+ species.
+// Bait is no longer permanent gear — it is a per-cast SOL-purchased wager.
+// ONE bait is spent on every Pro cast. The selected bait drives bite speed and
+// the rarity-odds roll (see fish/spawning.js). Tiers 1–3 are fast server /
+// provably-fair packs; tiers 4–6 are the premium Gamba-ready hybrid tiers.
 
 /** The currently selected bait definition (falls back to the basic tier). */
 export function getSelectedBait() {

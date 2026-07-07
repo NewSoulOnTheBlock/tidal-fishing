@@ -13,6 +13,7 @@
 
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { getCharacter, DEFAULT_CHARACTER } from "../data/characters.js";
 import { disposeObject3D } from "../core/disposal.js";
 
@@ -28,6 +29,12 @@ let loader = null;
 function gltfLoader() {
   if (!loader) loader = new GLTFLoader();
   return loader;
+}
+
+let fbxLoader = null;
+function getFbxLoader() {
+  if (!fbxLoader) fbxLoader = new FBXLoader();
+  return fbxLoader;
 }
 
 export function createAnglerBody(parent, character) {
@@ -140,6 +147,7 @@ export function createAnglerBody(parent, character) {
     ctrl.loaded = false;
     disposeAnim();
     if (cfg.vrm) loadVRM(loadToken);
+    else if (cfg.fbx) loadFBX(loadToken);
     else loadGLB(loadToken);
   }
 
@@ -158,6 +166,58 @@ export function createAnglerBody(parent, character) {
         if (token === loadToken) console.warn("[angler] failed to load body model:", err);
       }
     );
+  }
+
+  // Animated FBX character: the main FBX is both the visible rig/model and the
+  // looping idle animation. A matching cast FBX can provide a one-shot cast clip.
+  async function loadFBX(token) {
+    try {
+      const asset = await getFbxLoader().loadAsync(cfg.url);
+      if (token !== loadToken) {
+        disposeObject3D(asset);
+        return;
+      }
+
+      mountModel(asset);
+
+      // Use the model's hand bone for rod anchoring when present. Mixamo exports
+      // usually use mixamorigRightHand; cfg.rodHand can override this live.
+      const gripBone = cfg.rodHand || "mixamorigRightHand";
+      handBone =
+        asset.getObjectByName(gripBone) ||
+        asset.getObjectByName("mixamorigRightHand") ||
+        asset.getObjectByName("RightHand") ||
+        asset.getObjectByName("rightHand") ||
+        null;
+
+      mixer = new THREE.AnimationMixer(asset);
+      const idleClip = asset.animations?.[0];
+      if (idleClip) {
+        idleAction = mixer.clipAction(idleClip);
+        idleAction.setLoop(THREE.LoopRepeat, Infinity);
+        idleAction.play();
+      }
+
+      const castUrl = cfg.anims?.cast;
+      if (castUrl) {
+        const castAsset = await getFbxLoader().loadAsync(castUrl);
+        if (token !== loadToken) {
+          disposeObject3D(castAsset);
+          return;
+        }
+        const clip =
+          THREE.AnimationClip.findByName(castAsset.animations || [], "mixamo.com") ||
+          castAsset.animations?.[0];
+        if (clip) {
+          castAction = mixer.clipAction(clip);
+          castAction.setLoop(THREE.LoopOnce, 1);
+          castAction.clampWhenFinished = true;
+        }
+        disposeObject3D(castAsset);
+      }
+    } catch (err) {
+      if (token === loadToken) console.warn("[angler] failed to load FBX body:", err);
+    }
   }
 
   // Animated VRM character: load the avatar, retarget its Mixamo idle/cast clips

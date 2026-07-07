@@ -43,6 +43,7 @@ import { ControlsUI } from "./ui/controlsUI.js";
 import { WeatherUI } from "./ui/weatherUI.js";
 import { ProfileUI } from "./ui/profileUI.js";
 import { LeaderboardUI } from "./ui/leaderboardUI.js";
+import { DailyQuestsUI } from "./ui/dailyQuestsUI.js";
 import { OnboardingUI } from "./ui/onboardingUI.js";
 import { UnderwaterFX } from "./ui/underwaterFX.js";
 import { TutorialUI } from "./ui/tutorialUI.js";
@@ -53,10 +54,12 @@ import { initMobileWalletAdapter } from "./web3/mwa.js";
 import { initTelegram, isTelegram, tgHaptic, tgSetBackButton } from "./platform/telegram.js";
 import { shortAddress } from "./web3/solana.js";
 import { refreshRate as warmTideRate } from "./web3/priceConvert.js";
+import { GamepadInput } from "./input/gamepad.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
 import { initJournal } from "./progression/journal.js";
 // import { initDailyLogin, checkDailyLogin } from "./progression/dailyLogin.js"; // DISABLED - daily rewards removed
 import { initAchievements } from "./progression/achievements.js";
+import { initDailyQuests, recordQuestEvent } from "./progression/dailyQuests.js";
 import { initWeather } from "./progression/weather.js";
 
 // ---------------------------------------------------------------------------
@@ -79,6 +82,7 @@ initMobileWalletAdapter();
 S.progressionJournal = initJournal(S);
 // S.dailyLogin = initDailyLogin(S); // DISABLED - daily rewards removed
 S.achievements = initAchievements(S);
+S.dailyQuests = initDailyQuests(S);
 S.weather = initWeather(S);
 
 // Haptic feedback on the key fishing beats. tgHaptic uses Telegram's native
@@ -198,6 +202,7 @@ const controlsUI = new ControlsUI();
 const weatherUI = new WeatherUI(scene);
 const profileUI = new ProfileUI();
 const leaderboardUI = new LeaderboardUI();
+const dailyQuestsUI = new DailyQuestsUI();
 const onboardingUI = new OnboardingUI();
 const tutorialUI = new TutorialUI();
 
@@ -373,11 +378,13 @@ machine.register(Phase.CHARGING, {
   },
 });
 
-// Rotates R2-D2's cast-sound cycle so each cast plays the next clip.
-let castSoundIdx = 0;
+// Rotates each character's cast-sound cycle independently so every character
+// plays their clips in order whenever that character casts.
+const castSoundIdxByCharacter = new Map();
 machine.register(Phase.FLYING, {
   enter() {
     S.stats.casts += 1;
+    recordQuestEvent("cast", 1);
     audio.play("whoosh");
     anglerBody.playCast(); // animated characters throw on release (no-op otherwise)
     // Character-specific cast voice/SFX. A body can define either a single
@@ -386,8 +393,10 @@ machine.register(Phase.FLYING, {
     const cfg = anglerBody.config;
     const cycle = Array.isArray(cfg?.castSounds) ? cfg.castSounds.filter(Boolean) : null;
     if (cycle && cycle.length) {
-      audio.playSample(cycle[castSoundIdx % cycle.length], { volume: 0.9 });
-      castSoundIdx++;
+      const key = cfg.id || "default";
+      const idx = castSoundIdxByCharacter.get(key) || 0;
+      audio.playSample(cycle[idx % cycle.length], { volume: 0.9 });
+      castSoundIdxByCharacter.set(key, idx + 1);
     } else if (cfg?.castSound) {
       audio.playSample(cfg.castSound, { volume: 0.9 });
     }
@@ -692,6 +701,57 @@ window.addEventListener("contextmenu", (e) => {
   if (e.target.closest("#canvas-wrap")) e.preventDefault();
 });
 
+const gamepadInput = new GamepadInput({
+  onConnect: (name) => events.emit("toast", { msg: `${name.split("(")[0].trim() || "Gamepad"} connected`, kind: "success" }),
+  onDisconnect: () => events.emit("toast", { msg: "Gamepad disconnected", kind: "warn" }),
+  onAim: (normX) => casting.setPointerX(normX),
+  onPrimaryDown: () => {
+    if (catchCard.active) {
+      window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true }));
+      return;
+    }
+    inputHeld = true;
+    waitingHoldT = 0;
+    pressDown();
+  },
+  onPrimaryUp: () => {
+    if (!inputHeld) return;
+    inputHeld = false;
+    pressUp();
+    waitingHoldT = 0;
+  },
+  onSteer: (dir) => {
+    if (!paused && machine.is(Phase.REELING)) {
+      steerKey = dir;
+      fight.setSteer(dir);
+    }
+  },
+  onDodge: () => {
+    if (!paused && machine.is(Phase.REELING)) fight.tryDodge();
+  },
+  onHeave: () => {
+    if (!paused && machine.is(Phase.REELING)) fight.tryHeave();
+  },
+  onRetrieve: () => {
+    if (!paused && machine.is(Phase.WAITING)) machine.set(Phase.RETRIEVING);
+  },
+  onPause: () => {
+    audio.play("click");
+    if (machine.current === Phase.MENU) return;
+    handleEscape();
+  },
+  onControls: () => controlsUI.toggle(),
+  onBag: () => {
+    if (machine.is(Phase.IDLE)) {
+      audio.play("click");
+      machine.set(Phase.SHOP, { tab: "sell" });
+    }
+  },
+  onQuests: () => {
+    if (!paused && isGameplayPhase(machine.current)) dailyQuestsUI.toggle();
+  },
+});
+
 window.addEventListener("keydown", (e) => {
   // While the user is typing in a text field (Fishermans Hole chat, onboarding
   // name, profile editor), let the browser handle the key normally — don't
@@ -748,6 +808,9 @@ window.addEventListener("keydown", (e) => {
       break;
     case "KeyJ":
       toggleScreen(Phase.JOURNAL);
+      break;
+    case "KeyQ":
+      if (!paused && isGameplayPhase(machine.current)) dailyQuestsUI.toggle();
       break;
     case "KeyC":
       // Open fish collection journal
@@ -850,6 +913,10 @@ function toggleScreen(phase) {
 
 function handleEscape() {
   if (catchCard.active) return;
+  if (dailyQuestsUI.isOpen()) {
+    dailyQuestsUI.hide();
+    return;
+  }
   if (paused) {
     setPaused(false);
     return;
@@ -875,6 +942,9 @@ function handleEscape() {
 document.getElementById("btn-map").addEventListener("click", () => toggleScreen(Phase.MAP));
 document.getElementById("btn-shop").addEventListener("click", () => toggleScreen(Phase.SHOP));
 document.getElementById("btn-journal").addEventListener("click", () => toggleScreen(Phase.JOURNAL));
+document.getElementById("btn-quests")?.addEventListener("click", () => {
+  if (!paused && isGameplayPhase(machine.current)) dailyQuestsUI.toggle();
+});
 document.getElementById("btn-profile").addEventListener("click", () => {
   if (!paused && isGameplayPhase(machine.current)) {
     audio.init();
@@ -892,7 +962,7 @@ document.getElementById("btn-mode")?.addEventListener("click", () => {
   const mode = toggleMode();
   if (mode === "pro") {
     events.emit("toast", {
-      msg: "Pro Angler — every cast needs bait, but your catches are worth real $SBF.",
+      msg: "Pro Angler — buy bait with SOL, cast it as your wager, then sell your catches to win.",
       kind: "gold",
     });
   } else {
@@ -1000,6 +1070,8 @@ function tick() {
   const dt = Math.min(clock3.getDelta(), 0.05);
   const phase = machine.current;
   const gameplay = isGameplayPhase(phase) && !paused;
+  const aiming = phase === Phase.IDLE || phase === Phase.CHARGING;
+  gamepadInput.update(dt, { canAim: !paused && aiming, canSteer: !paused && phase === Phase.REELING });
 
   if (gameplay) {
     gclock.advance(dt);
@@ -1047,7 +1119,6 @@ function tick() {
   if (!paused) feedingSpots.update(dt);
 
   if (!paused) {
-    const aiming = phase === Phase.IDLE || phase === Phase.CHARGING;
     casting.update(dt, { aiming, previewVisible: aiming });
 
     switch (phase) {
@@ -1157,6 +1228,7 @@ onWalletChange(({ account }) => {
   prevWalletAddr = addr;
 
   const had = setWalletSlot(addr);
+  S.dailyQuests = initDailyQuests(S);
   // Owner/dev wallets get everything unlocked (gear, anglers, locations, bait).
   const isDev = economy.applyDevUnlocks(addr);
   if (isDev) saveGame();

@@ -11,12 +11,12 @@ import { formatMoney, hourToClock, clamp } from "../utils/utils.js";
 const $ = (id) => document.getElementById(id);
 
 const PROMPTS = {
-  [Phase.IDLE]: "Aim with the <b>mouse</b> — hold <b>Click</b> or <b>Space</b> to charge a cast",
+  [Phase.IDLE]: "Aim with the <b>mouse</b> or <b>left stick</b> — hold <b>Click</b>, <b>Space</b>, or <b>A / RT</b> to charge a cast",
   [Phase.CHARGING]: "Release to <b>cast!</b>",
   [Phase.FLYING]: "Nice arc...",
-  [Phase.WAITING]: "Wait for a bite — <b>tap</b> to jig the lure · <b>hold</b> Click (or <b>R</b>) to reel back",
+  [Phase.WAITING]: "Wait for a bite — <b>tap</b> to jig the lure · <b>hold</b> Click or press <b>R / X</b> to reel back",
   [Phase.BITE]: "HOOK IT! CLICK NOW!",
-  [Phase.REELING]: "<b>Hold</b> to reel · <b>move the mouse ◄ ►</b> to fight its runs · <b>pull back</b> (▲) to land it",
+  [Phase.REELING]: "<b>Hold</b> to reel · <b>mouse / stick / D-pad ◄ ►</b> to fight runs · <b>W / Y</b> to land it",
   [Phase.CATCH]: "",
   [Phase.RETRIEVING]: "Reeling the line back in...",
 };
@@ -28,6 +28,7 @@ export class HUD {
     this.level = $("hud-level");
     this.xpFill = $("hud-xpfill");
     this.xpText = $("hud-xptext");
+    this.withdrawBtn = $("hud-withdraw");
     this.clock = $("hud-clock");
     this.seg = $("hud-seg");
     this.weather = $("hud-weather");
@@ -62,6 +63,7 @@ export class HUD {
       this.tensionSweet.style.width = `${CONFIG.reel.sweetHigh - CONFIG.reel.sweetLow}%`;
     }
     this.buttons = [$("btn-map"), $("btn-shop"), $("btn-journal"), $("btn-profile")];
+    this.withdrawBtn?.addEventListener("click", () => events.emit("withdraw:request"));
 
     this.bindEvents();
   }
@@ -69,6 +71,7 @@ export class HUD {
   bindEvents() {
     events.on("money", () => {
       this.updateMoney();
+      this.updateWithdrawButton();
       this.money.classList.remove("pulse");
       void this.money.offsetWidth; // restart the pulse animation
       this.money.classList.add("pulse");
@@ -114,6 +117,7 @@ export class HUD {
 
   refreshAll() {
     this.updateMoney();
+    this.updateWithdrawButton();
     this.updateXp();
     this.updateGear();
     this.updateBag();
@@ -124,6 +128,15 @@ export class HUD {
 
   updateMoney() {
     this.money.textContent = formatMoney(S.profile.money);
+  }
+
+  updateWithdrawButton() {
+    if (!this.withdrawBtn) return;
+    const earned = Math.floor(S.profile.money);
+    this.withdrawBtn.disabled = earned <= 0;
+    this.withdrawBtn.title = earned > 0
+      ? `Withdraw ${formatMoney(earned)} to your connected wallet`
+      : "Earn $SBF before withdrawing";
   }
 
   updateXp() {

@@ -9,9 +9,11 @@ const GROUPS = [
     title: "🎣 Casting",
     rows: [
       { keys: ["Move Mouse"], desc: "Aim your cast direction" },
+      { keys: ["Left Stick"], desc: "Aim with a connected controller / PSG1-style gamepad" },
       { keys: ["Hold Click", "Space"], desc: "Charge the power meter — release to cast" },
+      { keys: ["A / Cross", "RT"], desc: "Gamepad charge, cast, hook, and reel" },
       { keys: ["Click", "Space"], desc: "Set the hook the instant you see the !" },
-      { keys: ["R"], desc: "Reel the line back in while you wait" },
+      { keys: ["R", "X / Square"], desc: "Reel the line back in while you wait" },
     ],
   },
   {
@@ -19,8 +21,9 @@ const GROUPS = [
     rows: [
       { keys: ["Hold Click", "Space"], desc: "Reel it in — let go to ease the tension" },
       { keys: ["Move Mouse", "◄ ►", "A / D"], desc: "Fight its runs — lean the rod the way it bolts" },
-      { keys: ["Pull Back", "▲", "W"], desc: "Heave the fish out of the water to land it" },
-      { keys: ["Shift"], desc: "Dodge / give line when it surges" },
+      { keys: ["Left Stick", "D-Pad ◄ ►"], desc: "Gamepad rod lean during fights" },
+      { keys: ["Pull Back", "▲", "W", "Y / Triangle"], desc: "Heave the fish out of the water to land it" },
+      { keys: ["Shift", "B / Circle"], desc: "Dodge / give line when it surges" },
     ],
   },
   {
@@ -33,6 +36,10 @@ const GROUPS = [
       { keys: ["A"], desc: "Achievements" },
       { keys: ["L"], desc: "Leaderboard" },
       { keys: ["P"], desc: "Profile" },
+      { keys: ["Start"], desc: "Pause / close a panel" },
+      { keys: ["Select"], desc: "Open this controls guide" },
+      { keys: ["LB"], desc: "Open Catch Bag / Sell tab" },
+      { keys: ["RB"], desc: "Open Daily Quests" },
       { keys: ["Esc"], desc: "Pause / close a panel" },
     ],
   },

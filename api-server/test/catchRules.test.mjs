@@ -38,8 +38,8 @@ test('legit lake catch (creekfish_redtrout in lake) is accepted', () => {
   assert.equal(r.sizeCm, 20);
 });
 
-test('legit pier legendary (bastionray on the pier) is accepted', () => {
-  const r = evalCatch('bastionray', 'pier', { value: 300, sizeCm: 150, weightKg: 80 }, ZERO);
+test('legit ocean legendary (jadeveil oracleray in ocean) is accepted', () => {
+  const r = evalCatch('oracleray_jadeveil', 'ocean', { value: 300, sizeCm: 200, weightKg: 80 }, ZERO);
   assert.equal(r.ok, true);
   assert.equal(r.rarity, 'legendary');
   assert.ok(r.value > 0);
@@ -125,14 +125,14 @@ test('jackpot just under the cap is still accepted', () => {
 
 test('legendary hourly streak is rejected', () => {
   const counts = { ...ZERO, lh: SERVER_CAPS.legendaryHour };
-  const r = evalCatch('bastionray', 'pier', { value: 300 }, counts);
+  const r = evalCatch('oracleray_jadeveil', 'ocean', { value: 300 }, counts);
   assert.equal(r.ok, false);
   assert.equal(r.code, 'RARITY_LIMIT');
 });
 
 test('legendary daily streak is rejected', () => {
   const counts = { ...ZERO, ld: SERVER_CAPS.legendaryDay };
-  const r = evalCatch('bastionray', 'pier', { value: 300 }, counts);
+  const r = evalCatch('oracleray_jadeveil', 'ocean', { value: 300 }, counts);
   assert.equal(r.ok, false);
   assert.equal(r.code, 'RARITY_LIMIT');
 });

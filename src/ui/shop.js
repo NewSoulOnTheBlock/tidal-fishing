@@ -232,10 +232,10 @@ export class ShopUI {
     const intro = document.createElement("div");
     intro.className = "shop-anglers-intro";
     intro.innerHTML =
-      `Every cast spends <b>1 bait</b>. Cheaper bait lands mostly common fish; pricier bait lifts your odds for rare, epic & legendary catches. Stock up in bulk below.`;
+      `Wagering mode: <b>buy bait with SOL</b>, spend <b>1 bait per cast</b>, then win by selling the fish you catch. Tiers 1–3 are fast server/provably-fair packs; tiers 4–6 are premium Gamba-ready casts.`;
     this.contentEl.appendChild(intro);
 
-    // Bulk-quantity selector (applies to every buy button on the tab).
+    // Bulk-quantity selector (applies to every SOL buy button on the tab).
     const presets = [10, 25, 50, 100];
     if (!presets.includes(this.baitQty)) this.baitQty = 10;
     const qtyRow = document.createElement("div");
@@ -245,15 +245,15 @@ export class ShopUI {
     qtyLabel.textContent = "Quantity:";
     qtyRow.appendChild(qtyLabel);
     for (const q of presets) {
-      const b = document.createElement("button");
-      b.className = `tab-btn${this.baitQty === q ? " active" : ""}`;
-      b.textContent = `×${q}`;
-      b.addEventListener("click", () => {
+      const btn = document.createElement("button");
+      btn.className = `tab-btn${this.baitQty === q ? " active" : ""}`;
+      btn.textContent = `×${q}`;
+      btn.addEventListener("click", () => {
         audio.play("click");
         this.baitQty = q;
         this.render();
       });
-      qtyRow.appendChild(b);
+      qtyRow.appendChild(btn);
     }
     this.contentEl.appendChild(qtyRow);
 
@@ -262,33 +262,22 @@ export class ShopUI {
     const walletConnected = Boolean(currentPublicKey());
     const solPayAvailable = isSolPayEnabled();
 
-    // $SBF bait prices are the LIVE SOL-equivalent (Jupiter rate) so paying in
-    // $SBF always costs the same value as paying the SOL price. Ensure we have a
-    // rate; if it loads while this tab is open, re-render so prices reflect the
-    // live market instead of the cold-start fallback.
-    const rateWasLoaded = isRateLoaded();
-    refreshRate().then(() => {
-      if (this.tab === "bait" && !rateWasLoaded && isRateLoaded()) this.render();
-    });
-
     BAITS.forEach((b) => {
       const count = economy.baitCount(b.id);
       const isActive = selected === b.id;
-      const solCost = Number((b.solPrice * qty).toFixed(4));
-      const tideCost = solToTideLive(solCost);
-      const afford = S.profile.money >= tideCost;
+      const solCost = Number((b.solPrice * qty).toFixed(6));
 
       const row = document.createElement("div");
       row.className = `shop-item${isActive ? " equipped" : ""}`;
       const stats = baitStatLines(b)
-        .map((s) => `<span>${s}</span>`)
+        .map((s) => `<span>${escapeHtml(s)}</span>`)
         .join(" · ");
       const swatch = `#${lookSwatch(b.look).toString(16).padStart(6, "0")}`;
       row.innerHTML = `
         <div class="shop-item-info">
-          <div class="shop-item-name"><span class="gear-swatch" style="background:${swatch}"></span>${b.name} <span class="tier-badge">×${count} owned</span></div>
-          <div class="shop-item-stats">${stats}</div>
-          <div class="shop-item-blurb">${b.blurb}</div>
+          <div class="shop-item-name"><span class="gear-swatch" style="background:${swatch}"></span>${escapeHtml(b.name)} <span class="tier-badge">TIER ${b.tier}</span> <span class="tier-badge">×${count} owned</span></div>
+          <div class="shop-item-stats bait-odds-lines">${stats}</div>
+          <div class="shop-item-blurb">${escapeHtml(b.blurb)}</div>
         </div>
         <div class="shop-item-action"></div>
       `;
@@ -314,49 +303,21 @@ export class ShopUI {
         action.appendChild(selBtn);
       }
 
-      // Purchase options — SOL is the headline price; $SBF is the f2p fallback.
       const paymentOptions = document.createElement("div");
       paymentOptions.className = "payment-options";
-
-      const tideBtn = document.createElement("button");
-      tideBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
-      tideBtn.innerHTML = `
-        <span class="pay-label">Buy ×${qty} · $SBF</span>
-        <span class="pay-amount">${formatMoney(tideCost)}</span>
+      const solBtn = document.createElement("button");
+      solBtn.className = `btn btn-sol ${walletConnected && solPayAvailable ? "" : "btn-disabled"}`;
+      solBtn.innerHTML = `
+        <span class="pay-label">Buy ×${qty} bait · SOL</span>
+        <span class="pay-amount">${formatSol(solCost)}</span>
       `;
-      if (afford) {
-        tideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-offchain", 0, tideCost));
-      } else {
-        tideBtn.disabled = true;
-        tideBtn.title = "Not enough $SBF";
-      }
-      paymentOptions.appendChild(tideBtn);
-
       if (walletConnected && solPayAvailable) {
-        const solBtn = document.createElement("button");
-        solBtn.className = "btn btn-sol";
-        solBtn.innerHTML = `
-          <span class="pay-label">Buy ×${qty} · SOL</span>
-          <span class="pay-amount">${formatSol(solCost)}</span>
-        `;
         solBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "sol", solCost));
-        paymentOptions.appendChild(solBtn);
+      } else {
+        solBtn.disabled = true;
+        solBtn.title = walletConnected ? "SOL payment unavailable" : "Connect wallet to buy bait with SOL";
       }
-
-      // Pay with on-chain wallet $SBF (transfer to treasury). Same value as the
-      // off-chain button, but spends the real token instead of earned in-game
-      // $SBF — so a player can stock bait straight from their wallet holdings.
-      if (walletConnected && isOnChainPayEnabled()) {
-        const onChainTideBtn = document.createElement("button");
-        onChainTideBtn.className = "btn btn-tide";
-        onChainTideBtn.innerHTML = `
-          <span class="pay-label">Buy ×${qty} · $SBF (on-chain)</span>
-          <span class="pay-amount">${formatMoney(tideCost)}</span>
-        `;
-        onChainTideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-onchain", 0, tideCost));
-        paymentOptions.appendChild(onChainTideBtn);
-      }
-
+      paymentOptions.appendChild(solBtn);
       action.appendChild(paymentOptions);
       this.contentEl.appendChild(row);
     });
@@ -379,10 +340,13 @@ export class ShopUI {
       const name = sp ? sp.name : "Mystery catch";
       const color = rarity ? rarity.color : "var(--text-secondary, #9bb0c0)";
       const art = sp ? fishSVG(sp.look) : "🐟";
+      const baitTag = fish.baitName
+        ? ` · ${escapeHtml(fish.baitName)}${fish.baitTier ? ` T${fish.baitTier}` : ""}`
+        : "";
       const meta =
         Number.isFinite(fish.sizeCm) && Number.isFinite(fish.weightKg)
-          ? `${formatLength(fish.sizeCm)} · ${formatWeight(fish.weightKg)}`
-          : "Legacy catch";
+          ? `${formatLength(fish.sizeCm)} · ${formatWeight(fish.weightKg)}${baitTag}`
+          : `Legacy catch${baitTag}`;
       const value = Number.isFinite(fish.value) ? fish.value : 0;
       const row = document.createElement("div");
       row.className = "sell-row";

@@ -81,6 +81,10 @@ export class CatchCard {
       ? `<div class="catch-value catch-jackpot-value">+${formatMoney(fish.value)}<div class="catch-jackpot-sub">credited instantly</div></div>`
       : `<div class="catch-value">Worth ${formatMoney(fish.value)}</div>`;
 
+    const baitMeta = !flags.casual && fish.baitName
+      ? `<div class="catch-wager-meta">Bait wager: ${fish.baitName}${fish.baitTier ? ` · Tier ${fish.baitTier}` : ""}${fish.baitSettlement ? ` · ${fish.baitSettlement === "gamba-premium" ? "Gamba premium" : "server/provably-fair"}` : ""}</div>`
+      : "";
+
     overlay.innerHTML = `
       <div class="catch-card ${flags.isJackpot ? "catch-card-jackpot" : ""}" style="--rarity:${rarity.color}">
         ${ribbon}
@@ -92,6 +96,7 @@ export class CatchCard {
           <div class="catch-stat"><span class="cs-label">Weight</span><span class="cs-value">${formatWeight(fish.weightKg)}</span></div>
         </div>
         ${valueLine}
+        ${baitMeta}
         <div class="catch-xp">+${flags.xpGained} XP${flags.isNew ? " (first catch bonus)" : ""}</div>
         <div class="catch-collection">📖 ${S.journal ? Object.keys(S.journal).length : 0} / ${FISH_SPECIES.length} species collected</div>
         <div class="catch-actions">

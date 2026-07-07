@@ -65,6 +65,7 @@ export class WalletPanel {
     });
 
     events.on("wallet:refresh", () => this.refreshBalances());
+    events.on("withdraw:request", () => this.handleHudWithdrawRequest());
     // Resume balance polling immediately when the tab becomes visible again
     // (the interval is paused while hidden to avoid background RPC spam).
     this._onVis = () => { if (!document.hidden) this.refreshBalances(); };
@@ -178,6 +179,24 @@ export class WalletPanel {
       this.withdrawing = false;
       this.render();
     }
+  }
+
+  handleHudWithdrawRequest() {
+    const earned = Math.floor(S.profile.money);
+    if (earned <= 0) {
+      events.emit("toast", { msg: "Earn $SBF before withdrawing", kind: "warn" });
+      return;
+    }
+    if (!this.account) {
+      events.emit("toast", { msg: "Connect your wallet to withdraw", kind: "warn" });
+      this.openModal();
+      return;
+    }
+    if (!TIDE_MINT) {
+      events.emit("toast", { msg: "Withdrawals activate once $SBF goes live", kind: "warn" });
+      return;
+    }
+    this.handleWithdrawClick(earned);
   }
 
   /**

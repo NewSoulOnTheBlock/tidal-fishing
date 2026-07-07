@@ -144,6 +144,11 @@ export function rollFish(ctx) {
     xp,
     sizeNorm,
     jackpot: !!sp.jackpot,
+    baitId: ctx.bait?.id || null,
+    baitName: ctx.bait?.name || null,
+    baitTier: ctx.bait?.tier || null,
+    baitSettlement: ctx.bait?.settlement || null,
+    baitSolPrice: Number.isFinite(ctx.bait?.solPrice) ? ctx.bait.solPrice : null,
     fight: {
       strength: sp.fight.strength * (0.85 + 0.35 * sizeNorm),
       surgeEvery: sp.fight.surgeEvery,

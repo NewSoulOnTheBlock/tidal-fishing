@@ -103,6 +103,7 @@ export function createDefaultState() {
     progressionJournal: null,  // Initialized by initJournal()
     dailyLogin: null,          // Initialized by initDailyLogin()
     achievements: null,        // Initialized by initAchievements()
+    dailyQuests: null,         // Initialized by initDailyQuests()
     weather: null,             // Initialized by initWeather()
     onchain: {
       purchases: [],           // { kind, signature, burned, at }

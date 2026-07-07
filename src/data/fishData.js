@@ -27,7 +27,7 @@ export function getTimeSegment(hours) {
 export const FISH_SPECIES = [
   // ---------------- VOXEL FISH (catchable species) ----------------
   {
-    id: "creekfish_albino", name: "Albino Creekfish", rarity: "uncommon",
+    id: "creekfish_albino", name: "Albino Creekfish", rarity: "common",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["dawn", "day", "dusk"],
     sizeCm: [9, 26], weightMidKg: 0.28, baseValue: 64,
     fight: { strength: 0.74, surgeEvery: [4.4, 7], heft: 0.7, stamina: 9 },
@@ -64,7 +64,7 @@ export const FISH_SPECIES = [
     desc: "Cold steel-blue scales that vanish against deep riffles. Favours the brighter hours over open gravel.",
   },
   {
-    id: "creekfish_sunrise", name: "Sunrise Creekfish", rarity: "uncommon",
+    id: "creekfish_sunrise", name: "Sunrise Creekfish", rarity: "common",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["dawn"],
     sizeCm: [9, 26], weightMidKg: 0.3, baseValue: 78,
     fight: { strength: 0.78, surgeEvery: [4, 6.5], heft: 0.74, stamina: 10 },
@@ -76,7 +76,7 @@ export const FISH_SPECIES = [
     desc: "A dawn riser banded in peach and twilight violet, like the sky it surfaces under. Gone by mid-morning.",
   },
   {
-    id: "creekfish_berryplum", name: "Berryplum Creekfish", rarity: "uncommon",
+    id: "creekfish_berryplum", name: "Berryplum Creekfish", rarity: "common",
     locations: ["lake"], zones: ["mid"], time: ["dusk", "night"],
     sizeCm: [9, 26], weightMidKg: 0.32, baseValue: 92,
     fight: { strength: 0.8, surgeEvery: [3.9, 6.2], heft: 0.78, stamina: 10 },
@@ -88,7 +88,7 @@ export const FISH_SPECIES = [
     desc: "Deep berry-and-plum scales with a sugared sheen. Comes out to feed as the light goes purple.",
   },
   {
-    id: "creekfish_purple", name: "Royal Creekfish", rarity: "rare",
+    id: "creekfish_purple", name: "Royal Creekfish", rarity: "common",
     locations: ["lake"], zones: ["mid", "deep"], time: ["dusk", "night"],
     sizeCm: [11, 28], weightMidKg: 0.38, baseValue: 168,
     fight: { strength: 0.92, surgeEvery: [3.6, 5.8], heft: 0.85, stamina: 11 },
@@ -100,7 +100,7 @@ export const FISH_SPECIES = [
     desc: "Robed in regal violet that faintly luminesces in the dark current. The rarest of the common creek morphs.",
   },
   {
-    id: "creekfish_cave", name: "Cave Creekfish", rarity: "rare",
+    id: "creekfish_cave", name: "Cave Creekfish", rarity: "common",
     locations: ["lake"], zones: ["deep"], time: ["night"],
     sizeCm: [11, 30], weightMidKg: 0.4, baseValue: 184,
     fight: { strength: 0.95, surgeEvery: [3.4, 5.5], heft: 0.9, stamina: 12 },
@@ -112,7 +112,7 @@ export const FISH_SPECIES = [
     desc: "A slate-dark recluse from the undercut banks and flooded caves. Surfaces only in the dead of night.",
   },
   {
-    id: "darttail", name: "Blue Darttail", rarity: "uncommon",
+    id: "darttail", name: "Blue Darttail", rarity: "common",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["day"],
     sizeCm: [18, 48], weightMidKg: 0.7, baseValue: 128,
     fight: { strength: 0.95, surgeEvery: [2.8, 4.6], heft: 0.7, stamina: 11 },
@@ -124,7 +124,7 @@ export const FISH_SPECIES = [
     desc: "A needle-quick raider of the pilings, indigo-backed with a forked tail it snaps like a whip. Surges constantly — never stops moving.",
   },
   {
-    id: "darttail_ice", name: "Frost Darttail", rarity: "uncommon",
+    id: "darttail_ice", name: "Frost Darttail", rarity: "common",
     locations: ["lake"], zones: ["shallow", "mid"], time: ["dawn", "day"],
     sizeCm: [18, 48], weightMidKg: 0.7, baseValue: 142,
     fight: { strength: 1.0, surgeEvery: [2.6, 4.4], heft: 0.72, stamina: 11 },
@@ -136,7 +136,7 @@ export const FISH_SPECIES = [
     desc: "Pale glacier-blue and cold to the touch, it runs the surface chop at first light.",
   },
   {
-    id: "darttail_coralshock", name: "Coralshock Darttail", rarity: "rare",
+    id: "darttail_coralshock", name: "Coralshock Darttail", rarity: "common",
     locations: ["lake"], zones: ["mid"], time: ["day", "dusk"],
     sizeCm: [20, 50], weightMidKg: 0.8, baseValue: 296,
     fight: { strength: 1.15, surgeEvery: [2.4, 4], heft: 0.8, stamina: 12 },
@@ -148,7 +148,7 @@ export const FISH_SPECIES = [
     desc: "Electric violet flushed with shock-pink, lit like a reef at carnival. A prize among the dart shoals.",
   },
   {
-    id: "darttail_ember", name: "Ember Darttail", rarity: "rare",
+    id: "darttail_ember", name: "Ember Darttail", rarity: "common",
     locations: ["lake"], zones: ["mid", "deep"], time: ["dusk", "night"],
     sizeCm: [20, 50], weightMidKg: 0.8, baseValue: 318,
     fight: { strength: 1.2, surgeEvery: [2.3, 3.9], heft: 0.82, stamina: 12 },
@@ -160,7 +160,7 @@ export const FISH_SPECIES = [
     desc: "Smoulders rust-red and ember-orange in the dark water, hunting the lamplit pilings after sunset.",
   },
   {
-    id: "darttail_toxic", name: "Toxic Darttail", rarity: "rare",
+    id: "darttail_toxic", name: "Toxic Darttail", rarity: "common",
     locations: ["lake"], zones: ["deep"], time: ["night"],
     sizeCm: [22, 52], weightMidKg: 0.85, baseValue: 352,
     fight: { strength: 1.25, surgeEvery: [2.2, 3.8], heft: 0.85, stamina: 13 },
@@ -172,7 +172,7 @@ export const FISH_SPECIES = [
     desc: "Acid-green and faintly glowing, the rarest dart morph. They say the brighter ones aren't safe to touch.",
   },
   {
-    id: "deepfin", name: "Teal Deepfin", rarity: "uncommon",
+    id: "deepfin", name: "Teal Deepfin", rarity: "common",
     locations: ["lake"], zones: ["mid", "deep"], time: ["day", "dusk"],
     sizeCm: [22, 60], weightMidKg: 2.4, baseValue: 196,
     fight: { strength: 1.3, surgeEvery: [3.6, 5.6], heft: 1.4, stamina: 15 },
@@ -184,7 +184,7 @@ export const FISH_SPECIES = [
     desc: "A tall, deep-bodied drifter of the cold middle water, sea-teal fading to slate. Heaves hard but tires honest.",
   },
   {
-    id: "deepfin_moss", name: "Moss Deepfin", rarity: "uncommon",
+    id: "deepfin_moss", name: "Moss Deepfin", rarity: "common",
     locations: ["lake"], zones: ["mid", "deep"], time: ["day"],
     sizeCm: [22, 60], weightMidKg: 2.5, baseValue: 210,
     fight: { strength: 1.35, surgeEvery: [3.5, 5.5], heft: 1.45, stamina: 15 },
@@ -196,7 +196,7 @@ export const FISH_SPECIES = [
     desc: "Olive and moss-green, mottled like a kelp shadow. Holds station over the deep reefs by day.",
   },
   {
-    id: "deepfin_amberleaf", name: "Amberleaf Deepfin", rarity: "rare",
+    id: "deepfin_amberleaf", name: "Amberleaf Deepfin", rarity: "common",
     locations: ["lake"], zones: ["deep"], time: ["day", "dusk"],
     sizeCm: [24, 66], weightMidKg: 3, baseValue: 432,
     fight: { strength: 1.6, surgeEvery: [3.2, 5], heft: 1.7, stamina: 17 },
@@ -208,7 +208,7 @@ export const FISH_SPECIES = [
     desc: "Pale amber dappled with leaf-gold, a rare giant that rises from the deep when the light slants low.",
   },
   {
-    id: "deepfin_plumtide", name: "Plumtide Deepfin", rarity: "rare",
+    id: "deepfin_plumtide", name: "Plumtide Deepfin", rarity: "common",
     locations: ["lake"], zones: ["deep"], time: ["dusk", "night"],
     sizeCm: [24, 68], weightMidKg: 3.2, baseValue: 488,
     fight: { strength: 1.65, surgeEvery: [3, 4.8], heft: 1.8, stamina: 18 },
@@ -220,7 +220,7 @@ export const FISH_SPECIES = [
     desc: "Lavender-pale washing into deep plum, faintly luminous in the twilight depths. A collector's prize.",
   },
   {
-    id: "deepfin_sunset", name: "Sunset Deepfin", rarity: "rare",
+    id: "deepfin_sunset", name: "Sunset Deepfin", rarity: "common",
     locations: ["lake"], zones: ["deep"], time: ["dawn", "dusk"],
     sizeCm: [24, 68], weightMidKg: 3.2, baseValue: 520,
     fight: { strength: 1.7, surgeEvery: [3, 4.7], heft: 1.85, stamina: 18 },
@@ -232,7 +232,7 @@ export const FISH_SPECIES = [
     desc: "Peach-gold flank bleeding into deep maroon, the colours of the horizon at the turn of the day. The rarest deepfin of all.",
   },
   {
-    id: "bladejaw", name: "Bladejaw", rarity: "rare",
+    id: "bladejaw", name: "Bladejaw", rarity: "common",
     locations: ["river"], zones: ["shallow","mid"], time: ["day"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 300,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -244,7 +244,7 @@ export const FISH_SPECIES = [
     desc: "A razor-jawed reef hunter that strikes from ambush in the shallows.",
   },
   {
-    id: "bladejaw_obsidian", name: "Obsidian Bladejaw", rarity: "rare",
+    id: "bladejaw_obsidian", name: "Obsidian Bladejaw", rarity: "uncommon",
     locations: ["river"], zones: ["shallow","mid"], time: ["dawn","day"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 320,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -256,7 +256,7 @@ export const FISH_SPECIES = [
     desc: "A razor-jawed reef hunter that strikes from ambush in the shallows. The obsidian morph is a rare prize among anglers.",
   },
   {
-    id: "bladejaw_reefsteel", name: "Reefsteel Bladejaw", rarity: "rare",
+    id: "bladejaw_reefsteel", name: "Reefsteel Bladejaw", rarity: "uncommon",
     locations: ["river"], zones: ["shallow","mid"], time: ["dusk","night"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 335,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -268,7 +268,7 @@ export const FISH_SPECIES = [
     desc: "A razor-jawed reef hunter that strikes from ambush in the shallows. The reefsteel morph is a rare prize among anglers.",
   },
   {
-    id: "bladejaw_venomgold", name: "Venomgold Bladejaw", rarity: "rare",
+    id: "bladejaw_venomgold", name: "Venomgold Bladejaw", rarity: "uncommon",
     locations: ["river"], zones: ["shallow","mid"], time: ["night"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 355,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -280,7 +280,7 @@ export const FISH_SPECIES = [
     desc: "A razor-jawed reef hunter that strikes from ambush in the shallows. The venomgold morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin", name: "Crownfin", rarity: "rare",
+    id: "crownfin", name: "Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dawn","dusk"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 370,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -292,7 +292,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble.",
   },
   {
-    id: "crownfin_amethyst", name: "Amethyst Crownfin", rarity: "rare",
+    id: "crownfin_amethyst", name: "Amethyst Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["day","dusk"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 390,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -304,7 +304,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The amethyst morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin_crimsoncrest", name: "Crimsoncrest Crownfin", rarity: "rare",
+    id: "crownfin_crimsoncrest", name: "Crimsoncrest Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dawn","day","dusk","night"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 410,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -316,7 +316,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The crimsoncrest morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin_emerald", name: "Emerald Crownfin", rarity: "rare",
+    id: "crownfin_emerald", name: "Emerald Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["day"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 425,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -328,7 +328,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The emerald morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin_frost", name: "Frost Crownfin", rarity: "rare",
+    id: "crownfin_frost", name: "Frost Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dawn","day"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 445,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -340,7 +340,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The frost morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin_sunburst", name: "Sunburst Crownfin", rarity: "rare",
+    id: "crownfin_sunburst", name: "Sunburst Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dusk","night"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 460,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -352,7 +352,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The sunburst morph is a rare prize among anglers.",
   },
   {
-    id: "crownfin_tidejade", name: "Tidejade Crownfin", rarity: "rare",
+    id: "crownfin_tidejade", name: "Tidejade Crownfin", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["night"],
     sizeCm: [30, 72], weightMidKg: 2.4, baseValue: 480,
     fight: { strength: 1.3, surgeEvery: [3.2, 5], heft: 1.4, stamina: 14 },
@@ -364,7 +364,7 @@ export const FISH_SPECIES = [
     desc: "Crowned with a fan of golden dorsal spines — a true reef noble. The tidejade morph is a rare prize among anglers.",
   },
   {
-    id: "celestialcrest", name: "Celestialcrest", rarity: "epic",
+    id: "celestialcrest", name: "Celestialcrest", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["day"],
     sizeCm: [50, 142], weightMidKg: 9.1, baseValue: 900,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -376,7 +376,7 @@ export const FISH_SPECIES = [
     desc: "Its crest shimmers with what looks like a map of distant stars.",
   },
   {
-    id: "moonveil", name: "Moonveil", rarity: "epic",
+    id: "moonveil", name: "Moonveil", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dawn","day"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 780,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -388,7 +388,7 @@ export const FISH_SPECIES = [
     desc: "Trails gossamer, moonlit fins like drifting silk through the dark water.",
   },
   {
-    id: "moonveil_aurora", name: "Aurora Moonveil", rarity: "epic",
+    id: "moonveil_aurora", name: "Aurora Moonveil", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dusk","night"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 840,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -400,7 +400,7 @@ export const FISH_SPECIES = [
     desc: "Trails gossamer, moonlit fins like drifting silk through the dark water. The aurora morph is a rare prize among anglers.",
   },
   {
-    id: "moonveil_glacierfin", name: "Glacierfin Moonveil", rarity: "epic",
+    id: "moonveil_glacierfin", name: "Glacierfin Moonveil", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["night"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 900,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -412,7 +412,7 @@ export const FISH_SPECIES = [
     desc: "Trails gossamer, moonlit fins like drifting silk through the dark water. The glacierfin morph is a rare prize among anglers.",
   },
   {
-    id: "moonveil_nightblossom", name: "Nightblossom Moonveil", rarity: "epic",
+    id: "moonveil_nightblossom", name: "Nightblossom Moonveil", rarity: "uncommon",
     locations: ["river"], zones: ["mid","deep"], time: ["dawn","dusk"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 960,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -424,7 +424,7 @@ export const FISH_SPECIES = [
     desc: "Trails gossamer, moonlit fins like drifting silk through the dark water. The nightblossom morph is a rare prize among anglers.",
   },
   {
-    id: "moonveil_roseglow", name: "Roseglow Moonveil", rarity: "epic",
+    id: "moonveil_roseglow", name: "Roseglow Moonveil", rarity: "rare",
     locations: ["river"], zones: ["mid","deep"], time: ["day","dusk"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1020,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -436,7 +436,7 @@ export const FISH_SPECIES = [
     desc: "Trails gossamer, moonlit fins like drifting silk through the dark water. The roseglow morph is a rare prize among anglers.",
   },
   {
-    id: "thornback", name: "Thornback", rarity: "epic",
+    id: "thornback", name: "Thornback", rarity: "rare",
     locations: ["pier"], zones: ["mid","deep"], time: ["dawn","day","dusk","night"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1080,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -448,7 +448,7 @@ export const FISH_SPECIES = [
     desc: "Armoured in jagged dorsal thorns; few predators dare to take it.",
   },
   {
-    id: "thornback_emberstone", name: "Emberstone Thornback", rarity: "epic",
+    id: "thornback_emberstone", name: "Emberstone Thornback", rarity: "rare",
     locations: ["pier"], zones: ["mid","deep"], time: ["day"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1140,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -460,7 +460,7 @@ export const FISH_SPECIES = [
     desc: "Armoured in jagged dorsal thorns; few predators dare to take it. The emberstone morph is a rare prize among anglers.",
   },
   {
-    id: "thornback_jadefire", name: "Jadefire Thornback", rarity: "epic",
+    id: "thornback_jadefire", name: "Jadefire Thornback", rarity: "rare",
     locations: ["pier"], zones: ["mid","deep"], time: ["dawn","day"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1200,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -472,7 +472,7 @@ export const FISH_SPECIES = [
     desc: "Armoured in jagged dorsal thorns; few predators dare to take it. The jadefire morph is a rare prize among anglers.",
   },
   {
-    id: "thornback_mossglow", name: "Mossglow Thornback", rarity: "epic",
+    id: "thornback_mossglow", name: "Mossglow Thornback", rarity: "rare",
     locations: ["pier"], zones: ["mid","deep"], time: ["dusk","night"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1260,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -484,7 +484,7 @@ export const FISH_SPECIES = [
     desc: "Armoured in jagged dorsal thorns; few predators dare to take it. The mossglow morph is a rare prize among anglers.",
   },
   {
-    id: "thornback_sunstone", name: "Sunstone Thornback", rarity: "epic",
+    id: "thornback_sunstone", name: "Sunstone Thornback", rarity: "rare",
     locations: ["pier"], zones: ["mid","deep"], time: ["night"],
     sizeCm: [50, 120], weightMidKg: 7, baseValue: 1320,
     fight: { strength: 1.7, surgeEvery: [2.9, 4.6], heft: 1.8, stamina: 18 },
@@ -496,7 +496,7 @@ export const FISH_SPECIES = [
     desc: "Armoured in jagged dorsal thorns; few predators dare to take it. The sunstone morph is a rare prize among anglers.",
   },
   {
-    id: "bastionray", name: "Bastionray", rarity: "legendary",
+    id: "bastionray", name: "Bastionray", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["day"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 2200,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -508,7 +508,7 @@ export const FISH_SPECIES = [
     desc: "Broad as a shield, it patrols the abyss like a slow-moving fortress.",
   },
   {
-    id: "bastionray_marshfire", name: "Marshfire Bastionray", rarity: "legendary",
+    id: "bastionray_marshfire", name: "Marshfire Bastionray", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["dawn","day"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 2370,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -520,7 +520,7 @@ export const FISH_SPECIES = [
     desc: "Broad as a shield, it patrols the abyss like a slow-moving fortress. The marshfire morph is a rare prize among anglers.",
   },
   {
-    id: "bastionray_moonjade", name: "Moonjade Bastionray", rarity: "legendary",
+    id: "bastionray_moonjade", name: "Moonjade Bastionray", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["dusk","night"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 2540,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -532,7 +532,7 @@ export const FISH_SPECIES = [
     desc: "Broad as a shield, it patrols the abyss like a slow-moving fortress. The moonjade morph is a rare prize among anglers.",
   },
   {
-    id: "bastionray_royalplum", name: "Royalplum Bastionray", rarity: "legendary",
+    id: "bastionray_royalplum", name: "Royalplum Bastionray", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["night"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 2710,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -544,7 +544,7 @@ export const FISH_SPECIES = [
     desc: "Broad as a shield, it patrols the abyss like a slow-moving fortress. The royalplum morph is a rare prize among anglers.",
   },
   {
-    id: "leviathan", name: "Leviathan", rarity: "legendary",
+    id: "leviathan", name: "Leviathan", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["dawn","dusk"],
     sizeCm: [95, 254], weightMidKg: 52, baseValue: 3600,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -556,7 +556,7 @@ export const FISH_SPECIES = [
     desc: "An ancient deep-dweller of monstrous bulk and slow, crushing power.",
   },
   {
-    id: "prismacrown", name: "Prismacrown", rarity: "legendary",
+    id: "prismacrown", name: "Prismacrown", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["day","dusk"],
     sizeCm: [95, 254], weightMidKg: 52, baseValue: 3815,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -568,7 +568,7 @@ export const FISH_SPECIES = [
     desc: "Its scales split the light into a wandering, ever-shifting rainbow.",
   },
   {
-    id: "skyspear", name: "Skyspear", rarity: "legendary",
+    id: "skyspear", name: "Skyspear", rarity: "rare",
     locations: ["pier"], zones: ["deep"], time: ["dawn","day","dusk","night"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 3220,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -580,7 +580,7 @@ export const FISH_SPECIES = [
     desc: "A living javelin that rockets up from the deep like a thrown spear.",
   },
   {
-    id: "skyspear_citrinejade", name: "Citrinejade Skyspear", rarity: "legendary",
+    id: "skyspear_citrinejade", name: "Citrinejade Skyspear", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["day"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 3390,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -592,7 +592,7 @@ export const FISH_SPECIES = [
     desc: "A living javelin that rockets up from the deep like a thrown spear. The citrinejade morph is a rare prize among anglers.",
   },
   {
-    id: "skyspear_emberwave", name: "Emberwave Skyspear", rarity: "legendary",
+    id: "skyspear_emberwave", name: "Emberwave Skyspear", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["dawn","day"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 3560,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -604,7 +604,7 @@ export const FISH_SPECIES = [
     desc: "A living javelin that rockets up from the deep like a thrown spear. The emberwave morph is a rare prize among anglers.",
   },
   {
-    id: "skyspear_solarflare", name: "Solarflare Skyspear", rarity: "legendary",
+    id: "skyspear_solarflare", name: "Solarflare Skyspear", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["dusk","night"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 3730,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -616,7 +616,7 @@ export const FISH_SPECIES = [
     desc: "A living javelin that rockets up from the deep like a thrown spear. The solarflare morph is a rare prize among anglers.",
   },
   {
-    id: "skyspear_voidfrost", name: "Voidfrost Skyspear", rarity: "legendary",
+    id: "skyspear_voidfrost", name: "Voidfrost Skyspear", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["night"],
     sizeCm: [95, 215], weightMidKg: 40, baseValue: 3900,
     fight: { strength: 2.1, surgeEvery: [2.6, 4.3], heft: 2.4, stamina: 24 },
@@ -628,7 +628,7 @@ export const FISH_SPECIES = [
     desc: "A living javelin that rockets up from the deep like a thrown spear. The voidfrost morph is a rare prize among anglers.",
   },
   {
-    id: "aetherwing", name: "Aetherwing", rarity: "mythic",
+    id: "aetherwing", name: "Aetherwing", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["day"],
     sizeCm: [150, 389], weightMidKg: 123.5, baseValue: 6000,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -640,7 +640,7 @@ export const FISH_SPECIES = [
     desc: "Wing-finned and near weightless, it seems to fly through the water.",
   },
   {
-    id: "dreadmaw", name: "Dreadmaw", rarity: "mythic",
+    id: "dreadmaw", name: "Dreadmaw", rarity: "epic",
     locations: ["pier"], zones: ["deep"], time: ["dawn","day"],
     sizeCm: [150, 389], weightMidKg: 123.5, baseValue: 6325,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -652,7 +652,7 @@ export const FISH_SPECIES = [
     desc: "All teeth and hunger — the nightmare that haunts the lightless trench.",
   },
   {
-    id: "oracleray", name: "Oracleray", rarity: "mythic",
+    id: "oracleray", name: "Oracleray", rarity: "epic",
     locations: ["ocean"], zones: ["deep"], time: ["dusk","night"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 5320,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -664,7 +664,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight.",
   },
   {
-    id: "oracleray_abyssglow", name: "Abyssglow Oracleray", rarity: "mythic",
+    id: "oracleray_abyssglow", name: "Abyssglow Oracleray", rarity: "epic",
     locations: ["ocean"], zones: ["deep"], time: ["night"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 5580,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -676,7 +676,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight. The abyssglow morph is a rare prize among anglers.",
   },
   {
-    id: "oracleray_duskgold", name: "Duskgold Oracleray", rarity: "mythic",
+    id: "oracleray_duskgold", name: "Duskgold Oracleray", rarity: "epic",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","dusk"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 5840,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -688,7 +688,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight. The duskgold morph is a rare prize among anglers.",
   },
   {
-    id: "oracleray_emberbloom", name: "Emberbloom Oracleray", rarity: "mythic",
+    id: "oracleray_emberbloom", name: "Emberbloom Oracleray", rarity: "epic",
     locations: ["ocean"], zones: ["deep"], time: ["day","dusk"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 6100,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -700,7 +700,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight. The emberbloom morph is a rare prize among anglers.",
   },
   {
-    id: "oracleray_jadeveil", name: "Jadeveil Oracleray", rarity: "mythic",
+    id: "oracleray_jadeveil", name: "Jadeveil Oracleray", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","day","dusk","night"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 6360,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -712,7 +712,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight. The jadeveil morph is a rare prize among anglers.",
   },
   {
-    id: "oracleray_sunoracle", name: "Sunoracle Oracleray", rarity: "mythic",
+    id: "oracleray_sunoracle", name: "Sunoracle Oracleray", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["day"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 6620,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -724,7 +724,7 @@ export const FISH_SPECIES = [
     desc: "Said to glimpse the turning tides of fate; its eyes hold cold starlight. The sunoracle morph is a rare prize among anglers.",
   },
   {
-    id: "stormreaver", name: "Stormreaver", rarity: "mythic",
+    id: "stormreaver", name: "Stormreaver", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","day"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 6880,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -736,7 +736,7 @@ export const FISH_SPECIES = [
     desc: "Rides the deep currents like living lightning — fast and merciless.",
   },
   {
-    id: "stormreaver_shockflare", name: "Shockflare Stormreaver", rarity: "mythic",
+    id: "stormreaver_shockflare", name: "Shockflare Stormreaver", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["dusk","night"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 7140,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -748,7 +748,7 @@ export const FISH_SPECIES = [
     desc: "Rides the deep currents like living lightning — fast and merciless. The shockflare morph is a rare prize among anglers.",
   },
   {
-    id: "stormreaver_tideflare", name: "Tideflare Stormreaver", rarity: "mythic",
+    id: "stormreaver_tideflare", name: "Tideflare Stormreaver", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["night"],
     sizeCm: [150, 330], weightMidKg: 95, baseValue: 7400,
     fight: { strength: 2.4, surgeEvery: [2.3, 3.9], heft: 2.7, stamina: 28 },
@@ -760,7 +760,7 @@ export const FISH_SPECIES = [
     desc: "Rides the deep currents like living lightning — fast and merciless. The tideflare morph is a rare prize among anglers.",
   },
   {
-    id: "emperorray", name: "Emperorray", rarity: "ultramythic",
+    id: "emperorray", name: "Emperorray", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["day"],
     sizeCm: [230, 566], weightMidKg: 240.5, baseValue: 11000,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -772,7 +772,7 @@ export const FISH_SPECIES = [
     desc: "The undisputed emperor of the abyssal plain. To land one is legend itself.",
   },
   {
-    id: "moonfang", name: "Moonfang", rarity: "ultramythic",
+    id: "moonfang", name: "Moonfang", rarity: "legendary",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","day"],
     sizeCm: [230, 566], weightMidKg: 240.5, baseValue: 11715,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -784,7 +784,7 @@ export const FISH_SPECIES = [
     desc: "A pale, fanged hunter that surfaces to feed only under a full moon.",
   },
   {
-    id: "royalcrest", name: "Royalcrest", rarity: "ultramythic",
+    id: "royalcrest", name: "Royalcrest", rarity: "mythic",
     locations: ["ocean"], zones: ["deep"], time: ["dusk","night"],
     sizeCm: [230, 480], weightMidKg: 185, baseValue: 9940,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -796,7 +796,7 @@ export const FISH_SPECIES = [
     desc: "A sovereign of the deep, robed in regal colour beneath a jewelled crest.",
   },
   {
-    id: "royalcrest_amethyst", name: "Amethyst Royalcrest", rarity: "ultramythic",
+    id: "royalcrest_amethyst", name: "Amethyst Royalcrest", rarity: "mythic",
     locations: ["ocean"], zones: ["deep"], time: ["night"],
     sizeCm: [230, 480], weightMidKg: 185, baseValue: 10510,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -808,7 +808,7 @@ export const FISH_SPECIES = [
     desc: "A sovereign of the deep, robed in regal colour beneath a jewelled crest. The amethyst morph is a rare prize among anglers.",
   },
   {
-    id: "royalcrest_aurora", name: "Aurora Royalcrest", rarity: "ultramythic",
+    id: "royalcrest_aurora", name: "Aurora Royalcrest", rarity: "mythic",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","dusk"],
     sizeCm: [230, 480], weightMidKg: 185, baseValue: 11080,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -820,7 +820,7 @@ export const FISH_SPECIES = [
     desc: "A sovereign of the deep, robed in regal colour beneath a jewelled crest. The aurora morph is a rare prize among anglers.",
   },
   {
-    id: "royalcrest_emerald", name: "Emerald Royalcrest", rarity: "ultramythic",
+    id: "royalcrest_emerald", name: "Emerald Royalcrest", rarity: "mythic",
     locations: ["ocean"], zones: ["deep"], time: ["day","dusk"],
     sizeCm: [230, 480], weightMidKg: 185, baseValue: 11650,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },
@@ -832,7 +832,7 @@ export const FISH_SPECIES = [
     desc: "A sovereign of the deep, robed in regal colour beneath a jewelled crest. The emerald morph is a rare prize among anglers.",
   },
   {
-    id: "royalcrest_frostfire", name: "Frostfire Royalcrest", rarity: "ultramythic",
+    id: "royalcrest_frostfire", name: "Frostfire Royalcrest", rarity: "mythic",
     locations: ["ocean"], zones: ["deep"], time: ["dawn","day","dusk","night"],
     sizeCm: [230, 480], weightMidKg: 185, baseValue: 12220,
     fight: { strength: 2.7, surgeEvery: [2, 3.5], heft: 3, stamina: 34 },

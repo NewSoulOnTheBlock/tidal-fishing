@@ -11,6 +11,7 @@ Your Tidal fishing game is now a Progressive Web App (PWA) ready for app store s
 - Display mode: standalone (full-screen app experience)
 - Icons configuration (192x192 and 512x512)
 - Categories: games, entertainment
+- Related applications configured as an empty array until native App Store / Play Store package IDs exist
 
 ### 2. Service Worker (`/public/sw.js`)
 - Offline functionality

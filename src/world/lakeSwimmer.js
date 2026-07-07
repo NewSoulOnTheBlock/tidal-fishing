@@ -82,13 +82,13 @@ export class LakeSwimmer {
     box.getSize(size);
     box.getCenter(center);
     const maxDim = Math.max(size.x, size.y, size.z) || 1;
-    const target = 2.2;
+    const target = 11.0;
     const scale = target / maxDim;
     model.scale.setScalar(scale);
     model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-    // Most generated characters stand upright; lay them forward so they read as
-    // an aquatic creature gliding under the surface.
-    model.rotation.set(THREE.MathUtils.degToRad(88), 0, THREE.MathUtils.degToRad(4));
+    // This GLB is already built as a horizontal fish along its local Z axis.
+    // Keep it flat so players see the top of the bull head while it swims.
+    model.rotation.set(0, 0, THREE.MathUtils.degToRad(4));
   }
 
   _beginPass() {
