@@ -16,7 +16,7 @@ function resolveApiBase() {
     return "http://localhost:3000";
   }
 
-  return "https://tidal-fishing.onrender.com";
+  return "https://tidal-fishing-d1sn.onrender.com";
 }
 
 export const API_BASE = resolveApiBase();
