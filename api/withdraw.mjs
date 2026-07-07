@@ -12,6 +12,40 @@ const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || "";
 const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);
 
+const TRUSTED_ORIGINS = new Set([
+  "https://www.bullfishblitz.com",
+  "https://bullfishblitz.com",
+  "https://tidal-fishing.vercel.app",
+  "https://tidal-fishing-ljiulguis-projects.vercel.app",
+  "https://tidal-fishing-kelbyrebelcrew-2550-ljiulguis-projects.vercel.app",
+  "https://tidalfishing.fun",
+  "http://localhost:8642",
+  "http://localhost:8643",
+  "http://127.0.0.1:8642",
+  "http://127.0.0.1:8643",
+  ...String(process.env.CORS_ORIGIN || "").split(",").map((s) => s.trim()).filter(Boolean),
+]);
+
+function requestOrigin(req) {
+  const origin = req.headers.origin;
+  if (typeof origin === "string" && TRUSTED_ORIGINS.has(origin)) return origin;
+  const referer = req.headers.referer || req.headers.referrer;
+  if (typeof referer === "string") {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (TRUSTED_ORIGINS.has(refererOrigin)) return refererOrigin;
+    } catch { /* ignore */ }
+  }
+  return null;
+}
+
+function applyCors(res, origin) {
+  res.setHeader("Vary", "Origin");
+  if (origin) res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Admin-Key");
+}
+
 // Minimal Solana primitives without web3.js
 const TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const ASSOCIATED_TOKEN_PROGRAM = "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
@@ -49,12 +83,18 @@ function getAssociatedTokenAddress(mint, owner) {
 }
 
 export default async function handler(req, res) {
+  const origin = requestOrigin(req);
+  applyCors(res, origin);
+
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    if (!origin) return res.status(403).json({ error: "Forbidden origin", code: "ORIGIN_FORBIDDEN" });
     return res.status(204).end();
   }
+
+  if (!origin) {
+    return res.status(403).json({ error: "Forbidden origin", code: "ORIGIN_FORBIDDEN" });
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

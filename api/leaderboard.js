@@ -10,6 +10,49 @@ export const config = {
 
 const hasKv = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 
+const TRUSTED_ORIGINS = new Set([
+  "https://www.bullfishblitz.com",
+  "https://bullfishblitz.com",
+  "https://tidal-fishing.vercel.app",
+  "https://tidal-fishing-ljiulguis-projects.vercel.app",
+  "https://tidal-fishing-kelbyrebelcrew-2550-ljiulguis-projects.vercel.app",
+  "https://tidalfishing.fun",
+  "http://localhost:8642",
+  "http://localhost:8643",
+  "http://127.0.0.1:8642",
+  "http://127.0.0.1:8643",
+  ...String(process.env.CORS_ORIGIN || "").split(",").map((s) => s.trim()).filter(Boolean),
+]);
+
+function requestOrigin(req) {
+  const origin = req.headers.get("origin");
+  if (origin && TRUSTED_ORIGINS.has(origin)) return origin;
+  const referer = req.headers.get("referer") || req.headers.get("referrer");
+  if (referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (TRUSTED_ORIGINS.has(refererOrigin)) return refererOrigin;
+    } catch { /* ignore */ }
+  }
+  return null;
+}
+
+function corsHeaders(origin) {
+  return {
+    "Vary": "Origin",
+    ...(origin ? { "Access-Control-Allow-Origin": origin } : {}),
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Key",
+  };
+}
+
+function forbiddenOrigin() {
+  return new Response(
+    JSON.stringify({ error: "Forbidden origin", code: "ORIGIN_FORBIDDEN" }),
+    { status: 403, headers: { "Content-Type": "application/json", "Vary": "Origin" } }
+  );
+}
+
 function emptyLeaderboard(type, species = null) {
   if (type === "species") return { type: "species", species, catches: [] };
   if (type === "recent") return { type: "recent", catches: [] };
@@ -18,17 +61,15 @@ function emptyLeaderboard(type, species = null) {
 
 export default async function handler(req) {
   const { method } = req;
-
-  // CORS headers
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
+  const origin = requestOrigin(req);
+  const headers = corsHeaders(origin);
 
   if (method === "OPTIONS") {
+    if (!origin) return forbiddenOrigin();
     return new Response(null, { status: 200, headers });
   }
+
+  if (!origin) return forbiddenOrigin();
 
   try {
     if (!hasKv) {
