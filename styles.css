@@ -1055,8 +1055,23 @@ kbd {
 .panel-mid { width: min(620px, 94vw); }
 .panel-wide { width: min(880px, 95vw); height: min(640px, 88vh); }
 .panel-title { font-size: 1.45rem; font-weight: 800; letter-spacing: 0.03em; }
-.panel-head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
-.panel-head .panel-title { flex: 1; }
+.panel-head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; flex-wrap: nowrap; }
+.panel-head .panel-title { flex: 1 1 auto; min-width: 0; }
+.panel-head .money-text { flex: 0 0 auto; white-space: nowrap; }
+.panel-head .btn-close {
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  min-width: 58px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.1;
+}
+.panel-head .btn-close:hover { transform: none; }
 
 .howto-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 18px 0 22px; }
 .howto-list li { font-size: 0.92rem; color: #cfdde8; line-height: 1.45; }
@@ -1444,6 +1459,11 @@ kbd {
   min-width: 220px;
 }
 #wallet-mount.wallet-mount-hidden { display: none; }
+body.ui-screen-open #hud,
+body.ui-screen-open .world-badge,
+body.ui-screen-open .weather-widget {
+  display: none !important;
+}
 
 /* Push the gameplay HUD top-right column below the wallet panel above it so the
    (variable-height) panel never covers the clock + location card. The offset is

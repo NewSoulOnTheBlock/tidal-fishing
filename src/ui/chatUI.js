@@ -21,7 +21,7 @@ export class ChatUI {
     this.listEl = null;
     this.footerEl = null;
     this.lastId = 0;
-    this.open = true;
+    this.open = !(typeof window !== "undefined" && window.matchMedia?.("(max-width: 900px)").matches);
     this.sending = false;
     this.seen = new Set();
     this.pollTimer = null;
@@ -49,6 +49,8 @@ export class ChatUI {
       <div class="trollbox-footer" id="trollbox-footer"></div>
     `;
     document.body.appendChild(this.root);
+    this.root.classList.toggle("collapsed", !this.open);
+    this.root.querySelector(".trollbox-toggle").textContent = this.open ? "—" : "▢";
     this.listEl = this.root.querySelector("#trollbox-messages");
     this.footerEl = this.root.querySelector("#trollbox-footer");
 
@@ -64,6 +66,13 @@ export class ChatUI {
     this.fetchInitial();
     this.loadMedals();
     this.startPolling();
+
+    // Full-screen panels own the visual layer; hide chat completely there so it
+    // never overlaps shop/map/journal headers or content.
+    this._onPhase = ({ to }) => {
+      this.root?.classList.toggle("screen-hidden", ["SHOP", "JOURNAL", "MAP"].includes(to));
+    };
+    events.on("phase", this._onPhase);
 
     // Pause polling while the tab is hidden / the page is in the back-forward
     // cache to avoid needless network churn; resume when it's shown again.

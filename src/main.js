@@ -184,7 +184,11 @@ const catchCard = new CatchCard();
 const walletPanel = new WalletPanel();
 // Hide the floating wallet card while a full-screen panel (shop/map/journal) is
 // open so it can't overlap that panel's Close button; show it everywhere else.
-events.on("phase", ({ to }) => walletPanel.setMountHidden(SCREEN_PHASES.has(to)));
+events.on("phase", ({ to }) => {
+  const screenOpen = SCREEN_PHASES.has(to);
+  walletPanel.setMountHidden(screenOpen);
+  document.body.classList.toggle("ui-screen-open", screenOpen);
+});
 const shopUI = new ShopUI(() => machine.set(Phase.IDLE));
 const journalUI = new JournalUI(() => machine.set(Phase.IDLE));
 const mapUI = new MapUI(

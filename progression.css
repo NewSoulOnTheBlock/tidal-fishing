@@ -2077,10 +2077,15 @@ body.weather-cloudy {
   border: 1px solid var(--accent);
   border-radius: 14px;
   box-shadow: 0 10px 34px rgba(0,0,0,0.5);
-  z-index: 900;
+  z-index: 90;
   overflow: hidden;
   backdrop-filter: blur(6px);
   font-size: 0.9rem;
+}
+
+.trollbox.screen-hidden,
+body.ui-screen-open .trollbox {
+  display: none !important;
 }
 
 .trollbox-header {
@@ -2182,8 +2187,16 @@ body.weather-cloudy {
 .trollbox-setname:hover { background: rgba(95,212,255,0.16); }
 
 @media (max-width: 560px) {
-  .trollbox { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 50vh; }
-  .trollbox-messages { max-height: 34vh; }
+  .trollbox { right: 8px; left: 8px; bottom: 8px; width: auto; max-height: 42vh; }
+  .trollbox-messages { max-height: 28vh; }
+}
+
+@media (max-width: 900px) {
+  .trollbox.collapsed {
+    width: auto;
+    min-width: 214px;
+    max-width: calc(100vw - 16px);
+  }
 }
 
 /* ── In-chat flair: top-3 medals + level badge ───────────────────────────── */
