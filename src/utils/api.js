@@ -10,13 +10,14 @@ function resolveApiBase() {
   const explicit = ENV.VITE_API_URL || ENV.VITE_API_SERVER_URL;
   if (explicit) return String(explicit).replace(/\/+$/, "");
 
-  // Local dev convenience.
+  // Local dev convenience. Production must go through the same-origin Vercel
+  // proxy, because the Render backend now rejects direct browser/public calls.
   if (typeof window !== "undefined" &&
       /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
     return "http://localhost:3000";
   }
 
-  return "https://tidal-fishing-d1sn.onrender.com";
+  return "/api/backend";
 }
 
 export const API_BASE = resolveApiBase();
