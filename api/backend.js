@@ -59,6 +59,11 @@ function forwardHeaders(req) {
     const lower = key.toLowerCase();
     if (HOP_BY_HOP_HEADERS.has(lower)) continue;
     if (lower === "x-bfb-internal-secret") continue;
+    // Do not forward the public browser Origin/Referer from IPFS gateways to
+    // Render. Render is private behind this proxy and authorizes the request via
+    // x-bfb-internal-secret; forwarding arbitrary gateway origins trips Render's
+    // browser-origin gate before the internal-secret path can complete.
+    if (lower === "origin" || lower === "referer") continue;
     if (Array.isArray(value)) headers[key] = value.join(", ");
     else if (value !== undefined) headers[key] = String(value);
   }
