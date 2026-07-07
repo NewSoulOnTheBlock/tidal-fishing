@@ -161,6 +161,8 @@ export class OnboardingUI {
     this.chooser = mountCharacterChooser(mount, {
       initial: S.profile.character || "r2d2",
       confirmLabel: "Fish as {name} →",
+      cancelLabel: "Skip for now",
+      onCancel: () => this.finishCharacter(S.profile.character || "r2d2"),
       onConfirm: (id) => this.finishCharacter(id),
     });
   }

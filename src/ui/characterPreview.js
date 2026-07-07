@@ -83,6 +83,33 @@ export function createCharacterPreview(container) {
     container.classList.remove("cc-loading");
   }
 
+  function makePlaceholder(opts = {}) {
+    const group = new THREE.Group();
+    const bodyMat = new THREE.MeshStandardMaterial({ color: opts.color || 0x4f8cff, roughness: 0.75, metalness: 0.02 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: 0xffd166, roughness: 0.7, metalness: 0.08 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x162033, roughness: 0.85, metalness: 0.02 });
+    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 0.56, 4, 10), bodyMat);
+    body.position.y = 0.56;
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 12), bodyMat);
+    head.position.y = 1.1;
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.04), trimMat);
+    visor.position.set(0, 1.12, 0.22);
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.018, 1.05, 5), darkMat);
+    rod.position.set(0.42, 0.82, 0.05);
+    rod.rotation.z = -0.52;
+    group.add(body, head, visor, rod);
+    group.userData.placeholder = true;
+    return group;
+  }
+
+  function setPlaceholder(opts = {}) {
+    baseYaw = THREE.MathUtils.degToRad(opts.yawDeg || 0);
+    turntable.rotation.y = baseYaw;
+    ++loadToken;
+    container.classList.remove("cc-loading");
+    mount(makePlaceholder(opts));
+  }
+
   function setModel(url, opts = {}) {
     baseYaw = THREE.MathUtils.degToRad(opts.yawDeg || 0);
     turntable.rotation.y = baseYaw;
@@ -179,6 +206,7 @@ export function createCharacterPreview(container) {
 
   return {
     setModel,
+    setPlaceholder,
     dispose() {
       running = false;
       cancelAnimationFrame(raf);

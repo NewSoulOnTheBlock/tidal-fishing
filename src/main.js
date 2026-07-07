@@ -20,6 +20,7 @@ import { CloudLayer } from "./world/clouds.js";
 import { NightSky } from "./world/nightSky.js";
 import { WeatherFX } from "./world/weatherFX.js";
 import { DistantLife } from "./world/distantLife.js";
+import { LakeSwimmer } from "./world/lakeSwimmer.js";
 import { MountainRange } from "./world/mountainRange.js";
 import { CastingSystem } from "./gameplay/casting.js";
 import { Bobber } from "./gameplay/bobber.js";
@@ -138,6 +139,7 @@ const weatherFX = new WeatherFX(scene, {
   },
 });
 const distantLife = new DistantLife(scene);
+const lakeSwimmer = new LakeSwimmer(scene);
 const mountains = new MountainRange(scene);
 window.__mountains = mountains;
 const underwaterFX = new UnderwaterFX();
@@ -293,6 +295,7 @@ function travelTo(locId, silent = false) {
   water.setParams(loc.water);
   effects.setLocationAmbient(loc);
   distantLife.setLocation(loc);
+  lakeSwimmer.setLocation(loc);
   mountains.setLocation(loc);
   audio.setAmbience(loc.ambience, gclock.segment);
   hud.updateLocation();
@@ -1035,6 +1038,7 @@ function tick() {
   weatherFX.setMist(mistAmount(gclock.segment));
   weatherFX.update(dt, camera.position);
   distantLife.update(dt, camera.position);
+  lakeSwimmer.update(dt, effects);
   effects.update(dt, camera, gclock.segment);
   anglerBody.update(dt); // advance the angler's idle/cast animation (no-op for static bodies)
   // Anchor the procedural rod to the VRM angler's hand so the pole stays in their

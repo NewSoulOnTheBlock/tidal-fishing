@@ -14,6 +14,8 @@ import { formatMoney } from "../utils/utils.js";
 export function mountCharacterChooser(container, opts = {}) {
   const confirmLabel = opts.confirmLabel || "Confirm";
   const onConfirm = typeof opts.onConfirm === "function" ? opts.onConfirm : () => {};
+  const onCancel = typeof opts.onCancel === "function" ? opts.onCancel : null;
+  const cancelLabel = opts.cancelLabel || "Cancel";
   let selected =
     opts.initial && getCharacter(opts.initial).id === opts.initial && isAnglerOwned(opts.initial)
       ? opts.initial
@@ -39,7 +41,10 @@ export function mountCharacterChooser(container, opts = {}) {
           </button>`;
         }).join("")}
       </div>
-      <button type="button" class="btn btn-primary cc-confirm"></button>
+      <div class="cc-actions">
+        ${onCancel ? `<button type="button" class="btn btn-secondary cc-cancel">${cancelLabel}</button>` : ""}
+        <button type="button" class="btn btn-primary cc-confirm"></button>
+      </div>
     </div>
   `;
 
@@ -47,9 +52,11 @@ export function mountCharacterChooser(container, opts = {}) {
   const nameEl = container.querySelector(".cc-name");
   const blurbEl = container.querySelector(".cc-blurb");
   const confirmBtn = container.querySelector(".cc-confirm");
+  const cancelBtn = container.querySelector(".cc-cancel");
   const chips = Array.from(container.querySelectorAll(".cc-chip"));
 
   const preview = createCharacterPreview(stage);
+  let previewId = "";
 
   function render() {
     const c = getCharacter(selected);
@@ -61,7 +68,15 @@ export function mountCharacterChooser(container, opts = {}) {
       chip.classList.toggle("is-selected", on);
       chip.setAttribute("aria-selected", on ? "true" : "false");
     });
-    preview.setModel(c.url, { yawDeg: c.yawDeg, vrm: c.vrm, idleAnim: c.anims?.idle });
+    if (previewId !== c.id) {
+      previewId = c.id;
+      // Animated VRM avatars are large and expensive to parse/retarget. Loading
+      // them inside the chooser can stall low-end/mobile browsers and make the
+      // overlay feel frozen. Use a lightweight in-canvas stand-in here; the real
+      // avatar still loads when the user confirms the selection in the game.
+      if (c.vrm) preview.setPlaceholder({ yawDeg: c.yawDeg });
+      else preview.setModel(c.url, { yawDeg: c.yawDeg });
+    }
   }
 
   chips.forEach((chip) => {
@@ -78,12 +93,22 @@ export function mountCharacterChooser(container, opts = {}) {
   });
 
   confirmBtn.addEventListener("click", () => onConfirm(selected));
+  cancelBtn?.addEventListener("click", () => onCancel?.());
+  const onKey = (e) => {
+    if (e.key === "Escape" && onCancel) {
+      e.preventDefault();
+      e.stopPropagation();
+      onCancel();
+    }
+  };
+  window.addEventListener("keydown", onKey, true);
 
   render();
 
   return {
     getSelected: () => selected,
     dispose() {
+      window.removeEventListener("keydown", onKey, true);
       preview.dispose();
     },
   };

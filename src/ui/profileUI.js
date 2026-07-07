@@ -485,7 +485,6 @@ export class ProfileUI {
       <div class="avatar-picker-content character-picker-content">
         <h3>Choose Your Character</h3>
         <div class="character-picker-mount"></div>
-        <button class="btn btn-secondary btn-cancel">Cancel</button>
       </div>
     `;
     this.panel.appendChild(picker);
@@ -494,6 +493,8 @@ export class ProfileUI {
     const chooser = mountCharacterChooser(mount, {
       initial: S.profile.character || 'r2d2',
       confirmLabel: 'Use {name}',
+      cancelLabel: 'Cancel',
+      onCancel: () => this.closeCharacterPicker(),
       onConfirm: (id) => {
         const char = getCharacter(id);
         this.currentProfile.player.character = char.id;
@@ -513,7 +514,7 @@ export class ProfileUI {
     this._charPicker = picker;
     this._charChooser = chooser;
 
-    picker.querySelector('.btn-cancel').addEventListener('click', () => this.closeCharacterPicker());
+
     picker.addEventListener('click', (e) => {
       if (e.target === picker) this.closeCharacterPicker();
     });
