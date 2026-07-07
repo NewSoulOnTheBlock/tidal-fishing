@@ -17,7 +17,7 @@ import rateLimit from 'express-rate-limit';
 import crypto from 'node:crypto';
 import pg from 'pg';
 import dotenv from 'dotenv';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { evaluateCatch } from './catchRules.js';
@@ -1749,14 +1749,6 @@ app.get('/api/player/journal/:walletAddress', cacheControl('no-store'), async (r
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`[server] Tidal API listening on port ${PORT}`);
-  console.log(`[server] CORS origin: ${CORS_ORIGIN}`);
-  console.log(`[server] Treasury: ${treasuryKeypair ? '✅ Loaded' : '❌ Not configured'}`);
-  console.log(`[server] $SBF Mint: ${TIDE_MINT_STR}`);
-  console.log(`[server] Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'}`);
-});
 
 // Prune the ip_activity audit table hourly so it can't grow without bound
 // (every catch-validate inserts a row). Keep ~2 days for rate-limit windows.
@@ -1946,4 +1938,31 @@ installRaffleSystem({
   cacheControl,
   announce: (msg, kind) => { insertSystemChat(msg, kind).catch(() => {}); },
   logger: console,
+});
+
+// Serve the Vite frontend from the same Render web service. This makes the
+// Render/default/custom domain load the game at `/` instead of Express' default
+// "Cannot GET /" response, while keeping all `/api/*` routes handled above.
+const staticDir = join(__dirname, '..', 'dist');
+const indexHtml = join(staticDir, 'index.html');
+if (existsSync(indexHtml)) {
+  app.use(express.static(staticDir));
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'API route not found' });
+    res.sendFile(indexHtml);
+  });
+  console.log(`[server] Serving frontend from ${staticDir}`);
+} else {
+  app.get('/', (req, res) => {
+    res.type('html').send('<!doctype html><title>Bull Fish Blitz API</title><h1>Bull Fish Blitz API is live</h1><p>The frontend build was not found on this service. API routes are available under <code>/api/*</code>.</p>');
+  });
+}
+
+// Start server after every API/static route is registered.
+app.listen(PORT, () => {
+  console.log(`[server] Bull Fish Blitz listening on port ${PORT}`);
+  console.log(`[server] CORS origin: ${CORS_ORIGIN}`);
+  console.log(`[server] Treasury: ${treasuryKeypair ? '✅ Loaded' : '❌ Not configured'}`);
+  console.log(`[server] $SBF Mint: ${TIDE_MINT_STR}`);
+  console.log(`[server] Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'}`);
 });
