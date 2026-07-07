@@ -318,6 +318,27 @@ function requestAdminKey(req) {
   return req.headers['x-admin-key'] || req.body?.adminKey || req.query?.adminKey;
 }
 
+const REQUIRE_INTERNAL_API_SECRET = String(process.env.REQUIRE_INTERNAL_API_SECRET || 'false').toLowerCase() === 'true';
+const INTERNAL_API_SECRET = process.env.BFB_INTERNAL_API_SECRET || '';
+
+function timingSafeStringEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || !a || !b) return false;
+  const aa = Buffer.from(a);
+  const bb = Buffer.from(b);
+  return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
+}
+
+function internalSecretValid(req) {
+  return timingSafeStringEqual(req.headers['x-bfb-internal-secret'], INTERNAL_API_SECRET);
+}
+
+function requireInternalApiSecret(req, res, next) {
+  if (req.path === '/health' || req.path === '/api/health') return next();
+  if (!REQUIRE_INTERNAL_API_SECRET) return next();
+  if (internalSecretValid(req)) return next();
+  return res.status(403).json({ error: 'Internal API only', code: 'INTERNAL_API_FORBIDDEN' });
+}
+
 function trustedRequestOrigin(req) {
   const origin = req.headers.origin;
   if (typeof origin === 'string' && TRUSTED_ORIGINS.has(origin)) return origin;
@@ -335,6 +356,11 @@ function trustedRequestOrigin(req) {
 function requireTrustedApiOrigin(req, res, next) {
   // Render/platform uptime checks must be able to hit health without browser headers.
   if (req.path === '/health' || req.path === '/api/health') return next();
+
+  // The Vercel same-origin proxy proves it is our backend caller with the
+  // internal secret. In that path, browser Origin/Referer may be absent on
+  // same-origin GETs, so do not require both signals.
+  if (internalSecretValid(req)) return next();
 
   // Admin automation can still run from a terminal/cron when it proves knowledge
   // of ADMIN_SECRET; browser-facing public/player APIs require our frontend origin.
@@ -653,6 +679,7 @@ const catchLimiter = rateLimit({
 // Baseline per-IP rate limit + ban check on every API route. Origin gating runs
 // first so random curl/scripts without our frontend Origin are rejected before
 // spending DB work on ban checks.
+app.use('/api', requireInternalApiSecret);
 app.use('/api', requireTrustedApiOrigin);
 app.use('/api', globalLimiter);
 app.use('/api', checkBans);
@@ -738,6 +765,14 @@ function createTransferIx(source, dest, owner, amount, tokenProgram) {
   });
 }
 
+function withdrawTxErrorMessage(error) {
+  const message = String(error?.message || error || 'Transaction failed');
+  if (message.includes('no record of a prior credit') || message.includes('insufficient lamports')) {
+    return 'Treasury wallet needs SOL for transaction fees. Send a small amount of SOL to the treasury wallet and try again.';
+  }
+  return message;
+}
+
 // Routes
 
 // Health check
@@ -765,7 +800,10 @@ app.get('/api/treasury/balance', cacheControl('public, max-age=30'), async (req,
     const tokenProgram = await detectTokenProgram(mintPk);
     const { address: ata } = await getAssociatedTokenAddress(mintPk, treasuryKeypair.publicKey, tokenProgram);
     
-    const balance = await connection.getTokenAccountBalance(ata);
+    const [balance, solLamports] = await Promise.all([
+      connection.getTokenAccountBalance(ata),
+      connection.getBalance(treasuryKeypair.publicKey),
+    ]);
     
     res.json({
       address: treasuryKeypair.publicKey.toBase58(),
@@ -775,6 +813,10 @@ app.get('/api/treasury/balance', cacheControl('public, max-age=30'), async (req,
         raw: balance.value.amount,
         ui: balance.value.uiAmountString,
         decimals: balance.value.decimals,
+      },
+      sol: {
+        lamports: solLamports,
+        ui: solLamports / 1_000_000_000,
       },
     });
   } catch (error) {
@@ -871,6 +913,15 @@ app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
 
     const intAmount = Math.round(amount);
 
+    const treasuryLamports = await connection.getBalance(treasuryKeypair.publicKey);
+    if (treasuryLamports < 10_000) {
+      return res.status(503).json({
+        error: 'Treasury wallet needs SOL for transaction fees. Send a small amount of SOL to the treasury wallet and try again.',
+        treasury: treasuryKeypair.publicKey.toBase58(),
+        sol: treasuryLamports / 1_000_000_000,
+      });
+    }
+
     // --- Idempotency: claim the nonce before touching the chain. UNIQUE
     //     constraint makes a replayed request fail here. ---
     try {
@@ -946,7 +997,7 @@ app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
       );
       await pool.query(`UPDATE withdrawals SET status = 'failed' WHERE nonce = $1`, [nonce]);
       console.error('[withdraw] Transaction failed:', txErr);
-      return res.status(502).json({ error: txErr.message || 'Transaction failed' });
+      return res.status(502).json({ error: withdrawTxErrorMessage(txErr) });
     }
 
     await pool.query(`UPDATE withdrawals SET status = 'sent', tx_signature = $2 WHERE nonce = $1`, [nonce, txSig]);
