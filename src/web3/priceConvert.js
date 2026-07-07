@@ -41,6 +41,13 @@ export function solToTideLive(solAmount) {
   return Math.max(1, Math.round(v * tidePerSol()));
 }
 
+/** Convert a $SBF-equivalent fish value to live SOL for SOL sale displays. */
+export function tideToSolLive(tideAmount) {
+  const v = Number(tideAmount);
+  if (!Number.isFinite(v) || v <= 0) return 0;
+  return v / tidePerSol();
+}
+
 /**
  * Refresh the cached rate from Jupiter. Resolves to the ($SBF per SOL) rate.
  * Self-throttling: returns the cache immediately while it's fresh, and dedupes

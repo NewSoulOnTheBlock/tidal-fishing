@@ -1,16 +1,22 @@
-// Client-side wrapper around POST /api/withdraw. The actual signing happens
-// server-side — the treasury private key never reaches the browser.
+// Client-side wrappers around treasury withdrawals. The actual on-chain signing
+// happens server-side — the treasury private key never reaches the browser.
 //
-// Treasury Wallet: CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror
-// This wallet holds $SBF reserves that users can withdraw to their connected wallets.
+// $SBF withdrawals transfer the token mint. SOL withdrawals spend the same
+// server-authoritative earned-fish ledger, convert the requested $SBF-equivalent
+// value to live SOL on the server, then transfer native SOL.
 
 import { TIDE_MINT } from "./solana.js";
 import { currentPublicKey, signMessage } from "./wallet.js";
 import { apiFetch } from "../utils/api.js";
 
-/** True when the client has enough config to even attempt a withdrawal. */
+/** True when the client has enough config to even attempt a $SBF withdrawal. */
 export function isWithdrawConfigured() {
   return Boolean(TIDE_MINT && currentPublicKey());
+}
+
+/** True when the client can request native SOL payouts. */
+export function isSolWithdrawConfigured() {
+  return Boolean(currentPublicKey());
 }
 
 /** Base64-encode a small byte array (signatures are 64 bytes). */
@@ -20,27 +26,18 @@ function toBase64(bytes) {
   return btoa(bin);
 }
 
-/**
- * Withdraw `amount` $SBF from the Tidal treasury to the connected wallet.
- *
- * The server requires a wallet signature proving ownership of the recipient
- * address. We build a short, human-readable, single-use authorization message,
- * ask the wallet to sign it, and send the signature alongside the request.
- * Returns the tx signature on success.
- */
-export async function withdrawTide(amount) {
+async function signedWithdrawalRequest({ path, title, currency, amount, bodyExtra = {} }) {
   const recipient = currentPublicKey();
   if (!recipient) throw new Error("Wallet not connected");
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Invalid amount");
 
   const recipientStr = recipient.toBase58();
-
-  // Build the authorization message the wallet will display + sign.
   const nonce = (crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const issued = Date.now();
   const message =
-    `Tidal Fishing withdrawal\n` +
+    `${title}\n` +
     `wallet: ${recipientStr}\n` +
+    `currency: ${currency}\n` +
     `amount: ${amount}\n` +
     `nonce: ${nonce}\n` +
     `issued: ${issued}`;
@@ -53,12 +50,10 @@ export async function withdrawTide(amount) {
     throw new Error(e?.message?.includes("reject") ? "Withdrawal signature declined" : "Could not sign withdrawal authorization");
   }
 
-  // 60s timeout: the server signs AND confirms the on-chain transfer before
-  // responding, so allow generous time but never hang the UI forever.
-  const res = await apiFetch("/api/withdraw", {
+  const res = await apiFetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ recipient: recipientStr, amount, message, signature }),
+    body: JSON.stringify({ recipient: recipientStr, amount, message, signature, ...bodyExtra }),
     timeoutMs: 60000,
   });
   let body;
@@ -70,5 +65,30 @@ export async function withdrawTide(amount) {
   if (!res.ok) {
     throw new Error(body?.error ?? `Withdraw failed (HTTP ${res.status})`);
   }
+  return body;
+}
+
+/** Withdraw `amount` $SBF from the treasury token account to the connected wallet. */
+export async function withdrawTide(amount) {
+  const body = await signedWithdrawalRequest({
+    path: "/api/withdraw",
+    title: "Tidal Fishing withdrawal",
+    currency: "SBF",
+    amount,
+  });
   return body.signature;
+}
+
+/**
+ * Withdraw a fish-sale balance as native SOL. `amount` is the $SBF-equivalent
+ * fish value to consume from the authoritative earned ledger; the server computes
+ * the live SOL amount and returns it with the transaction signature.
+ */
+export async function withdrawSol(amount) {
+  return signedWithdrawalRequest({
+    path: "/api/withdraw-sol",
+    title: "Bull Fish Blitz SOL fish sale",
+    currency: "SOL",
+    amount,
+  });
 }

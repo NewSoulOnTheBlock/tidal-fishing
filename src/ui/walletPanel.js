@@ -12,7 +12,8 @@ import {
   formatTokens,
 } from "../web3/token.js";
 import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT } from "../web3/solana.js";
-import { withdrawTide } from "../web3/withdraw.js";
+import { withdrawTide, withdrawSol } from "../web3/withdraw.js";
+import { tideToSolLive } from "../web3/priceConvert.js";
 import { onWalletConnect, onWalletDisconnect } from "../web3/databaseIntegration.js";
 import { PublicKey } from "@solana/web3.js";
 import { S, events } from "../state/gameState.js";
@@ -73,6 +74,7 @@ export class WalletPanel {
     // Re-render when the player's earned $SBF changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
+    events.on("solSale", () => this.render());
     // Re-sync the HUD offset when the viewport changes (breakpoints alter the
     // panel's height/position).
     window.addEventListener("resize", () => this.syncHudOffset());
@@ -93,6 +95,8 @@ export class WalletPanel {
     if (this.account) {
       const addr = this.account.address;
       const earned = Math.floor(S.profile.money);
+      const solSaleValue = Math.max(0, Math.floor(S.profile.solSaleValue || 0));
+      const solSaleAmount = tideToSolLive(solSaleValue);
       const mintConfigured = !!TIDE_MINT;
 
       // Compact withdraw button only — no permanent disclaimer (that lives on the
@@ -101,9 +105,13 @@ export class WalletPanel {
       let withdrawHtml = "";
       if (mintConfigured && earned > 0) {
         const label = this.withdrawing ? "Withdrawing…" : `Withdraw ${formatMoney(earned)}`;
-        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
+        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
       } else if (!mintConfigured && earned > 0) {
-        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $SBF goes live">Withdraw soon™</button>`;
+        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $SBF goes live">Withdraw soon™</button>`;
+      }
+      if (solSaleValue > 0) {
+        const solLabel = this.withdrawingSol ? "Sending SOL…" : `Withdraw ${formatSol(solSaleAmount)} from fish sales`;
+        withdrawHtml += `<button class="btn btn-sol btn-withdraw-compact" data-withdraw-sol ${this.withdrawingSol ? "disabled" : ""}>${solLabel}</button>`;
       }
 
       this.root.innerHTML = `
@@ -122,6 +130,10 @@ export class WalletPanel {
       const wBtn = this.root.querySelector("[data-withdraw]");
       if (wBtn && !wBtn.disabled) {
         wBtn.addEventListener("click", () => this.handleWithdrawClick(earned));
+      }
+      const solBtn = this.root.querySelector("[data-withdraw-sol]");
+      if (solBtn && !solBtn.disabled) {
+        solBtn.addEventListener("click", () => this.doSolWithdraw(solSaleValue));
       }
     } else {
       this.root.innerHTML = `
@@ -177,6 +189,31 @@ export class WalletPanel {
       events.emit("toast", { msg: e?.message ?? "Withdraw failed", kind: "warn" });
     } finally {
       this.withdrawing = false;
+      this.render();
+    }
+  }
+
+  async doSolWithdraw(amountSbfValue) {
+    if (this.withdrawingSol) return;
+    const amount = Math.max(0, Math.floor(amountSbfValue || 0));
+    if (amount <= 0) return;
+    this.withdrawingSol = true;
+    this.render();
+    try {
+      const result = await withdrawSol(amount);
+      economy.deductSolSaleValue(amount);
+      const solText = Number.isFinite(result?.solAmount) ? formatSol(result.solAmount) : "SOL";
+      events.emit("toast", {
+        msg: `Sold fish for ${solText} · ${shortAddress(result.signature, 6, 6)}`,
+        kind: "gold",
+        href: explorerTxUrl(result.signature),
+      });
+      this.refreshBalances();
+    } catch (e) {
+      console.error("[withdraw-sol] failed:", e);
+      events.emit("toast", { msg: e?.message ?? "SOL payout failed", kind: "warn" });
+    } finally {
+      this.withdrawingSol = false;
       this.render();
     }
   }

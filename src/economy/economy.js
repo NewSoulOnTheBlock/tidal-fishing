@@ -48,6 +48,13 @@ function emitMoney(delta) {
   events.emit("money", { money: S.profile.money, delta });
 }
 
+function emitSolSale(deltaSbfValue = 0) {
+  events.emit("solSale", {
+    solSaleValue: Math.max(0, Math.floor(S.profile.solSaleValue || 0)),
+    deltaSbfValue,
+  });
+}
+
 /**
  * Add money to player's balance (from rewards, claims, etc)
  */
@@ -75,6 +82,17 @@ export function deductMoney(amount) {
   if (take <= 0) return 0;
   S.profile.money -= take;
   emitMoney(-take);
+  saveGame();
+  return take;
+}
+
+/** Deduct a confirmed native-SOL payout from the SOL sale bucket. */
+export function deductSolSaleValue(amount) {
+  S.profile.solSaleValue = Math.max(0, Math.floor(S.profile.solSaleValue || 0));
+  const take = Math.min(S.profile.solSaleValue, Math.max(0, Math.floor(amount)));
+  if (take <= 0) return 0;
+  S.profile.solSaleValue -= take;
+  emitSolSale(-take);
   saveGame();
   return take;
 }
@@ -276,29 +294,39 @@ export async function registerCatch(fish) {
 export const inventoryValue = () =>
   S.inventory.reduce((sum, f) => sum + (Number.isFinite(f.value) ? f.value : 0), 0);
 
-export function sellFishAt(index) {
+export function sellFishAt(index, currency = "sbf") {
   const fish = S.inventory[index];
   if (!fish) return 0;
   const value = Number.isFinite(fish.value) ? fish.value : 0;
   S.inventory.splice(index, 1);
-  S.profile.money += value;
-  S.stats.earned += value;
+  if (currency === "sol") {
+    S.profile.solSaleValue = Math.max(0, Math.floor(S.profile.solSaleValue || 0)) + value;
+    emitSolSale(value);
+  } else {
+    S.profile.money += value;
+    S.stats.earned += value;
+    emitMoney(value);
+  }
   recordQuestEvent("sell", 1);
-  emitMoney(value);
   events.emit("inventory");
   saveGame();
   return value;
 }
 
-export function sellAll() {
+export function sellAll(currency = "sbf") {
   const total = inventoryValue();
   if (total <= 0) return 0;
   const count = S.inventory.length;
   S.inventory.length = 0;
-  S.profile.money += total;
-  S.stats.earned += total;
+  if (currency === "sol") {
+    S.profile.solSaleValue = Math.max(0, Math.floor(S.profile.solSaleValue || 0)) + total;
+    emitSolSale(total);
+  } else {
+    S.profile.money += total;
+    S.stats.earned += total;
+    emitMoney(total);
+  }
   recordQuestEvent("sell", count);
-  emitMoney(total);
   events.emit("inventory");
   saveGame();
   return total;

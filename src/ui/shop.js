@@ -13,8 +13,8 @@ import { audio } from "../audio/audioManager.js";
 import { formatMoney, formatLength, formatWeight } from "../utils/utils.js";
 import { fishSVG } from "./fishSvg.js";
 import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
-import { isSolPayEnabled, paySol, tideToSol, formatSol } from "../web3/solPayment.js";
-import { solToTideLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
+import { isSolPayEnabled, paySol, formatSol } from "../web3/solPayment.js";
+import { solToTideLive, tideToSolLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
 import { explorerTxUrl, shortAddress } from "../web3/solana.js";
 import { currentPublicKey } from "../web3/wallet.js";
 import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets, buyPackWithFish } from "../web3/raffle.js";
@@ -348,39 +348,64 @@ export class ShopUI {
           ? `${formatLength(fish.sizeCm)} · ${formatWeight(fish.weightKg)}${baitTag}`
           : `Legacy catch${baitTag}`;
       const value = Number.isFinite(fish.value) ? fish.value : 0;
+      const solValue = tideToSolLive(value);
       const row = document.createElement("div");
       row.className = "sell-row";
       row.innerHTML = `
         <div class="fish-mini">${art}</div>
         <span class="sell-name" style="color:${color}">${name}</span>
         <span class="sell-meta">${meta}</span>
-        <span class="sell-value">${formatMoney(value)}</span>
+        <span class="sell-value">${formatMoney(value)} <small>or ${formatSol(solValue)}</small></span>
       `;
-      const btn = document.createElement("button");
-      btn.className = "btn";
-      btn.textContent = "Sell";
-      btn.addEventListener("click", () => {
+      const sbfBtn = document.createElement("button");
+      sbfBtn.className = "btn";
+      sbfBtn.textContent = "Sell $SBF";
+      sbfBtn.addEventListener("click", () => {
         audio.play("sell");
-        economy.sellFishAt(idx);
+        economy.sellFishAt(idx, "sbf");
         this.render();
       });
-      row.appendChild(btn);
+      const solBtn = document.createElement("button");
+      solBtn.className = "btn btn-sol";
+      solBtn.textContent = "Sell SOL";
+      solBtn.title = `Adds ${formatSol(solValue)} to your SOL sale balance`;
+      solBtn.addEventListener("click", () => {
+        audio.play("sell");
+        const sold = economy.sellFishAt(idx, "sol");
+        events.emit("toast", { msg: `Sold fish for ${formatSol(tideToSolLive(sold))} SOL-equivalent`, kind: "gold" });
+        this.render();
+      });
+      const actions = document.createElement("div");
+      actions.className = "sell-actions";
+      actions.appendChild(sbfBtn);
+      actions.appendChild(solBtn);
+      row.appendChild(actions);
       this.contentEl.appendChild(row);
     });
 
     const footer = document.createElement("div");
     footer.className = "sell-footer";
-    footer.innerHTML = `<span class="sell-total">Total: <span style="color:var(--gold)">${formatMoney(economy.inventoryValue())}</span></span>`;
+    footer.innerHTML = `<span class="sell-total">Total: <span style="color:var(--gold)">${formatMoney(economy.inventoryValue())}</span> <span class="sell-sol-total">or ${formatSol(tideToSolLive(economy.inventoryValue()))}</span></span>`;
     const sellAllBtn = document.createElement("button");
     sellAllBtn.className = "btn btn-buy";
-    sellAllBtn.textContent = "Sell All";
+    sellAllBtn.textContent = "Sell All $SBF";
     sellAllBtn.addEventListener("click", () => {
-      const total = economy.sellAll();
+      const total = economy.sellAll("sbf");
       audio.play("sell");
       events.emit("toast", { msg: `Sold everything for ${formatMoney(total)}`, kind: "success" });
       this.render();
     });
+    const sellAllSolBtn = document.createElement("button");
+    sellAllSolBtn.className = "btn btn-sol";
+    sellAllSolBtn.textContent = "Sell All SOL";
+    sellAllSolBtn.addEventListener("click", () => {
+      const total = economy.sellAll("sol");
+      audio.play("sell");
+      events.emit("toast", { msg: `Sold everything for ${formatSol(tideToSolLive(total))} SOL-equivalent`, kind: "gold" });
+      this.render();
+    });
     footer.appendChild(sellAllBtn);
+    footer.appendChild(sellAllSolBtn);
     this.contentEl.appendChild(footer);
   }
 

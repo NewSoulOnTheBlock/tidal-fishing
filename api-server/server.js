@@ -151,6 +151,32 @@ const TIDE_MINT_STR = (_envMint && _envMint !== TIDE_MINT_OLD) ? _envMint : TIDE
 const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || '';
 const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);
+const SOL_MINT_STR = 'So11111111111111111111111111111111111111112';
+const JUPITER_PRICE_URL = `https://lite-api.jup.ag/price/v3?ids=${SOL_MINT_STR},${TIDE_MINT_STR}`;
+const FALLBACK_TIDE_PER_SOL = Number(process.env.TIDAL_FALLBACK_TIDE_PER_SOL ?? 4_000_000);
+const MIN_SOL_WITHDRAW_LAMPORTS = 5_000;
+let priceCache = { tidePerSol: 0, at: 0 };
+async function tidePerSolServer() {
+  if (priceCache.tidePerSol > 0 && Date.now() - priceCache.at < 60_000) return priceCache.tidePerSol;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    let data;
+    try {
+      const res = await fetch(JUPITER_PRICE_URL, { signal: ctrl.signal, headers: { accept: 'application/json' } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      data = await res.json();
+    } finally {
+      clearTimeout(t);
+    }
+    const solUsd = Number(data?.[SOL_MINT_STR]?.usdPrice);
+    const tideUsd = Number(data?.[TIDE_MINT_STR]?.usdPrice);
+    if (solUsd > 0 && tideUsd > 0) priceCache = { tidePerSol: solUsd / tideUsd, at: Date.now() };
+  } catch (e) {
+    console.warn('[price] Jupiter SOL/$SBF failed:', e?.message || e);
+  }
+  return priceCache.tidePerSol > 0 ? priceCache.tidePerSol : FALLBACK_TIDE_PER_SOL;
+}
 // Only the real Bull Fish Blitz frontends should be able to call browser-facing
 // API routes. CORS alone is not an auth boundary, so we also enforce Origin /
 // Referer below for every /api route (except health checks and admin-secret
@@ -1012,6 +1038,124 @@ app.post('/api/withdraw', withdrawLimiter, async (req, res) => {
   } catch (error) {
     console.error('[withdraw] Error:', error);
     res.status(502).json({ error: error.message || 'Transaction failed' });
+  }
+});
+
+// Native SOL payout path for fish sold as SOL. The requested `amount` is the
+// $SBF-equivalent fish value being consumed from the same authoritative earned
+// ledger used by token withdrawals; the server converts it to live SOL at payout
+// time and transfers native SOL from the treasury.
+app.post('/api/withdraw-sol', withdrawLimiter, async (req, res) => {
+  try {
+    if (!treasuryKeypair) {
+      return res.status(503).json({ error: 'SOL payouts not configured: treasury key missing' });
+    }
+
+    const { recipient, amount, message, signature } = req.body;
+    if (typeof recipient !== 'string' || !recipient) return res.status(400).json({ error: 'recipient (string) required' });
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'amount (positive number) required' });
+    if (amount > MAX_UI_AMOUNT) return res.status(400).json({ error: `amount exceeds per-call cap of ${MAX_UI_AMOUNT}` });
+    if (typeof message !== 'string' || typeof signature !== 'string') return res.status(401).json({ error: 'Signed authorization required' });
+
+    let recipientPk;
+    try { recipientPk = new PublicKey(recipient); } catch { return res.status(400).json({ error: 'Invalid recipient address' }); }
+
+    if (ACCOUNT_SUSPENSION_ENABLED) {
+      const bannedRow = await pool.query('SELECT reason FROM banned_wallets WHERE wallet_address = $1', [recipient]);
+      if (bannedRow.rows.length > 0) return res.status(403).json({ error: 'Account suspended', reason: bannedRow.rows[0].reason || 'This wallet has been banned' });
+    }
+
+    let sigBytes;
+    try { sigBytes = Buffer.from(signature, 'base64'); } catch { return res.status(401).json({ error: 'Malformed signature' }); }
+    if (sigBytes.length !== 64) return res.status(401).json({ error: 'Invalid signature' });
+    const verified = nacl.sign.detached.verify(new Uint8Array(Buffer.from(message, 'utf8')), new Uint8Array(sigBytes), recipientPk.toBytes());
+    if (!verified) return res.status(401).json({ error: 'Signature verification failed' });
+
+    const fields = {};
+    for (const line of message.split('\n')) {
+      const idx = line.indexOf(':');
+      if (idx > 0) fields[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+    }
+    if (fields.wallet !== recipient) return res.status(401).json({ error: 'Signed wallet does not match recipient' });
+    if (fields.currency !== 'SOL') return res.status(401).json({ error: 'Signed currency must be SOL' });
+    const signedAmount = parseFloat(String(fields.amount));
+    if (!Number.isFinite(signedAmount) || Math.abs(signedAmount - amount) > 1e-6) return res.status(401).json({ error: 'Signed amount does not match request' });
+    const issued = Number(fields.issued);
+    if (!Number.isFinite(issued) || Math.abs(Date.now() - issued) > 120000) return res.status(401).json({ error: 'Authorization expired — please try again' });
+    const nonce = String(fields.nonce || '').slice(0, 80);
+    if (!nonce) return res.status(401).json({ error: 'Missing authorization nonce' });
+
+    const intAmount = Math.round(amount);
+    const rate = await tidePerSolServer();
+    const solAmount = intAmount / rate;
+    const lamports = Math.floor(solAmount * 1_000_000_000);
+    if (lamports < MIN_SOL_WITHDRAW_LAMPORTS) {
+      return res.status(400).json({ error: `SOL payout too small. Sell more fish before withdrawing SOL.`, minLamports: MIN_SOL_WITHDRAW_LAMPORTS });
+    }
+
+    const treasuryLamports = await connection.getBalance(treasuryKeypair.publicKey);
+    if (treasuryLamports < lamports + 10_000) {
+      return res.status(503).json({
+        error: 'Treasury SOL balance too low for this payout. Try a smaller payout or fund the treasury.',
+        treasury: treasuryKeypair.publicKey.toBase58(),
+        sol: treasuryLamports / 1_000_000_000,
+      });
+    }
+
+    try {
+      await pool.query(`INSERT INTO withdrawals (wallet_address, amount, nonce, status) VALUES ($1, $2, $3, 'pending')`, [recipient, intAmount, nonce]);
+    } catch (e) {
+      if (e.code === '23505') return res.status(409).json({ error: 'This withdrawal was already submitted' });
+      throw e;
+    }
+
+    const reserve = await pool.query(
+      `UPDATE players
+         SET total_withdrawn = total_withdrawn + $2
+       WHERE wallet_address = $1
+         AND (total_earned - total_withdrawn) >= $2
+       RETURNING total_withdrawn, total_earned`,
+      [recipient, intAmount]
+    );
+    if (reserve.rows.length === 0) {
+      await pool.query(`UPDATE withdrawals SET status = 'rejected' WHERE nonce = $1`, [nonce]);
+      const p = await pool.query('SELECT total_earned, total_withdrawn FROM players WHERE wallet_address = $1', [recipient]);
+      const avail = p.rows.length ? Math.max(0, Number(p.rows[0].total_earned) - Number(p.rows[0].total_withdrawn)) : 0;
+      return res.status(400).json({ error: `Insufficient earned balance. You can sell/withdraw up to ${avail} $SBF-equivalent.`, withdrawable: avail });
+    }
+
+    let txSig;
+    try {
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+      const tx = new Transaction({ feePayer: treasuryKeypair.publicKey, blockhash, lastValidBlockHeight });
+      tx.add(
+        ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }),
+        SystemProgram.transfer({ fromPubkey: treasuryKeypair.publicKey, toPubkey: recipientPk, lamports })
+      );
+      tx.sign(treasuryKeypair);
+      txSig = await connection.sendRawTransaction(tx.serialize(), { maxRetries: 3 });
+      await connection.confirmTransaction({ signature: txSig, blockhash, lastValidBlockHeight }, 'confirmed');
+    } catch (txErr) {
+      await pool.query(`UPDATE players SET total_withdrawn = GREATEST(0, total_withdrawn - $2) WHERE wallet_address = $1`, [recipient, intAmount]);
+      await pool.query(`UPDATE withdrawals SET status = 'failed' WHERE nonce = $1`, [nonce]);
+      console.error('[withdraw-sol] Transaction failed:', txErr);
+      return res.status(502).json({ error: withdrawTxErrorMessage(txErr) });
+    }
+
+    await pool.query(`UPDATE withdrawals SET status = 'sent', tx_signature = $2 WHERE nonce = $1`, [nonce, txSig]);
+    console.log('[withdraw-sol] Success:', txSig, 'recipient:', recipient, 'sbfValue:', intAmount, 'sol:', solAmount);
+    res.json({
+      signature: txSig,
+      recipient,
+      amount: intAmount,
+      solAmount,
+      lamports,
+      rate,
+      explorerUrl: `https://solscan.io/tx/${txSig}`,
+    });
+  } catch (error) {
+    console.error('[withdraw-sol] Error:', error);
+    res.status(502).json({ error: error.message || 'SOL payout failed' });
   }
 });
 

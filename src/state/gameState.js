@@ -59,6 +59,10 @@ export function createDefaultState() {
     version: 1,
     profile: {
       money: CONFIG.economy.startMoney,
+      // Native-SOL sale bucket. Stored as the $SBF-equivalent fish value so the
+      // server can spend the same authoritative earned ledger, then convert to
+      // live SOL at withdrawal time.
+      solSaleValue: 0,
       xp: 0,
       level: 1,
       username: "",
