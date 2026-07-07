@@ -15,6 +15,38 @@ const HOP_BY_HOP_HEADERS = new Set([
   "upgrade",
 ]);
 
+const FIXED_ALLOWED_ORIGINS = new Set([
+  "https://www.bullfishblitz.com",
+  "https://bullfishblitz.com",
+  "https://tidal-fishing.vercel.app",
+]);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  try {
+    const { protocol, hostname } = new URL(origin);
+    if (protocol !== "https:") return false;
+    if (FIXED_ALLOWED_ORIGINS.has(origin)) return true;
+    return hostname.endsWith(".ipfs.w3s.link") ||
+      hostname.endsWith(".ipfs.dweb.link") ||
+      hostname.endsWith(".ipfs.cf-ipfs.com") ||
+      hostname === "ipfs.io" ||
+      hostname === "cloudflare-ipfs.com";
+  } catch {
+    return false;
+  }
+}
+
+function applyCors(req, res) {
+  const origin = req.headers.origin;
+  if (!isAllowedOrigin(origin)) return;
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Max-Age", "86400");
+}
+
 function backendPath(req) {
   const path = req.query?.path;
   if (typeof path !== "string" || !path.startsWith("/api/")) return null;
@@ -50,6 +82,11 @@ function applyResponseHeaders(res, upstreamHeaders = {}) {
 }
 
 export default function handler(req, res) {
+  applyCors(req, res);
+  if (req.method === "OPTIONS") {
+    return res.status(isAllowedOrigin(req.headers.origin) ? 204 : 403).end();
+  }
+
   const path = backendPath(req);
   if (!path) return res.status(400).json({ error: "Backend API path required", code: "BAD_BACKEND_PATH" });
 

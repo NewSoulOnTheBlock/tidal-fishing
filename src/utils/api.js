@@ -24,7 +24,10 @@ export const API_BASE = resolveApiBase();
 
 function resolveApiUrl(path) {
   if (/^https?:\/\//.test(path)) return path;
-  if (API_BASE === "/api/backend") {
+  // The Vercel backend proxy is query-param based. Support both same-origin
+  // production (`/api/backend`) and IPFS/decentralized builds that point at the
+  // canonical proxy URL (`https://www.bullfishblitz.com/api/backend`).
+  if (API_BASE === "/api/backend" || API_BASE.endsWith("/api/backend")) {
     return `${API_BASE}?path=${encodeURIComponent(path)}`;
   }
   return `${API_BASE}${path}`;
