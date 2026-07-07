@@ -14,9 +14,11 @@ const HOP_BY_HOP_HEADERS = new Set([
 ]);
 
 function backendPath(req) {
-  const raw = req.query?.path;
-  const parts = Array.isArray(raw) ? raw : raw ? [raw] : [];
-  return `/${parts.map((p) => encodeURIComponent(String(p))).join("/")}`;
+  const path = req.query?.path;
+  if (typeof path !== "string" || !path.startsWith("/api/")) {
+    return null;
+  }
+  return path;
 }
 
 function forwardHeaders(req) {
@@ -57,8 +59,10 @@ async function readBody(req) {
 }
 
 export default async function handler(req, res) {
-  const base = (process.env.RENDER_API_BASE || DEFAULT_RENDER_API_BASE).replace(/\/+$/, "");
   const path = backendPath(req);
+  if (!path) return res.status(400).json({ error: "Backend API path required", code: "BAD_BACKEND_PATH" });
+
+  const base = (process.env.RENDER_API_BASE || DEFAULT_RENDER_API_BASE).replace(/\/+$/, "");
   const query = { ...(req.query || {}) };
   delete query.path;
   const qs = new URLSearchParams(query).toString();

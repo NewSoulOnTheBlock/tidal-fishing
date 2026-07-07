@@ -10,18 +10,24 @@ function resolveApiBase() {
   const explicit = ENV.VITE_API_URL || ENV.VITE_API_SERVER_URL;
   if (explicit) return String(explicit).replace(/\/+$/, "");
 
-  // Local dev convenience. Point directly at the local Express API when running
-  // Vite dev/preview on localhost; production goes through the same-origin
-  // Vercel proxy so the Render backend secret never ships to the browser.
+  // Local dev convenience.
   if (typeof window !== "undefined" &&
       /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname)) {
     return "http://localhost:3000";
   }
 
-  return "/api/backend";
+  return "https://tidal-fishing-d1sn.onrender.com";
 }
 
 export const API_BASE = resolveApiBase();
+
+function resolveApiUrl(path) {
+  if (/^https?:\/\//.test(path)) return path;
+  if (API_BASE === "/api/backend") {
+    return `${API_BASE}?path=${encodeURIComponent(path)}`;
+  }
+  return `${API_BASE}${path}`;
+}
 
 // SIWS session hooks, wired in by src/web3/session.js. Kept as setter-injected
 // callbacks so this module has no import cycle with the session/wallet layer.
@@ -51,7 +57,7 @@ export function setAuthHooks({ getToken, reauth } = {}) {
  * otherwise.
  */
 export async function apiFetch(path, { timeoutMs = 12000, auth = false, interactive = true, _retried = false, ...options } = {}) {
-  const url = /^https?:\/\//.test(path) ? path : `${API_BASE}${path}`;
+  const url = resolveApiUrl(path);
   const headers = { ...(options.headers || {}) };
   const token = _getToken?.();
   if (token) headers['Authorization'] = `Bearer ${token}`;
