@@ -216,7 +216,7 @@ renderEarnings(data); // Show top 100
 - Weekly challenges
 
 **Phase 3: Web3 Expansion** (planned)
-- Deploy $TIDE token
+- Deploy $SBF token
 - Catch rare fish as cNFTs
 - Gear as Token-2022 NFTs
 - Marketplace integration

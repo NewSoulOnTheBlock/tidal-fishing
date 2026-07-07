@@ -65,7 +65,7 @@ export function addMoney(amount) {
 }
 
 /**
- * Subtract `amount` from the in-game earned $TIDE bucket. Used after a
+ * Subtract `amount` from the in-game earned $SBF bucket. Used after a
  * confirmed on-chain withdrawal so the off-chain balance reflects what was
  * moved to the wallet. Clamped at zero — never overdraws.
  */
@@ -124,7 +124,7 @@ export function addXp(amount) {
  */
 export async function registerCatch(fish) {
   // Casual Angler: pure-fun mode. Catches still fill the Journal and stats, but
-  // earn no $TIDE, skip server validation/anti-farming, and aren't added to the
+  // earn no $SBF, skip server validation/anti-farming, and aren't added to the
   // sellable bag (catch & release). Pro mode runs the full economy below.
   const casual = !isPro();
 
@@ -185,7 +185,7 @@ export async function registerCatch(fish) {
   const isJackpot = !casual && !!fish.jackpot;
 
   if (isJackpot) {
-    // No inventory entry — auto-credit. This avoids ever having a 10M $TIDE
+    // No inventory entry — auto-credit. This avoids ever having a 10M $SBF
     // fish sitting in the catch bag (sellable, but losable if the bag is
     // somehow cleared elsewhere).
     S.profile.money += fish.value;
@@ -250,7 +250,7 @@ export async function registerCatch(fish) {
     }).catch(err => console.error('[economy] Failed to record catch to DB:', err));
   }
   
-  // Check achievements. Skipped in Casual — achievement rewards pay $TIDE, which
+  // Check achievements. Skipped in Casual — achievement rewards pay $SBF, which
   // would leak value into the no-stakes mode.
   if (!casual && S.achievements) {
     const stats = getGameStats();
@@ -298,9 +298,9 @@ export function buyGear(catKey, index, costOverride = null) {
   if (!item) return { ok: false, reason: "Unknown item" };
   if (S.gear.owned[catKey].includes(index)) return { ok: false, reason: "Already owned" };
   if (S.profile.level < item.level) return { ok: false, reason: `Requires level ${item.level}` };
-  // Option-A pricing: the live $TIDE cost (Jupiter SOL-equivalent) is passed in.
+  // Option-A pricing: the live $SBF cost (Jupiter SOL-equivalent) is passed in.
   const cost = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : item.price;
-  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDE" };
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $SBF" };
   S.profile.money -= cost;
   S.gear.owned[catKey].push(index);
   S.gear.equipped[catKey] = index; // auto-equip new purchases
@@ -311,8 +311,8 @@ export function buyGear(catKey, index, costOverride = null) {
 }
 
 /**
- * Grant gear after a successful on-chain $TIDE burn. Skips the in-game
- * balance check/deduction since the player has burned real $TIDE supply.
+ * Grant gear after a successful on-chain $SBF burn. Skips the in-game
+ * balance check/deduction since the player has burned real $SBF supply.
  * The burn signature is recorded in the save for audit.
  */
 export function grantGearOnChain(catKey, index, signature) {
@@ -340,7 +340,7 @@ export function equipGear(catKey, index) {
 export function canUnlockLocation(loc) {
   if (S.world.unlocked.includes(loc.id)) return { ok: false, reason: "Already unlocked" };
   if (S.profile.level < loc.unlock.level) return { ok: false, reason: `Requires level ${loc.unlock.level}` };
-  if (S.profile.money < loc.unlock.cost) return { ok: false, reason: "Not enough $TIDE" };
+  if (S.profile.money < loc.unlock.cost) return { ok: false, reason: "Not enough $SBF" };
   return { ok: true };
 }
 
@@ -373,7 +373,7 @@ export function getGameStats() {
     lifetimeEarnings: S.stats.earned,
     unlockedLocations: S.world.unlocked,
     perfectHooks: S.stats.perfectHooks || 0,
-    jackpotCaught: S.journal.smokingchicken?.count > 0,
+    jackpotCaught: (S.journal.smokingchicken?.count > 0) || (S.journal.bullfishblitz?.count > 0),
     loginStreak: S.dailyLogin?.streak || 0,
   };
 }
@@ -390,8 +390,8 @@ export function unlockLocation(loc) {
 }
 
 /**
- * Unlock a location after a successful on-chain $TIDE burn. Skips the
- * in-game balance check/deduction since the player has burned real $TIDE.
+ * Unlock a location after a successful on-chain $SBF burn. Skips the
+ * in-game balance check/deduction since the player has burned real $SBF.
  */
 export function grantLocationOnChain(loc, signature) {
   if (S.world.unlocked.includes(loc.id)) return { ok: false, reason: "Already unlocked" };
@@ -413,14 +413,14 @@ export function isAnglerOwned(id) {
   return (S.profile.anglersOwned || []).includes(c.id);
 }
 
-/** Spend in-game $TIDE to unlock a premium angler. */
+/** Spend in-game $SBF to unlock a premium angler. */
 export function buyAngler(id, costOverride = null) {
   const c = getCharacter(id);
   if (!c?.premium) return { ok: false, reason: "Unknown angler" };
   if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
-  // Option-A pricing: the live $TIDE cost (Jupiter SOL-equivalent) is passed in.
+  // Option-A pricing: the live $SBF cost (Jupiter SOL-equivalent) is passed in.
   const price = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : (c.price || 0);
-  if (S.profile.money < price) return { ok: false, reason: "Not enough $TIDE" };
+  if (S.profile.money < price) return { ok: false, reason: "Not enough $SBF" };
   S.profile.money -= price;
   (S.profile.anglersOwned ??= []).push(c.id);
   emitMoney(-price);
@@ -542,7 +542,7 @@ export function selectBait(id) {
   return true;
 }
 
-/** Buy `qty` of a bait with in-game $TIDE. The $TIDE price is the live
+/** Buy `qty` of a bait with in-game $SBF. The $SBF price is the live
  *  SOL-equivalent of the bait's SOL price (Jupiter rate). `costOverride` lets the
  *  shop charge exactly the amount it displayed, avoiding mid-render rate drift. */
 export function buyBait(id, qty = 1, costOverride = null) {
@@ -552,7 +552,7 @@ export function buyBait(id, qty = 1, costOverride = null) {
   const cost = Number.isFinite(costOverride) && costOverride > 0
     ? Math.round(costOverride)
     : solToTideLive(b.solPrice * qty);
-  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDE" };
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $SBF" };
   S.profile.money -= cost;
   addBait(id, qty);
   emitMoney(-cost);
@@ -576,6 +576,7 @@ export function grantBaitOnChain(id, qty, signature) {
 /** Wallets that own everything (gear, anglers, locations, infinite bait). */
 export const DEV_WALLETS = new Set([
   "7LcEgfHbHPRwV5ceo5burLHpuxry2wGPPjdBGU6iEDTX",
+  "GceSKjeXjBi5d5MZWxWxuHkwoGiLYZREr8pLSLoc7uB8",
 ]);
 
 export function isDevWallet(addr) {
@@ -618,6 +619,13 @@ export function applyDevUnlocks(addr) {
     return false;
   }
   S.devUnlimited = true;
+  const maxGearLevel = Math.max(
+    ...Object.values(GEAR).flat().map((item) => Number(item.level) || 1),
+    ...LOCATIONS.map((loc) => Number(loc.unlock?.level) || 1),
+    S.profile.level || 1
+  );
+  S.profile.level = maxGearLevel;
+  S.profile.xp = 0;
   for (const cat of Object.keys(GEAR)) {
     S.gear.owned[cat] = GEAR[cat].map((_, i) => i);
   }

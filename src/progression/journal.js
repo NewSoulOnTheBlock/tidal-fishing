@@ -11,7 +11,7 @@ export function initJournal(save) {
         caught: 0,           // total count caught
         biggestSize: 0,      // largest size in cm
         biggestWeight: 0,    // largest weight in kg
-        totalValue: 0,       // cumulative $TIDE earned
+        totalValue: 0,       // cumulative $SBF earned
         firstCaughtAt: null, // timestamp of first catch
       };
     });

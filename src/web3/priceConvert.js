@@ -1,8 +1,8 @@
-// Live SOL <-> $TIDE conversion via the Jupiter Price API v3.
+// Live SOL <-> $SBF conversion via the Jupiter Price API v3.
 //
-// Bait (and anything else priced in SOL) shows a $TIDE alternative price that
+// Bait (and anything else priced in SOL) shows a $SBF alternative price that
 // must equal the SOL cost's real market value. Rather than a fixed rate, we ask
-// Jupiter for the live USD price of both SOL and $TIDE and derive how many $TIDE
+// Jupiter for the live USD price of both SOL and $SBF and derive how many $SBF
 // equal 1 SOL: tidePerSol = usd(SOL) / usd(TIDE).
 //
 // The result is cached (60s) so the synchronous shop UI can read it instantly;
@@ -20,7 +20,7 @@ const REQUEST_TIMEOUT_MS = 8000;
 // Only used if the live price can't be fetched at all. Intentionally rough.
 const FALLBACK_TIDE_PER_SOL = 4_000_000;
 
-let cachedRate = 0; // $TIDE per 1 SOL; 0 = not yet loaded
+let cachedRate = 0; // $SBF per 1 SOL; 0 = not yet loaded
 let cachedAt = 0;
 let inflight = null;
 
@@ -29,12 +29,12 @@ export function isRateLoaded() {
   return cachedRate > 0;
 }
 
-/** Current $TIDE-per-SOL rate (live cache, or the fallback if never loaded). */
+/** Current $SBF-per-SOL rate (live cache, or the fallback if never loaded). */
 export function tidePerSol() {
   return cachedRate > 0 ? cachedRate : FALLBACK_TIDE_PER_SOL;
 }
 
-/** Convert a SOL amount to its live $TIDE-equivalent, rounded to a whole token. */
+/** Convert a SOL amount to its live $SBF-equivalent, rounded to a whole token. */
 export function solToTideLive(solAmount) {
   const v = Number(solAmount);
   if (!Number.isFinite(v) || v <= 0) return 0;
@@ -42,7 +42,7 @@ export function solToTideLive(solAmount) {
 }
 
 /**
- * Refresh the cached rate from Jupiter. Resolves to the ($TIDE per SOL) rate.
+ * Refresh the cached rate from Jupiter. Resolves to the ($SBF per SOL) rate.
  * Self-throttling: returns the cache immediately while it's fresh, and dedupes
  * concurrent callers onto a single in-flight request.
  */

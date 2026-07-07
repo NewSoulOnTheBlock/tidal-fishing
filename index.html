@@ -5,27 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   
   <!-- PWA Meta Tags -->
-  <meta name="application-name" content="Tidal" />
+  <meta name="application-name" content="Bull Fish Blitz" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Tidal" />
+  <meta name="apple-mobile-web-app-title" content="Bull Fish Blitz" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#5fd4ff" />
-  <meta name="description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and own your catches." />
+  <meta name="description" content="A web3 fishing adventure on Solana. Catch fish, earn $SBF, unlock new waters, and own your catches." />
   
   <!-- Open Graph / Social -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Tidal - Web3 Fishing Game" />
-  <meta property="og:description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and own your catches." />
+  <meta property="og:title" content="Bull Fish Blitz" />
+  <meta property="og:description" content="A web3 fishing adventure on Solana. Catch fish, earn $SBF, unlock new waters, and own your catches." />
   <meta property="og:url" content="https://tidalfishing.fun" />
-  <meta property="og:site_name" content="Tidal" />
+  <meta property="og:site_name" content="Bull Fish Blitz" />
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Tidal - Web3 Fishing Game" />
-  <meta name="twitter:description" content="A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and own your catches." />
+  <meta name="twitter:title" content="Bull Fish Blitz" />
+  <meta name="twitter:description" content="A web3 fishing adventure on Solana. Catch fish, earn $SBF, unlock new waters, and own your catches." />
   
-  <title>TIDAL — Web3 fishing on Solana</title>
+  <title>Bull Fish Blitz</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
@@ -47,7 +47,7 @@
   <div id="hud" class="hidden">
     <div class="hud-corner hud-topleft">
       <div class="hud-card">
-        <div id="hud-money" class="money-text">0 $TIDE</div>
+        <div id="hud-money" class="money-text">0 $SBF</div>
         <div class="level-row">
           <span id="hud-level" class="level-badge">Lv 1</span>
           <div class="xp-bar"><div id="hud-xpfill" class="xp-fill"></div></div>
@@ -131,7 +131,8 @@
   <!-- ======================= SCREENS ======================= -->
   <div id="screen-menu" class="screen hidden">
     <div class="menu-box">
-      <h1 class="game-title">TIDAL</h1>
+      <h1 class="game-title">Bull Fish Blitz</h1>
+      <img class="title-fish-logo" src="/brand/smoking-bull-fish.png" alt="Bull Fish Blitz mascot" />
       <p class="game-sub">a web3 fishing journey on Solana</p>
       <p id="menu-catch-of-day" class="menu-cod hidden"></p>
       <a id="menu-marketcap" class="menu-mcap hidden" href="#" target="_blank" rel="noopener"></a>
@@ -147,7 +148,7 @@
       <p class="menu-credits">Angler bodies: assorted voxel models (Sketchfab)</p>
       <footer class="menu-footer">
         <div class="ca-row">
-          <span class="ca-tag">$TIDE Contract</span>
+          <span class="ca-tag">$SBF Contract</span>
           <code id="ca-address" class="ca-address">—</code>
           <button id="ca-copy" class="ca-copy" type="button" title="Copy contract address" aria-label="Copy contract address">Copy</button>
         </div>
@@ -225,7 +226,7 @@
     <div class="panel panel-wide">
       <div class="panel-head">
         <h2 class="panel-title">Bait &amp; Tackle</h2>
-        <span id="shop-money" class="money-text">0 $TIDE</span>
+        <span id="shop-money" class="money-text">0 $SBF</span>
         <button id="shop-close" class="btn btn-close">Close</button>
       </div>
       <nav id="shop-tabs" class="tab-row"></nav>
@@ -259,7 +260,7 @@
 
   <div id="boot-loader">
     <div class="boot-spin"></div>
-    <div class="boot-text">Loading TIDAL…</div>
+    <div class="boot-text">Loading Bull Fish Blitz…</div>
     <div class="boot-sub">connecting to Solana mainnet</div>
   </div>
 </div>
@@ -315,7 +316,7 @@
     toast.className = 'toast toast-gold pwa-install-toast';
     toast.innerHTML = `
       <div style="display: flex; align-items: center; gap: 12px;">
-        <span>📱 Install Tidal as an app!</span>
+        <span>📱 Install Bull Fish Blitz as an app!</span>
         <button onclick="installPWA()" style="background: gold; color: black; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">Install</button>
         <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">Later</button>
       </div>

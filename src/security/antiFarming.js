@@ -16,8 +16,8 @@ const RATE_LIMITS = {
   maxCatchesPerDay: 800,     // Reduced from 2000
   
   // Maximum earnings per time period (scaled with the 100x payout multiplier)
-  maxEarningsPerHour: 500000,   // 500k $TIDE per hour
-  maxEarningsPerDay: 3000000,   // 3M $TIDE per day
+  maxEarningsPerHour: 500000,   // 500k $SBF per hour
+  maxEarningsPerDay: 3000000,   // 3M $SBF per day
   
   // Cooldowns
   minCatchInterval: 5000,     // 5 seconds between catches (increased from 3s)

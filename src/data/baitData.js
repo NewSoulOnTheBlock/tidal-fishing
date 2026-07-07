@@ -1,8 +1,8 @@
 // Consumable bait. ONE bait is spent per cast (see economy.consumeBait), so bait
 // is the core money sink of the loop. Each tier is priced primarily in SOL — the
-// cheapest is 0.01 SOL per 10 baits (0.001 each). The $TIDE fallback price is no
+// cheapest is 0.01 SOL per 10 baits (0.001 each). The $SBF fallback price is no
 // longer a fixed field: it is derived LIVE from the SOL price via the Jupiter
-// price API (see web3/priceConvert.js) so the $TIDE cost always equals the SOL
+// price API (see web3/priceConvert.js) so the $SBF cost always equals the SOL
 // cost's real value, keeping the game playable with earned currency.
 //
 // Rarity model: every tier carries `rarityOdds`, the per-cast chance to land
@@ -66,7 +66,7 @@ export const BAIT_BY_ID = Object.fromEntries(BAITS.map((b) => [b.id, b]));
 export const DEFAULT_BAIT_ID = BAITS[0].id;
 
 /** Bait the player is gifted on a fresh save. 0 = no starter bait; every player
- *  must buy bait before they can cast (SOL, or $TIDE at the live rate). */
+ *  must buy bait before they can cast (SOL, or $SBF at the live rate). */
 export const STARTER_BAIT_QTY = 0;
 
 /** Per-bait stat lines for the shop UI. */

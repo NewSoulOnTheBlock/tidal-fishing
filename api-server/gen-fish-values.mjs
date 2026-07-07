@@ -1,6 +1,6 @@
 // Generates fishValues.json — the server-side source of truth the catch
 // endpoint trusts. For every species it records:
-//   max     : the MAXIMUM plausible $TIDE value of a single catch (value clamp)
+//   max     : the MAXIMUM plausible $SBF value of a single catch (value clamp)
 //   rarity  : authoritative rarity (the server ignores the client-sent rarity)
 //   jackpot : auto-credit flag
 //   sizeMin : smallest legal size in cm (size/weight clamp + record integrity)

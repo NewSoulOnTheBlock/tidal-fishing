@@ -1,6 +1,6 @@
 // Shop screen: four gear categories with tiered upgrades plus a Sell tab for
 // the catch bag. Renders from data; all transactions go through economy.js.
-// Now with DUAL PAYMENT OPTIONS: pay with $TIDE or SOL!
+// Now with DUAL PAYMENT OPTIONS: pay with $SBF or SOL!
 
 import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
@@ -110,8 +110,8 @@ export class ShopUI {
 
   renderGear(catKey) {
     this.contentEl.innerHTML = "";
-    // Option-A pricing: each item is anchored to a SOL price and its $TIDE cost is
-    // the LIVE Jupiter SOL-equivalent (same model as bait), so paying in $TIDE always
+    // Option-A pricing: each item is anchored to a SOL price and its $SBF cost is
+    // the LIVE Jupiter SOL-equivalent (same model as bait), so paying in $SBF always
     // costs the same value as the SOL price. Ensure a rate is loaded; re-render once
     // it arrives so prices reflect the live market instead of the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
@@ -171,18 +171,18 @@ export class ShopUI {
           const paymentOptions = document.createElement("div");
           paymentOptions.className = "payment-options";
           
-          // Off-chain $TIDE button (always available)
+          // Off-chain $SBF button (always available)
           const offChainBtn = document.createElement("button");
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
-            <span class="pay-label">Pay with $TIDE</span>
+            <span class="pay-label">Pay with $SBF</span>
             <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
             offChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
-            offChainBtn.title = "Not enough $TIDE";
+            offChainBtn.title = "Not enough $SBF";
           }
           paymentOptions.appendChild(offChainBtn);
           
@@ -198,12 +198,12 @@ export class ShopUI {
             paymentOptions.appendChild(solBtn);
           }
           
-          // On-chain $TIDE button (if token deployed)
+          // On-chain $SBF button (if token deployed)
           if (tidePayAvailable) {
             const onChainBtn = document.createElement("button");
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
-              <span class="pay-label">Pay with $TIDE (on-chain)</span>
+              <span class="pay-label">Pay with $SBF (on-chain)</span>
               <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
             onChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-onchain', solAmount, tideCost));
@@ -215,7 +215,7 @@ export class ShopUI {
           // No wallet connected - standard buy button
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDE";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $SBF";
           btn.disabled = !afford;
           if (afford) {
             btn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
@@ -262,8 +262,8 @@ export class ShopUI {
     const walletConnected = Boolean(currentPublicKey());
     const solPayAvailable = isSolPayEnabled();
 
-    // $TIDE bait prices are the LIVE SOL-equivalent (Jupiter rate) so paying in
-    // $TIDE always costs the same value as paying the SOL price. Ensure we have a
+    // $SBF bait prices are the LIVE SOL-equivalent (Jupiter rate) so paying in
+    // $SBF always costs the same value as paying the SOL price. Ensure we have a
     // rate; if it loads while this tab is open, re-render so prices reflect the
     // live market instead of the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
@@ -314,21 +314,21 @@ export class ShopUI {
         action.appendChild(selBtn);
       }
 
-      // Purchase options — SOL is the headline price; $TIDE is the f2p fallback.
+      // Purchase options — SOL is the headline price; $SBF is the f2p fallback.
       const paymentOptions = document.createElement("div");
       paymentOptions.className = "payment-options";
 
       const tideBtn = document.createElement("button");
       tideBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
       tideBtn.innerHTML = `
-        <span class="pay-label">Buy ×${qty} · $TIDE</span>
+        <span class="pay-label">Buy ×${qty} · $SBF</span>
         <span class="pay-amount">${formatMoney(tideCost)}</span>
       `;
       if (afford) {
         tideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-offchain", 0, tideCost));
       } else {
         tideBtn.disabled = true;
-        tideBtn.title = "Not enough $TIDE";
+        tideBtn.title = "Not enough $SBF";
       }
       paymentOptions.appendChild(tideBtn);
 
@@ -343,14 +343,14 @@ export class ShopUI {
         paymentOptions.appendChild(solBtn);
       }
 
-      // Pay with on-chain wallet $TIDE (transfer to treasury). Same value as the
+      // Pay with on-chain wallet $SBF (transfer to treasury). Same value as the
       // off-chain button, but spends the real token instead of earned in-game
-      // $TIDE — so a player can stock bait straight from their wallet holdings.
+      // $SBF — so a player can stock bait straight from their wallet holdings.
       if (walletConnected && isOnChainPayEnabled()) {
         const onChainTideBtn = document.createElement("button");
         onChainTideBtn.className = "btn btn-tide";
         onChainTideBtn.innerHTML = `
-          <span class="pay-label">Buy ×${qty} · $TIDE (on-chain)</span>
+          <span class="pay-label">Buy ×${qty} · $SBF (on-chain)</span>
           <span class="pay-amount">${formatMoney(tideCost)}</span>
         `;
         onChainTideBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-onchain", 0, tideCost));
@@ -684,7 +684,7 @@ export class ShopUI {
     intro.innerHTML = `Unlock animated anglers to fish as. Each is yours forever once bought.`;
     this.contentEl.appendChild(intro);
 
-    // Option-A pricing: $TIDE cost is the LIVE Jupiter SOL-equivalent of each angler's
+    // Option-A pricing: $SBF cost is the LIVE Jupiter SOL-equivalent of each angler's
     // SOL price. Re-render once the rate loads so prices leave the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
     refreshRate().then(() => {
@@ -735,14 +735,14 @@ export class ShopUI {
           const offChainBtn = document.createElement("button");
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
-            <span class="pay-label">Pay with $TIDE</span>
+            <span class="pay-label">Pay with $SBF</span>
             <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
             offChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
-            offChainBtn.title = "Not enough $TIDE";
+            offChainBtn.title = "Not enough $SBF";
           }
           paymentOptions.appendChild(offChainBtn);
 
@@ -761,7 +761,7 @@ export class ShopUI {
             const onChainBtn = document.createElement("button");
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
-              <span class="pay-label">Pay with $TIDE (on-chain)</span>
+              <span class="pay-label">Pay with $SBF (on-chain)</span>
               <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
             onChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-onchain", solAmount, tideCost));
@@ -772,7 +772,7 @@ export class ShopUI {
         } else {
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDE";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $SBF";
           btn.disabled = !afford;
           if (afford) {
             btn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
@@ -827,18 +827,18 @@ export class ShopUI {
       }
     } else if (method === "tide-onchain") {
       try {
-        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        events.emit("toast", { msg: "Processing $SBF transfer...", kind: "info" });
         const sig = await payTide(tideCost, { memo: `tidal:bait:${id}:${qty}` });
         economy.grantBaitOnChain(id, qty, sig);
         audio.play("buy");
         events.emit("toast", {
-          msg: `Bought ×${qty} ${b.name} with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          msg: `Bought ×${qty} ${b.name} with $SBF · ${shortAddress(sig, 6, 6)}`,
           kind: "gold",
           href: explorerTxUrl(sig),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain $TIDE bait payment failed", e);
+        console.error("[tidal] on-chain $SBF bait payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {
@@ -889,19 +889,19 @@ export class ShopUI {
       }
     } else if (method === "tide-onchain") {
       try {
-        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        events.emit("toast", { msg: "Processing $SBF transfer...", kind: "info" });
         const sig = await payTide(tideCost, { memo: `tidal:angler:${id}` });
         economy.grantAnglerOnChain(id, sig);
         economy.selectAngler(id);
         audio.play("buy");
         events.emit("toast", {
-          msg: `${c.name} unlocked with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          msg: `${c.name} unlocked with $SBF · ${shortAddress(sig, 6, 6)}`,
           kind: "gold",
           href: explorerTxUrl(sig),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain $TIDE angler payment failed", e);
+        console.error("[tidal] on-chain $SBF angler payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {
@@ -921,11 +921,11 @@ export class ShopUI {
     const item = GEAR[catKey][idx];
     
     if (method === 'tide-offchain') {
-      // Standard off-chain $TIDE purchase
+      // Standard off-chain $SBF purchase
       const res = economy.buyGear(catKey, idx, tideCost);
       if (res.ok) {
         audio.play("buy");
-        events.emit("toast", { msg: `${item.name} purchased with $TIDE`, kind: "success" });
+        events.emit("toast", { msg: `${item.name} purchased with $SBF`, kind: "success" });
       } else {
         audio.play("error");
         events.emit("toast", { msg: res.reason, kind: "warn" });
@@ -956,21 +956,21 @@ export class ShopUI {
       }
       
     } else if (method === 'tide-onchain') {
-      // On-chain $TIDE payment (treasury transfer)
+      // On-chain $SBF payment (treasury transfer)
       try {
-        events.emit("toast", { msg: "Processing $TIDE transfer...", kind: "info" });
+        events.emit("toast", { msg: "Processing $SBF transfer...", kind: "info" });
         const sig = await payTide(tideCost, { memo: `tidal:gear:${catKey}:${idx}` });
         
         economy.grantGearOnChain(catKey, idx, sig);
         audio.play("buy");
         events.emit("toast", {
-          msg: `${item.name} unlocked with $TIDE · ${shortAddress(sig, 6, 6)}`,
+          msg: `${item.name} unlocked with $SBF · ${shortAddress(sig, 6, 6)}`,
           kind: "gold",
           href: explorerTxUrl(sig),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain $TIDE payment failed", e);
+        console.error("[tidal] on-chain $SBF payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {

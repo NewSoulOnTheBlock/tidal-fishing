@@ -15,7 +15,7 @@ Your fishing game now has a complete player profile system where players can cus
 ### Stats Dashboard (6 Cards)
 1. ⚡ **Level** - Your current level
 2. 🎣 **Catches** - Total fish caught
-3. 💰 **Earned** - Total $TIDE earned
+3. 💰 **Earned** - Total $SBF earned
 4. ⚡ **Perfect Hooks** - Precision catches
 5. 🔥 **Login Streak** - Consecutive days
 6. 🏆 **Achievements** - Progress tracker
@@ -33,7 +33,7 @@ Organized into 6 categories:
 - Collector (5 species) → Pokédex Complete (all species)
 
 **Money Achievements (4):**
-- First Grand (1k) → Millionaire (1M $TIDE)
+- First Grand (1k) → Millionaire (1M $SBF)
 
 **Location Achievements (3):**
 - River Explorer → Deep Sea Captain
@@ -75,7 +75,7 @@ Organized into 6 categories:
 - **Unlocked**: Full color with ✓ checkmark
 - **Locked**: Grayscale with 🔒 lock icon
 - **Progress Bar**: Shows completion %
-- **Rewards**: Displays $TIDE bonus for each
+- **Rewards**: Displays $SBF bonus for each
 
 **Badge Info:**
 - Icon (emoji)
@@ -191,16 +191,16 @@ const { player, achievements } = await getPlayerProfile(walletAddress);
 
 ## 🎊 Achievement Rewards
 
-When you unlock achievements, you earn bonus $TIDE:
+When you unlock achievements, you earn bonus $SBF:
 
-- **Starter Achievements**: 100-500 $TIDE
-- **Mid-tier**: 800-3,000 $TIDE
-- **Collection**: 1,200-25,000 $TIDE
-- **Money Milestones**: 200-50,000 $TIDE
-- **Locations**: 500-10,000 $TIDE
-- **Special**: 800-10,000 $TIDE
+- **Starter Achievements**: 100-500 $SBF
+- **Mid-tier**: 800-3,000 $SBF
+- **Collection**: 1,200-25,000 $SBF
+- **Money Milestones**: 200-50,000 $SBF
+- **Locations**: 500-10,000 $SBF
+- **Special**: 800-10,000 $SBF
 
-**Total Possible**: ~150,000+ $TIDE from achievements!
+**Total Possible**: ~150,000+ $SBF from achievements!
 
 ## 💡 Pro Tips
 

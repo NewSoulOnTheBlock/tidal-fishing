@@ -32,7 +32,7 @@ export function mountCharacterChooser(container, opts = {}) {
         ${CHARACTERS.map((c) => {
           const locked = !isAnglerOwned(c.id);
           return `
-          <button type="button" class="cc-chip${locked ? " is-locked" : ""}" role="option" data-id="${c.id}" data-locked="${locked ? "1" : ""}" aria-selected="false"${locked ? ` title="Unlock in Shop → Anglers (${formatMoney(c.price)} $TIDE)"` : ""}>
+          <button type="button" class="cc-chip${locked ? " is-locked" : ""}" role="option" data-id="${c.id}" data-locked="${locked ? "1" : ""}" aria-selected="false"${locked ? ` title="Unlock in Shop → Anglers (${formatMoney(c.price)} $SBF)"` : ""}>
             <span class="cc-chip-emoji">${c.emoji || "🎣"}</span>
             <span class="cc-chip-name">${c.name}</span>
             ${locked ? `<span class="cc-chip-lock">🔒</span>` : ""}
@@ -68,7 +68,7 @@ export function mountCharacterChooser(container, opts = {}) {
     chip.addEventListener("click", () => {
       if (chip.dataset.locked) {
         const c = getCharacter(chip.dataset.id);
-        events.emit("toast", { msg: `Unlock ${c.name} in Shop → Anglers (${formatMoney(c.price)} $TIDE)`, kind: "warn" });
+        events.emit("toast", { msg: `Unlock ${c.name} in Shop → Anglers (${formatMoney(c.price)} $SBF)`, kind: "warn" });
         return;
       }
       if (chip.dataset.id === selected) return;

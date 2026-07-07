@@ -2,7 +2,7 @@
 //
 // All Phase 1 operations are GET-only against mainnet:
 //   - fetchSolBalance(pubkey)      -> SOL balance in lamports
-//   - fetchTideBalance(pubkey)     -> $TIDE balance (raw + ui amount) or null
+//   - fetchTideBalance(pubkey)     -> $SBF balance (raw + ui amount) or null
 //   - fetchOwnedCount(pubkey, ...) -> # of tokens / NFTs of a given mint
 //
 // Phase 2 will add the write-side counterparts (mint, transfer, claim, burn).
@@ -27,7 +27,7 @@ export async function fetchSolBalance(pubkey) {
   }
 }
 
-/** Returns { raw: bigint, ui: number, decimals: number } | null if $TIDE not deployed or owner has none. */
+/** Returns { raw: bigint, ui: number, decimals: number } | null if $SBF not deployed or owner has none. */
 export async function fetchTideBalance(pubkey) {
   if (!TIDE_MINT) return null;
   return fetchSplBalance(pubkey, TIDE_MINT);

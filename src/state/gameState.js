@@ -67,7 +67,7 @@ export function createDefaultState() {
       character: "r2d2",
       anglersOwned: [], // premium angler ids unlocked in Shop → Anglers
       tutorialSeen: false,
-      // Casual (default) = play for fun, no bait, no $TIDE. Pro = bait required,
+      // Casual (default) = play for fun, no bait, no $SBF. Pro = bait required,
       // catches are valuable. See state/gameMode.js.
       mode: "casual",
     },

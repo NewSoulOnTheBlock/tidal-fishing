@@ -1,8 +1,8 @@
-// On-chain $TIDE payment helpers — TREASURY TRANSFER MODEL.
+// On-chain $SBF payment helpers — TREASURY TRANSFER MODEL.
 //
 // When the player has a wallet connected AND VITE_TIDE_MINT is set, every gear
-// / location purchase TRANSFERS the $TIDE amount from the player's ATA to the
-// treasury wallet. This creates a circular economy: players earn $TIDE, spend
+// / location purchase TRANSFERS the $SBF amount from the player's ATA to the
+// treasury wallet. This creates a circular economy: players earn $SBF, spend
 // it to unlock gear/maps, and the treasury recycles it for future payouts.
 //
 // Until the token is deployed, TIDE_MINT will be null and the UI branches that
@@ -24,7 +24,7 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xW
 
 const TIDE_DECIMALS = Number(import.meta.env.VITE_TIDE_DECIMALS ?? 6);
 
-/** True if a wallet is connected AND the $TIDE mint is configured. */
+/** True if a wallet is connected AND the $SBF mint is configured. */
 export function isOnChainPayEnabled() {
   return Boolean(TIDE_MINT && currentPublicKey());
 }
@@ -40,20 +40,20 @@ export function paymentConfig() {
 }
 
 /**
- * Transfer `uiAmount` of on-chain $TIDE from the connected wallet to the
+ * Transfer `uiAmount` of on-chain $SBF from the connected wallet to the
  * treasury wallet. Returns the tx signature on success.
  *
- * `uiAmount` is the human-facing $TIDE figure (e.g. 9000). It's converted to
+ * `uiAmount` is the human-facing $SBF figure (e.g. 9000). It's converted to
  * raw token units using `VITE_TIDE_DECIMALS` (default 6).
  *
- * The transfer creates a circular economy: players earn $TIDE from fishing,
+ * The transfer creates a circular economy: players earn $SBF from fishing,
  * spend it to unlock gear/maps, and the treasury recycles it for future payouts.
  * A memo instruction is attached so block explorers display the purchase
  * reason (`tidal:gear:rods:2`, `tidal:loc:river`, etc.).
  */
 export async function payTide(uiAmount, { memo } = {}) {
   if (!isOnChainPayEnabled()) {
-    throw new Error("On-chain $TIDE payment is not configured");
+    throw new Error("On-chain $SBF payment is not configured");
   }
   if (!TIDE_TREASURY) {
     throw new Error("Treasury wallet not configured");
@@ -64,7 +64,7 @@ export async function payTide(uiAmount, { memo } = {}) {
 
   const balance = await fetchSplBalance(payer, TIDE_MINT);
   if (!balance || balance.raw < rawAmount) {
-    throw new Error(`Not enough on-chain $TIDE (have ${balance?.ui ?? 0}, need ${uiAmount})`);
+    throw new Error(`Not enough on-chain $SBF (have ${balance?.ui ?? 0}, need ${uiAmount})`);
   }
 
   const { address: playerAta, programId: tokenProgram } = await getAssociatedTokenAddress(TIDE_MINT, payer);

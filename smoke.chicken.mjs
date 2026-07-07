@@ -84,7 +84,7 @@ const uiCheck = await page.evaluate(() => {
         <div class="catch-stat"><span class="cs-label">Length</span><span class="cs-value">75.4cm</span></div>
         <div class="catch-stat"><span class="cs-label">Weight</span><span class="cs-value">4.1kg</span></div>
       </div>
-      <div class="catch-value catch-jackpot-value">+10,000,000 $TIDE<div class="catch-jackpot-sub">credited instantly</div></div>
+      <div class="catch-value catch-jackpot-value">+10,000,000 $SBF<div class="catch-jackpot-sub">credited instantly</div></div>
       <div class="catch-xp">+390 XP (first catch bonus)</div>
       <button class="btn btn-primary btn-big">I'm rich</button>
     </div>

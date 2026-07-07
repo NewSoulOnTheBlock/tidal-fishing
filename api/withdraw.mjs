@@ -1,13 +1,13 @@
 // POST /api/withdraw
 //
-// Transfers $TIDE from the Tidal treasury wallet to a player's connected
+// Transfers $SBF from the Tidal treasury wallet to a player's connected
 // wallet. Uses raw Solana RPC calls (no @solana/web3.js dependency issues)
 
 import bs58 from "bs58";
 import { createHash } from "crypto";
 
 const RPC_URL = process.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump";
+const TIDE_MINT_STR = process.env.VITE_TIDE_MINT || "HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump";
 const SECRET_STR = process.env.TIDAL_TREASURY_SECRET || "";
 const TIDE_DECIMALS = Number(process.env.VITE_TIDE_DECIMALS ?? 6);
 const MAX_UI_AMOUNT = Number(process.env.TIDAL_WITHDRAW_MAX ?? 100_000_000);

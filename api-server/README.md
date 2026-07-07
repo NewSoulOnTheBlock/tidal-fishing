@@ -1,6 +1,6 @@
 # Tidal API Server
 
-Express server for handling Solana $TIDE withdrawals.
+Express server for handling Solana $SBF withdrawals.
 
 ## Quick Deploy to Render
 
@@ -22,8 +22,8 @@ Express server for handling Solana $TIDE withdrawals.
 In Render dashboard, add these:
 
 ```
-TIDAL_TREASURY_SECRET=auyRzxYNj3K5zEXg92BLueo4jVqwsNfXBCvWZc5WqJynyLC5MUUUT8cn49NWifTsFwBjr9DW4GTtH6MUPU65Lht
-VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+TIDAL_TREASURY_SECRET=<your_base58_treasury_secret>
+VITE_TIDE_MINT=HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
 VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=021f44ec-4a1a-4d35-ab8a-f7263ea0f2dd
 CORS_ORIGIN=https://tidalfishing.fun
 ```
@@ -68,10 +68,10 @@ curl http://localhost:3000/api/health
 Health check - returns server status and config
 
 ### `GET /api/treasury/balance`
-Get treasury $TIDE balance
+Get treasury $SBF balance
 
 ### `POST /api/withdraw`
-Withdraw $TIDE to user wallet
+Withdraw $SBF to user wallet
 
 **Request:**
 ```json
@@ -108,7 +108,7 @@ For 24/7 uptime: Upgrade to $7/month
 - Check logs in Render dashboard
 
 **Withdrawals failing?**
-- Check treasury has $TIDE tokens
+- Check treasury has $SBF tokens
 - Check treasury has SOL for fees
 - Check RPC URL is valid
 

@@ -149,7 +149,7 @@ export class HUD {
     this.modeBtn.classList.toggle("mode-pro", pro);
     this.modeBtn.classList.toggle("mode-casual", !pro);
     this.modeBtn.title = pro
-      ? "Pro Angler — bait required, catches worth $TIDE. Click to switch to Casual."
+      ? "Pro Angler — bait required, catches worth $SBF. Click to switch to Casual."
       : "Casual Angler — fish freely for fun. Click to switch to Pro.";
     // Keep the bait chip's visibility in sync with the active mode.
     this.baitChip.classList.toggle("hidden", !pro);

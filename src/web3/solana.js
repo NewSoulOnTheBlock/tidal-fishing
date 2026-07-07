@@ -14,15 +14,15 @@ export const NETWORK = "mainnet-beta";
 export const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || DEFAULT_RPC;
 export const EXPLORER_BASE = "https://solscan.io";
 
-// On-chain Tidal mints. These addresses are set in Phase 2 when the $TIDE
+// On-chain Tidal mints. These addresses are set in Phase 2 when the $SBF
 // token + cNFT trees are deployed. For now we expose a single source of truth.
 //
 // Override via env (VITE_TIDE_MINT, VITE_GEAR_COLLECTION) for staging tests.
-const RAW_TIDE_MINT = import.meta.env.VITE_TIDE_MINT || "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump";
+const RAW_TIDE_MINT = import.meta.env.VITE_TIDE_MINT || "HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump";
 const RAW_GEAR_COLLECTION = import.meta.env.VITE_GEAR_COLLECTION || "";
 const RAW_CATCH_TREE = import.meta.env.VITE_CATCH_TREE || "";
 
-// Treasury wallet that holds $TIDE tokens for user withdrawals
+// Treasury wallet that holds $SBF tokens for user withdrawals
 const RAW_TIDE_TREASURY = import.meta.env.VITE_TIDE_TREASURY || "CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror";
 
 export const TIDE_MINT = parsePubkeyOrNull(RAW_TIDE_MINT);
@@ -62,7 +62,7 @@ export function shortAddress(addr, head = 4, tail = 4) {
 
 // Base58 encoder (Bitcoin/Solana alphabet). Used to stringify the raw signature
 // bytes that some wallet adapters return from signAndSend. Lives here so the
-// $TIDE and SOL payment paths share one implementation instead of duplicating it.
+// $SBF and SOL payment paths share one implementation instead of duplicating it.
 const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 export function base58Encode(bytes) {
   let num = 0n;

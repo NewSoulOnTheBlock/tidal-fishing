@@ -8,6 +8,14 @@ export const config = {
   runtime: "edge",
 };
 
+const hasKv = Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+
+function emptyLeaderboard(type, species = null) {
+  if (type === "species") return { type: "species", species, catches: [] };
+  if (type === "recent") return { type: "recent", catches: [] };
+  return { type: "earnings", leaderboard: [] };
+}
+
 export default async function handler(req) {
   const { method } = req;
 
@@ -23,6 +31,26 @@ export default async function handler(req) {
   }
 
   try {
+    if (!hasKv) {
+      const url = new URL(req.url);
+      const type = url.searchParams.get("type") || "earnings";
+      const species = url.searchParams.get("species");
+
+      if (method === "GET") {
+        return new Response(
+          JSON.stringify(emptyLeaderboard(type, species)),
+          { status: 200, headers: { ...headers, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (method === "POST") {
+        return new Response(
+          JSON.stringify({ error: "Leaderboard storage not configured" }),
+          { status: 503, headers: { ...headers, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     if (method === "POST") {
       // Submit a catch to leaderboard
       const body = await req.json();

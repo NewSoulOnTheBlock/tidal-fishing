@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Tidal — Web3 fishing game on Solana mainnet. Forked from bridge-mind/tideline.",
+  "description": "Bull Fish Blitz — Web3 fishing game on Solana mainnet. Forked from bridge-mind/tideline.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

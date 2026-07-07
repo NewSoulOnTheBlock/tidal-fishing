@@ -1,8 +1,8 @@
 # Tidal Treasury Wallet Configuration
 
-## $TIDE Token Contract
+## $SBF Token Contract
 ```
-CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
 ```
 
 ## Treasury Wallet Address
@@ -10,21 +10,21 @@ CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
 CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror
 ```
 
-This wallet holds the $TIDE token reserves that users can withdraw to their connected wallets.
+This wallet holds the $SBF token reserves that users can withdraw to their connected wallets.
 
 ## How It Works
 
 ### 1. **In-Game Earnings**
-   - Users earn $TIDE by catching fish, completing challenges, tournaments, etc.
+   - Users earn $SBF by catching fish, completing challenges, tournaments, etc.
    - Earnings are tracked in-game as `S.profile.money`
 
 ### 2. **Withdrawal System**
    - **UI Location**: Wallet panel (top-right corner) when connected
-   - **Button**: "Withdraw X $TIDE" appears when `S.profile.money > 0`
+   - **Button**: "Withdraw X $SBF" appears when `S.profile.money > 0`
    - **Process**: Calls `/api/withdraw` endpoint with recipient address
 
 ### 3. **On-Chain Transfer**
-   - Treasury wallet sends actual $TIDE SPL tokens to user's wallet
+   - Treasury wallet sends actual $SBF SPL tokens to user's wallet
    - Transaction is signed server-side (treasury private key never reaches browser)
    - User sees tx confirmation in Solscan/Solana Explorer
 
@@ -34,13 +34,13 @@ This wallet holds the $TIDE token reserves that users can withdraw to their conn
 
 ## Configuration
 
-The $TIDE token mint and treasury wallet are configured in `src/web3/solana.js`:
+The $SBF token mint and treasury wallet are configured in `src/web3/solana.js`:
 
 ```javascript
-// $TIDE Token Contract Address
+// $SBF Token Contract Address
 export const TIDE_MINT = parsePubkeyOrNull(
   import.meta.env.VITE_TIDE_MINT || 
-  "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump"
+  "HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump"
 );
 
 // Treasury Wallet Address
@@ -72,7 +72,7 @@ VITE_TIDE_TREASURY=<your_test_wallet_address>
 The withdrawal endpoint (`/api/withdraw`) needs to:
 
 1. Verify the request (recipient address, amount)
-2. Check treasury has sufficient $TIDE balance
+2. Check treasury has sufficient $SBF balance
 3. Create transfer instruction (treasury → recipient)
 4. Sign transaction with treasury private key
 5. Send transaction to Solana network
@@ -81,11 +81,11 @@ The withdrawal endpoint (`/api/withdraw`) needs to:
 ## Example Withdrawal Flow
 
 ```
-User clicks "Withdraw 1,000 $TIDE"
+User clicks "Withdraw 1,000 $SBF"
     ↓
 Client → POST /api/withdraw { recipient, amount: 1000 }
     ↓
-Server verifies treasury has 1,000+ $TIDE
+Server verifies treasury has 1,000+ $SBF
     ↓
 Server creates & signs transfer transaction
     ↓
@@ -100,10 +100,10 @@ Client shows success toast with tx link
 
 ## Treasury Monitoring
 
-**$TIDE Token Contract:**
-- Solscan: https://solscan.io/token/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
-- Solana Explorer: https://explorer.solana.com/address/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
-- DexScreener: https://dexscreener.com/solana/CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+**$SBF Token Contract:**
+- Solscan: https://solscan.io/token/HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
+- Solana Explorer: https://explorer.solana.com/address/HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
+- DexScreener: https://dexscreener.com/solana/HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
 
 **Treasury Wallet Balance:**
 - Solscan: https://solscan.io/account/CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror
@@ -111,7 +111,7 @@ Client shows success toast with tx link
 
 **Fund the treasury:**
 1. Transfer SOL for transaction fees (~0.01 SOL per 1000 withdrawals)
-2. Transfer $TIDE tokens to cover user withdrawals
+2. Transfer $SBF tokens to cover user withdrawals
 3. Monitor balance to ensure withdrawals never fail
 
 ## Testing
@@ -120,11 +120,11 @@ Client shows success toast with tx link
 1. Set `VITE_TIDE_MINT` to your test token mint
 2. Set `VITE_TIDE_TREASURY` to your test wallet
 3. Fund test treasury with test tokens
-4. Connect wallet and earn $TIDE in-game
+4. Connect wallet and earn $SBF in-game
 5. Click withdraw button and verify transaction
 
 ### Production Checklist:
-- [ ] Treasury wallet funded with $TIDE tokens
+- [ ] Treasury wallet funded with $SBF tokens
 - [ ] Treasury wallet has SOL for tx fees (min 0.1 SOL)
 - [ ] Treasury private key stored securely
 - [ ] `/api/withdraw` endpoint deployed
@@ -135,7 +135,7 @@ Client shows success toast with tx link
 ## Support
 
 If withdrawals fail, check:
-1. Treasury has sufficient $TIDE balance
+1. Treasury has sufficient $SBF balance
 2. Treasury has sufficient SOL for fees
 3. User's wallet has associated token account (auto-created if not)
 4. Solana network is not congested (check status.solana.com)

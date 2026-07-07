@@ -15,8 +15,8 @@ Set these in Vercel Dashboard (Project Settings → Environment Variables):
    - ⚠️ **CRITICAL**: Keep this secret! Never commit to git.
 
 ### 2. **VITE_TIDE_MINT** (Already set in code)
-   - **Description**: $TIDE token contract address
-   - **Value**: `CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump`
+   - **Description**: $SBF token contract address
+   - **Value**: `HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump`
    - **Environment**: Production, Preview, Development
    - ℹ️ Already hardcoded in `src/web3/solana.js`, but can be overridden
 
@@ -30,10 +30,10 @@ Set these in Vercel Dashboard (Project Settings → Environment Variables):
    - **Description**: Token decimals (default: 9)
    - **Value**: `9`
    - **Environment**: Production
-   - ℹ️ Only override if $TIDE uses different decimals
+   - ℹ️ Only override if $SBF uses different decimals
 
 ### 5. **TIDAL_WITHDRAW_MAX** (Optional)
-   - **Description**: Max $TIDE per withdrawal (anti-abuse)
+   - **Description**: Max $SBF per withdrawal (anti-abuse)
    - **Value**: `100000000` (100 million)
    - **Environment**: Production
    - ℹ️ Prevents single massive withdrawals
@@ -76,19 +76,19 @@ console.log(base58);
 ## How It Works
 
 ```
-User clicks "Withdraw X $TIDE"
+User clicks "Withdraw X $SBF"
     ↓
 Frontend → POST /api/withdraw
     { recipient: "user_wallet", amount: X }
     ↓
 Server loads treasury keypair from env
     ↓
-Server checks treasury has X+ $TIDE
+Server checks treasury has X+ $SBF
     ↓
 Server creates transfer instruction:
     From: Treasury ATA
     To: User ATA (creates if needed)
-    Amount: X $TIDE
+    Amount: X $SBF
     ↓
 Server signs with treasury key
     ↓
@@ -107,7 +107,7 @@ Frontend shows success toast
 ```bash
 # Set env vars in .env.local
 TIDAL_TREASURY_SECRET=<your_key>
-VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+VITE_TIDE_MINT=HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
 VITE_SOLANA_RPC_URL=<optional_rpc>
 
 # Start dev server
@@ -121,8 +121,8 @@ curl -X POST http://localhost:5173/api/withdraw \
 
 ### Production Testing:
 1. Connect wallet on https://tidalfishing.fun
-2. Earn some $TIDE (fish, challenges, etc.)
-3. Click "Withdraw X $TIDE" button
+2. Earn some $SBF (fish, challenges, etc.)
+3. Click "Withdraw X $SBF" button
 4. Check Solscan for transaction
 
 ## Security Checklist
@@ -130,7 +130,7 @@ curl -X POST http://localhost:5173/api/withdraw \
 - [ ] Treasury private key stored in Vercel env vars (NOT in code)
 - [ ] `.env.local` is in `.gitignore`
 - [ ] Treasury wallet funded with:
-  - [ ] $TIDE tokens for withdrawals
+  - [ ] $SBF tokens for withdrawals
   - [ ] SOL for transaction fees (~0.01 SOL per 1000 txs)
 - [ ] `TIDAL_WITHDRAW_MAX` set to reasonable limit
 - [ ] Custom RPC configured (avoid rate limits)
@@ -160,11 +160,11 @@ curl "https://api.mainnet-beta.solana.com" \
 ### "Withdrawals not configured"
 - Set `TIDAL_TREASURY_SECRET` and `VITE_TIDE_MINT` in Vercel env
 
-### "Treasury has no $TIDE token account"
-- Transfer $TIDE tokens to treasury wallet first
+### "Treasury has no $SBF token account"
+- Transfer $SBF tokens to treasury wallet first
 
 ### "Treasury balance too low"
-- Fund treasury with more $TIDE tokens
+- Fund treasury with more $SBF tokens
 
 ### "Transaction failed"
 - Check treasury has SOL for fees

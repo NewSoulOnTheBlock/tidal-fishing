@@ -1,5 +1,5 @@
 // SOL payment helper - direct Solana native token transfers
-// Used as an alternative to $TIDE token payments
+// Used as an alternative to $SBF token payments
 
 import {
   PublicKey,
@@ -11,14 +11,14 @@ import {
 import { connection, TIDE_TREASURY, base58Encode } from "./solana.js";
 import { signAndSendTransaction, currentPublicKey, signTransaction } from "./wallet.js";
 
-// Conversion rate: 1 SOL = X $TIDE
+// Conversion rate: 1 SOL = X $SBF
 // Adjust based on your token economics
-const SOL_TO_TIDE_RATE = 50000; // 1 SOL = 50,000 $TIDE
+const SOL_TO_TIDE_RATE = 50000; // 1 SOL = 50,000 $SBF
 const LAMPORTS_PER_SOL = 1_000_000_000;
 
 /**
- * Convert $TIDE amount to SOL equivalent
- * @param {number} tideAmount - Amount in $TIDE
+ * Convert $SBF amount to SOL equivalent
+ * @param {number} tideAmount - Amount in $SBF
  * @returns {number} Amount in SOL
  */
 export function tideToSol(tideAmount) {
@@ -26,9 +26,9 @@ export function tideToSol(tideAmount) {
 }
 
 /**
- * Convert SOL amount to $TIDE equivalent
+ * Convert SOL amount to $SBF equivalent
  * @param {number} solAmount - Amount in SOL
- * @returns {number} Amount in $TIDE
+ * @returns {number} Amount in $SBF
  */
 export function solToTide(solAmount) {
   return solAmount * SOL_TO_TIDE_RATE;
@@ -36,7 +36,7 @@ export function solToTide(solAmount) {
 
 /**
  * Get the conversion rate
- * @returns {number} How much $TIDE equals 1 SOL
+ * @returns {number} How much $SBF equals 1 SOL
  */
 export function getConversionRate() {
   return SOL_TO_TIDE_RATE;

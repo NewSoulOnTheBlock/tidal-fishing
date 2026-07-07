@@ -228,11 +228,11 @@ if (!isInstalledPWA()) {
 const socialUI = new SocialUI();
 socialUI.mount();
 
-// Warm the live SOL→$TIDE rate (Jupiter) so the bait shop shows the correct
-// $TIDE price the first time it's opened. Fire-and-forget; self-throttled.
+// Warm the live SOL→$SBF rate (Jupiter) so the bait shop shows the correct
+// $SBF price the first time it's opened. Fire-and-forget; self-throttled.
 warmTideRate().catch(() => {});
 
-// Title-screen market-cap pill + $TIDE contract-address footer. Lazy-loaded so
+// Title-screen market-cap pill + $SBF contract-address footer. Lazy-loaded so
 // this non-critical widget stays out of the main entry chunk (keeps the wallet
 // adapter graph from being pulled in eagerly).
 import("./ui/marketCapUI.js")
@@ -889,7 +889,7 @@ document.getElementById("btn-mode")?.addEventListener("click", () => {
   const mode = toggleMode();
   if (mode === "pro") {
     events.emit("toast", {
-      msg: "Pro Angler — every cast needs bait, but your catches are worth real $TIDE.",
+      msg: "Pro Angler — every cast needs bait, but your catches are worth real $SBF.",
       kind: "gold",
     });
   } else {

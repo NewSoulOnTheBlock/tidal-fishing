@@ -2,7 +2,7 @@
 // server-side — the treasury private key never reaches the browser.
 //
 // Treasury Wallet: CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror
-// This wallet holds $TIDE reserves that users can withdraw to their connected wallets.
+// This wallet holds $SBF reserves that users can withdraw to their connected wallets.
 
 import { TIDE_MINT } from "./solana.js";
 import { currentPublicKey, signMessage } from "./wallet.js";
@@ -21,7 +21,7 @@ function toBase64(bytes) {
 }
 
 /**
- * Withdraw `amount` $TIDE from the Tidal treasury to the connected wallet.
+ * Withdraw `amount` $SBF from the Tidal treasury to the connected wallet.
  *
  * The server requires a wallet signature proving ownership of the recipient
  * address. We build a short, human-readable, single-use authorization message,

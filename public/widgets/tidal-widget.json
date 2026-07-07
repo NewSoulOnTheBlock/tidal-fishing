@@ -23,7 +23,7 @@
       "spacing": "Medium",
       "facts": [
         { "title": "👑 Leader", "value": "${leader}" },
-        { "title": "💰 Earned", "value": "${earned} $TIDE" },
+        { "title": "💰 Earned", "value": "${earned} $SBF" },
         { "title": "🐟 Anglers", "value": "${players}" }
       ]
     }

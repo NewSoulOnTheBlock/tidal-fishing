@@ -40,7 +40,7 @@ function ensureSession(walletAddress) {
 
 /**
  * Daily check-in: advances the consecutive-day streak and, once per UTC day,
- * credits a small $TIDE bonus (server-authoritative). Runs once per connect and
+ * credits a small $SBF bonus (server-authoritative). Runs once per connect and
  * only after a session token exists. Non-interactive so it never pops a wallet
  * prompt on its own.
  */
@@ -62,7 +62,7 @@ async function checkInDaily(walletAddress) {
       addMoney(data.bonus);
       const streak = data.streak || 1;
       events.emit("toast", {
-        msg: `🔥 ${streak}-day streak! +${data.bonus} $TIDE daily bonus`,
+        msg: `🔥 ${streak}-day streak! +${data.bonus} $SBF daily bonus`,
         kind: "success",
       });
     }

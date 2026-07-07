@@ -1,10 +1,10 @@
 {
   "dir": "ltr",
   "lang": "en-US",
-  "name": "Tidal - Web3 Fishing Game",
-  "short_name": "Tidal",
+  "name": "Bull Fish Blitz",
+  "short_name": "Bull Fish Blitz",
   "id": "/",
-  "description": "A web3 fishing adventure on Solana. Catch fish, earn $TIDE, unlock new waters, and own your catches.",
+  "description": "A web3 fishing adventure on Solana. Catch fish, earn $SBF, unlock new waters, and own your catches.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["fullscreen", "standalone", "minimal-ui"],
@@ -41,7 +41,8 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
+  ]
+,
   "share_target": {
     "action": "/share",
     "method": "POST",
@@ -58,7 +59,7 @@
       "sizes": "2533x1258",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Tidal title screen — live weather and the global Fishermans Hole chat"
+      "label": "Bull Fish Blitz title screen — live weather and the global Fishermans Hole chat"
     },
     {
       "src": "/screenshots/screenshot-2.png",
@@ -79,7 +80,7 @@
     {
       "name": "Tidal Leaderboard",
       "short_name": "Tidal",
-      "description": "See who is leading the Tidal Fishing leaderboard, total $TIDE earned, and how many anglers are playing.",
+      "description": "See who is leading the Tidal Fishing leaderboard, total $SBF earned, and how many anglers are playing.",
       "tag": "tidal-leaderboard",
       "ms_ac_template": "/widgets/tidal-widget.json",
       "data": "https://tidal-fishing.onrender.com/api/widget",

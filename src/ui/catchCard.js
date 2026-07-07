@@ -117,7 +117,7 @@ export class CatchCard {
       this._preview?.dispose();
       this._preview = null;
       const stage = overlay.querySelector(".catch-fish-stage");
-      const preview = stage && createFishPreview(fish.speciesId, { width: 220, height: 150, preserveBuffer: true });
+      const preview = !sp.look?.image && stage && createFishPreview(fish.speciesId, { width: 220, height: 150, preserveBuffer: true });
       if (preview) {
         stage.innerHTML = "";
         stage.appendChild(preview.canvas);

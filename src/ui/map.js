@@ -1,5 +1,5 @@
 // Location-select screen: travel between unlocked waters, unlock new ones
-// with $TIDE + level, and see collection progress per spot.
+// with $SBF + level, and see collection progress per spot.
 
 import { S, events } from "../state/gameState.js";
 import { LOCATIONS } from "../data/locationData.js";
@@ -88,8 +88,8 @@ export class MapUI {
         if (isOnChainPayEnabled() && lvlOk) {
           const chainBtn = document.createElement("button");
           chainBtn.className = "btn btn-onchain";
-          chainBtn.innerHTML = `🔥 Burn ${loc.unlock.cost} $TIDE`;
-          chainBtn.title = `Burn ${loc.unlock.cost} on-chain $TIDE on Solana mainnet to unlock`;
+          chainBtn.innerHTML = `🔥 Burn ${loc.unlock.cost} $SBF`;
+          chainBtn.title = `Burn ${loc.unlock.cost} on-chain $SBF on Solana mainnet to unlock`;
           chainBtn.addEventListener("click", async () => {
             chainBtn.disabled = true;
             chainBtn.textContent = "Burning…";
@@ -99,7 +99,7 @@ export class MapUI {
               if (res.ok) {
                 audio.play("buy");
                 events.emit("toast", {
-                  msg: `${loc.name} unlocked — ${loc.unlock.cost} $TIDE burned · ${shortAddress(sig, 6, 6)}`,
+                  msg: `${loc.name} unlocked — ${loc.unlock.cost} $SBF burned · ${shortAddress(sig, 6, 6)}`,
                   kind: "gold",
                   href: explorerTxUrl(sig),
                 });

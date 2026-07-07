@@ -1,6 +1,6 @@
 # Tidal API Server (Render)
 
-Simple Express server for handling $TIDE withdrawals and other Solana transactions.
+Simple Express server for handling $SBF withdrawals and other Solana transactions.
 
 ## Quick Deploy to Render
 
@@ -13,7 +13,7 @@ Simple Express server for handling $TIDE withdrawals and other Solana transactio
 2. **Set Environment Variables**
    ```
    TIDAL_TREASURY_SECRET=<your_treasury_private_key_base58>
-   VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+   VITE_TIDE_MINT=HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
    VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
    PORT=3000
    CORS_ORIGIN=https://tidalfishing.fun
@@ -36,7 +36,7 @@ npm run dev
 
 ## Endpoints
 
-- `POST /api/withdraw` - Withdraw $TIDE to connected wallet
+- `POST /api/withdraw` - Withdraw $SBF to connected wallet
 - `GET /api/health` - Health check
 - `GET /api/treasury/balance` - Check treasury balance
 

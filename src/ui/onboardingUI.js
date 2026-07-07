@@ -36,7 +36,7 @@ export class OnboardingUI {
           <h1 class="onboarding-title">Welcome to <span>Tidal Fishing</span></h1>
           <p class="onboarding-tagline">
             The web3 fishing adventure on Solana. Cast your line, reel in rare
-            fish, climb the leaderboard, and earn&nbsp;$TIDE.
+            fish, climb the leaderboard, and earn&nbsp;$SBF.
           </p>
         </div>
 

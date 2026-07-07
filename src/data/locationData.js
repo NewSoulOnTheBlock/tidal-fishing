@@ -80,7 +80,7 @@ export const LOCATIONS = [
       ["emperorray", 0.07], ["moonfang", 0.07], ["royalcrest", 0.07],
       ["royalcrest_amethyst", 0.07], ["royalcrest_aurora", 0.07], ["royalcrest_emerald", 0.07],
       ["royalcrest_frostfire", 0.07], ["royalcrest_obsidian", 0.07], ["royalcrest_sandstone", 0.07],
-      ["royalcrest_sunset", 0.07], ["starforge", 0.07],
+      ["royalcrest_sunset", 0.07], ["starforge", 0.07], ["bullfishblitz", 0.035],
     ],
   },
 ];

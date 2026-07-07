@@ -214,7 +214,7 @@ kbd {
 .menu-toggle.active span:nth-child(2) { opacity: 0; }
 .menu-toggle.active span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* Mode toggle: clearly signals whether catches earn $TIDE. */
+/* Mode toggle: clearly signals whether catches earn $SBF. */
 .mode-btn { font-weight: 700; }
 .mode-btn.mode-casual {
   color: #9fe3ff;
@@ -909,17 +909,32 @@ kbd {
 .menu-box { text-align: center; padding: 30px; }
 .game-title {
   font-size: clamp(3.2rem, 9vw, 5.6rem);
-  font-weight: 800; letter-spacing: 0.14em;
-  background: linear-gradient(180deg, #d9f2ff 20%, #4db9e8 70%, #1b6fa8);
+  font-weight: 900; letter-spacing: 0.14em;
+  background: linear-gradient(180deg, #fff1a6 0%, #ffb13d 34%, #ff513f 68%, #9b1118 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 18px 60px rgba(64, 180, 240, 0.35);
+  -webkit-text-stroke: 2px rgba(4, 8, 14, 0.92);
+  paint-order: stroke fill;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.9),
+    0 10px 24px rgba(0, 0, 0, 0.72),
+    0 0 28px rgba(255, 81, 63, 0.55),
+    0 0 54px rgba(255, 177, 61, 0.35);
+}
+.title-fish-logo {
+  display: block;
+  width: clamp(150px, 28vw, 260px);
+  height: auto;
+  margin: 8px auto 18px;
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 24px rgba(95, 212, 255, 0.22));
+  pointer-events: none;
+  user-select: none;
 }
 .game-sub { color: var(--dim); letter-spacing: 0.3em; text-transform: uppercase; font-size: 0.85rem; margin: 6px 0 34px; }
 .menu-buttons { display: flex; flex-direction: column; gap: 10px; width: 280px; margin: 0 auto; }
 .menu-save-info { margin-top: 18px; font-size: 0.8rem; color: var(--dim); }
 .menu-credits { margin-top: 26px; font-size: 0.72rem; color: rgba(157, 177, 192, 0.55); }
 
-/* Title-screen $TIDE market-cap pill */
+/* Title-screen $SBF market-cap pill */
 .menu-mcap {
   display: inline-flex;
   align-items: center;
@@ -941,7 +956,7 @@ kbd {
 .mcap-up { color: var(--ok); }
 .mcap-down { color: var(--danger); }
 
-/* $TIDE contract-address footer */
+/* $SBF contract-address footer */
 .menu-footer {
   margin-top: 18px;
   padding-top: 16px;
@@ -2105,7 +2120,7 @@ kbd {
 }
 
 /* ====================================================================== */
-/* DUAL PAYMENT OPTIONS (SOL + $TIDE)                                    */
+/* DUAL PAYMENT OPTIONS (SOL + $SBF)                                    */
 /* ====================================================================== */
 
 .payment-options {
@@ -2150,7 +2165,7 @@ kbd {
   box-shadow: 0 4px 16px rgba(153, 69, 255, 0.4);
 }
 
-/* $TIDE button styling */
+/* $SBF button styling */
 .btn-tide {
   background: linear-gradient(135deg, #4A9EFF, #26DE81);
   border: 2px solid rgba(255, 255, 255, 0.2);

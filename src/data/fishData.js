@@ -891,6 +891,19 @@ export const FISH_SPECIES = [
     },
     desc: "Forged, they say, in the heart of a fallen star — and impossibly vast.",
   },
+  {
+    id: "bullfishblitz", name: "Bull Fish Blitz", rarity: "ultramythic",
+    locations: ["ocean"], zones: ["deep"], time: ["dawn", "day", "dusk", "night"],
+    sizeCm: [500, 500], weightMidKg: 777, baseValue: 1000000, fixedValue: true, jackpot: true,
+    fight: { strength: 3.8, surgeEvery: [0.9, 1.6], heft: 3.8, stamina: 90 },
+    hookWindowMult: 0.55,
+    look: {
+      shape: "flat",
+      colorA: 0xff513f, colorB: 0xffd36a, finColor: 0x111111, glow: true,
+      image: "/bull-fish-blitz-fish.png",
+    },
+    desc: "The ultimate bull fish: a smoking, sovereign trophy catch worth instant legend status.",
+  },
 
 ];
 

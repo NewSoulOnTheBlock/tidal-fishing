@@ -1,4 +1,4 @@
-// Wallet HUD panel — connect/disconnect, address pill, SOL + $TIDE balances.
+// Wallet HUD panel — connect/disconnect, address pill, SOL + $SBF balances.
 //
 // Lives in the top-right HUD column under the clock card. Renders as plain DOM
 // so it slots into the existing tideline aesthetic with zero extra runtime
@@ -21,10 +21,10 @@ import { formatMoney } from "../utils/utils.js";
 
 const REFRESH_INTERVAL_MS = 60_000;
 
-// Players must HOLD this much $TIDE in their connected wallet before the
-// earned-$TIDE withdraw faucet unlocks. Enforced on the withdraw tap (splash
+// Players must HOLD this much $SBF in their connected wallet before the
+// earned-$SBF withdraw faucet unlocks. Enforced on the withdraw tap (splash
 // popup when unmet); the disclaimer also shows on the wallet-connect screen.
-const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $TIDE
+const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $SBF
 
 export class WalletPanel {
   constructor() {
@@ -46,7 +46,7 @@ export class WalletPanel {
     this.modal = null;
     this.refreshTimer = null;
     this.account = null;
-    this.lastTideBalanceUi = 0; // on-chain $TIDE (UI units) for the hold gate
+    this.lastTideBalanceUi = 0; // on-chain $SBF (UI units) for the hold gate
     this._splash = null;        // active withdraw-locked splash, if any
     this._lastHudTop = 0;     // cached --hud-topright-top to avoid redundant writes
 
@@ -69,7 +69,7 @@ export class WalletPanel {
     // (the interval is paused while hidden to avoid background RPC spam).
     this._onVis = () => { if (!document.hidden) this.refreshBalances(); };
     document.addEventListener("visibilitychange", this._onVis);
-    // Re-render when the player's earned $TIDE changes so the Withdraw row
+    // Re-render when the player's earned $SBF changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
     // Re-sync the HUD offset when the viewport changes (breakpoints alter the
@@ -95,14 +95,14 @@ export class WalletPanel {
       const mintConfigured = !!TIDE_MINT;
 
       // Compact withdraw button only — no permanent disclaimer (that lives on the
-      // connect screen now). The 1M-$TIDE hold gate is enforced on tap via a
+      // connect screen now). The 1M-$SBF hold gate is enforced on tap via a
       // splash popup so the HUD stays small.
       let withdrawHtml = "";
       if (mintConfigured && earned > 0) {
         const label = this.withdrawing ? "Withdrawing…" : `Withdraw ${formatMoney(earned)}`;
         withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
       } else if (!mintConfigured && earned > 0) {
-        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $TIDE goes live">Withdraw soon™</button>`;
+        withdrawHtml = `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $SBF goes live">Withdraw soon™</button>`;
       }
 
       this.root.innerHTML = `
@@ -113,7 +113,7 @@ export class WalletPanel {
         </div>
         <div class="wallet-balances">
           <div class="wallet-bal"><span class="wallet-bal-tag">SOL</span><span class="wallet-bal-val" data-bal="sol">—</span></div>
-          <div class="wallet-bal"><span class="wallet-bal-tag">$TIDE</span><span class="wallet-bal-val" data-bal="tide">—</span></div>
+          <div class="wallet-bal"><span class="wallet-bal-tag">$SBF</span><span class="wallet-bal-val" data-bal="tide">—</span></div>
         </div>
         ${withdrawHtml}
       `;
@@ -128,7 +128,7 @@ export class WalletPanel {
           <span class="wallet-net">${NETWORK}</span>
           <button class="btn btn-primary wallet-connect">Connect Wallet</button>
         </div>
-        <div class="wallet-sub">Earn $TIDE · own your catches · withdraw to wallet</div>
+        <div class="wallet-sub">Earn $SBF · own your catches · withdraw to wallet</div>
       `;
       this.root.querySelector(".wallet-connect").addEventListener("click", () => this.openModal());
     }
@@ -181,7 +181,7 @@ export class WalletPanel {
   }
 
   /**
-   * Withdraw tap handler. Enforces the 1,000,000-$TIDE wallet-hold requirement:
+   * Withdraw tap handler. Enforces the 1,000,000-$SBF wallet-hold requirement:
    * if the connected wallet holds less, a splash popup explains it instead of
    * starting a withdraw. Otherwise the withdraw proceeds.
    */
@@ -205,12 +205,12 @@ export class WalletPanel {
       <div class="panel panel-narrow withdraw-splash-panel">
         <div class="withdraw-splash-icon">💧🔒</div>
         <h2 class="panel-title">Withdrawals Locked</h2>
-        <p class="withdraw-splash-text">Hold <strong>${MIN_HOLD_REQUIREMENT.toLocaleString()} $TIDE</strong> in your connected wallet to unlock withdrawals of your earned $TIDE.</p>
+        <p class="withdraw-splash-text">Hold <strong>${MIN_HOLD_REQUIREMENT.toLocaleString()} $SBF</strong> in your connected wallet to unlock withdrawals of your earned $SBF.</p>
         <div class="withdraw-splash-stats">
           <div class="ws-stat"><span class="ws-num">${formatTokens(tideUi, 0, 0)}</span><span class="ws-lbl">You hold</span></div>
           <div class="ws-stat"><span class="ws-num">${formatTokens(remaining, 0, 0)}</span><span class="ws-lbl">More needed</span></div>
         </div>
-        <p class="withdraw-splash-sub">Your earned $TIDE is safe — keep fishing and stacking. Withdrawals open the moment your wallet crosses the threshold.</p>
+        <p class="withdraw-splash-sub">Your earned $SBF is safe — keep fishing and stacking. Withdrawals open the moment your wallet crosses the threshold.</p>
         <button class="btn btn-primary withdraw-splash-close">Got it</button>
       </div>
     `;
@@ -256,7 +256,7 @@ export class WalletPanel {
       <div class="panel panel-narrow wallet-pick-panel">
         <h2 class="panel-title">Connect a Solana Wallet</h2>
         <p class="wallet-warn">Mainnet — your transactions are real. Tidal will never ask you to sign anything you didn't initiate.</p>
-        <p class="wallet-withdraw-note">💧 Withdrawals of earned $TIDE unlock once you <strong>hold ${MIN_HOLD_REQUIREMENT.toLocaleString()} $TIDE</strong> in your wallet.</p>
+        <p class="wallet-withdraw-note">💧 Withdrawals of earned $SBF unlock once you <strong>hold ${MIN_HOLD_REQUIREMENT.toLocaleString()} $SBF</strong> in your wallet.</p>
         <div class="wallet-pick-list">${list}</div>
         <button class="btn wallet-pick-cancel">Cancel</button>
       </div>

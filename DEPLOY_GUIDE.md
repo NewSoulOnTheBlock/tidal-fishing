@@ -6,7 +6,7 @@
 2. ✅ Frontend updated to call Render API
 3. ✅ Code committed locally
 4. ✅ Treasury wallet configured: `CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror`
-5. ✅ $TIDE mint configured: `CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump`
+5. ✅ $SBF mint configured: `HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump`
 
 ## 📋 Next Steps
 
@@ -45,8 +45,8 @@ Or create a new GitHub repo and push there.
    Click "Advanced" → "Add Environment Variable"
    
    ```
-   TIDAL_TREASURY_SECRET=auyRzxYNj3K5zEXg92BLueo4jVqwsNfXBCvWZc5WqJynyLC5MUUUT8cn49NWifTsFwBjr9DW4GTtH6MUPU65Lht
-   VITE_TIDE_MINT=CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump
+   TIDAL_TREASURY_SECRET=<your_base58_treasury_secret>
+   VITE_TIDE_MINT=HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump
    VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=021f44ec-4a1a-4d35-ab8a-f7263ea0f2dd
    CORS_ORIGIN=https://tidalfishing.fun
    ```
@@ -72,13 +72,13 @@ vercel deploy --prod --yes
 
 ### Step 5: Fund Treasury Wallet
 
-Send $TIDE tokens and SOL to treasury wallet:
+Send $SBF tokens and SOL to treasury wallet:
 ```
 CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror
 ```
 
 Recommended:
-- **$TIDE:** 10,000,000+ tokens (for withdrawals)
+- **$SBF:** 10,000,000+ tokens (for withdrawals)
 - **SOL:** 0.1 SOL (for transaction fees)
 
 ### Step 6: Test!
@@ -94,7 +94,7 @@ Recommended:
    ```
 
 3. **Test withdrawal in-game:**
-   - Play game, earn $TIDE
+   - Play game, earn $SBF
    - Click wallet panel → "Withdraw"
    - Enter amount → confirm
    - Should receive tokens in wallet!
@@ -106,7 +106,7 @@ Recommended:
 - Verify environment variables are set
 
 **Withdrawals failing with "Treasury balance too low"?**
-- Fund treasury wallet with $TIDE
+- Fund treasury wallet with $SBF
 
 **Withdrawals failing with "Transaction failed"?**
 - Check treasury has SOL for fees

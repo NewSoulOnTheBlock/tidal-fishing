@@ -1,4 +1,4 @@
-// $TIDE market data: live price + market cap for the title-screen dashboard.
+// $SBF market data: live price + market cap for the title-screen dashboard.
 //
 // Primary source: DexScreener (returns marketCap/fdv directly, CORS-open).
 // Fallback:       Jupiter Price API v3 (price only) × on-chain-style supply.
@@ -11,7 +11,7 @@
 // avoids perturbing Rollup's wallet-chunk tree-shaking for a tiny price widget.
 
 export const TIDE_MINT_ADDRESS =
-  import.meta.env.VITE_TIDE_MINT || "CiNiAdT5ongCHFJDv1ewoxMWCL1C4dt6Ua9KGRsmpump";
+  import.meta.env.VITE_TIDE_MINT || "HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump";
 
 const DEXSCREENER_URL = `https://api.dexscreener.com/latest/dex/tokens/${TIDE_MINT_ADDRESS}`;
 const JUPITER_URL = `https://lite-api.jup.ag/price/v3?ids=${TIDE_MINT_ADDRESS}`;
@@ -52,7 +52,7 @@ async function fromDexScreener() {
     priceUsd: Number.isFinite(priceUsd) ? priceUsd : null,
     marketCap,
     change24h: Number(best?.priceChange?.h24),
-    symbol: best?.baseToken?.symbol || "TIDE",
+    symbol: best?.baseToken?.symbol || "SBF",
     source: "dexscreener",
   };
 }
@@ -67,7 +67,7 @@ async function fromJupiter() {
     priceUsd,
     marketCap: priceUsd * PUMPFUN_SUPPLY,
     change24h: Number(entry?.priceChange24h),
-    symbol: "TIDE",
+    symbol: "SBF",
     source: "jupiter",
   };
 }

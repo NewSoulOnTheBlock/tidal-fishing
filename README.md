@@ -1,7 +1,7 @@
 # TIDAL — Web3 fishing on Solana
 
-A 3D fishing game where every fish you sell pays **$TIDE**, every rod or fishing
-spot is unlockable with **$TIDE**, and your progress is bound to your **Solana
+A 3D fishing game where every fish you sell pays **$SBF**, every rod or fishing
+spot is unlockable with **$SBF**, and your progress is bound to your **Solana
 wallet**. Built on Solana mainnet.
 
 **Play it now:** https://tidal-theta-tawny.vercel.app
@@ -10,9 +10,9 @@ Forked from [bridge-mind/tideline](https://github.com/bridge-mind/tideline)
 (Three.js procedural fishing sim, MIT). Tidal adds:
 
 - Wallet Standard connect (Phantom / Solflare / Backpack / etc.) — vanilla, no React
-- $TIDE economy — gear and locations cost $TIDE, fish sell for $TIDE
+- $SBF economy — gear and locations cost $SBF, fish sell for $SBF
 - Wallet-bound saves — each wallet gets its own progress slot
-- Optional on-chain $TIDE payment flow for gear & locations (gated by env vars)
+- Optional on-chain $SBF payment flow for gear & locations (gated by env vars)
 - Vite build pipeline, code-split chunks, Vercel deployment
 
 ## Run locally
@@ -45,8 +45,8 @@ project settings for production. See [`.env.example`](./.env.example).
 | Var | What it does |
 |---|---|
 | `VITE_SOLANA_RPC_URL` | Custom mainnet RPC (Helius / QuickNode / Triton / Alchemy). Strongly recommended — the public endpoint rate-limits aggressively. |
-| `VITE_TIDE_MINT` | $TIDE SPL token mint address. Until set, the wallet panel shows `—` for $TIDE balance and the burn buttons stay hidden. When set, gear & map UIs render a `🔥 Burn N $TIDE` button beside the regular Buy/Unlock button. |
-| `VITE_TIDE_DECIMALS` | Decimals of the $TIDE mint (default 9, matching SOL). |
+| `VITE_TIDE_MINT` | $SBF SPL token mint address. Until set, the wallet panel shows `—` for $SBF balance and the burn buttons stay hidden. When set, gear & map UIs render a `🔥 Burn N $SBF` button beside the regular Buy/Unlock button. |
+| `VITE_TIDE_DECIMALS` | Decimals of the $SBF mint (default 9, matching SOL). |
 | `VITE_CATCH_TREE` | (Phase 3) Bubblegum tree for catch cNFTs. |
 | `VITE_GEAR_COLLECTION` | (Phase 3) Verified collection for gear NFTs. |
 
@@ -70,7 +70,7 @@ src/
   state/                   gameState, save/load with wallet-bound slots
   utils/                   math / format / event bus
   web3/                    solana RPC client, wallet (Wallet Standard),
-                           token reads, on-chain $TIDE payment builder
+                           token reads, on-chain $SBF payment builder
 ```
 
 Game phases (explicit FSM): `MENU, IDLE, CHARGING, FLYING, WAITING, BITE,
@@ -82,22 +82,22 @@ When a wallet connects, the active save key switches from `tidal_save_v1` to
 `tidal_save_v1:<wallet_address>`. The anonymous local save is migrated into a
 new wallet's slot on first connection so signing in never feels like a wipe.
 
-### On-chain $TIDE payments (deflationary burn)
+### On-chain $SBF payments (deflationary burn)
 
 When `VITE_TIDE_MINT` is set and a wallet is connected, gear and location
-unlocks render a `🔥 Burn N $TIDE` button beside the regular Buy/Unlock
+unlocks render a `🔥 Burn N $SBF` button beside the regular Buy/Unlock
 button. The on-chain path:
 
-1. Reads the player's on-chain $TIDE balance and verifies they have enough.
+1. Reads the player's on-chain $SBF balance and verifies they have enough.
 2. Builds an SPL Token `Burn` instruction targeting the player's own ATA
-   (no treasury — burned $TIDE leaves circulation permanently).
+   (no treasury — burned $SBF leaves circulation permanently).
 3. Attaches a memo identifying the purchase (`tidal:gear:rods:2`, `tidal:loc:river`).
 4. Asks the wallet to sign and send (preferring `signAndSendTransaction`).
 5. On confirmation, calls `economy.grantGearOnChain` / `grantLocationOnChain`
-   which grant the item **without** deducting the in-game $TIDE balance and
+   which grant the item **without** deducting the in-game $SBF balance and
    record the tx signature in `S.onchain.purchases` for audit.
 
-The in-game $TIDE balance and the on-chain $TIDE balance are deliberately
+The in-game $SBF balance and the on-chain $SBF balance are deliberately
 **independent** in Phase 2 — both can purchase the same gear/locations but
 they're two separate currencies until the Phase 3 bridge ships. Every
 on-chain purchase reduces total supply (deflationary).
@@ -105,17 +105,17 @@ on-chain purchase reduces total supply (deflationary).
 ## Roadmap
 
 ### Phase 1 — Foundation ✅
-- Vite build, mainnet RPC config, wallet connect, wallet-bound saves, $TIDE
+- Vite build, mainnet RPC config, wallet connect, wallet-bound saves, $SBF
   branding, Vercel deploy.
 
 ### Phase 2 — On-chain spend ✅ (this commit)
-- `🔥 Burn N $TIDE` for gear & locations (dormant until `VITE_TIDE_MINT` set).
+- `🔥 Burn N $SBF` for gear & locations (dormant until `VITE_TIDE_MINT` set).
 - SPL Token Burn instruction + memo + audit trail in save. Deflationary —
-  every purchase permanently reduces $TIDE supply.
+  every purchase permanently reduces $SBF supply.
 
 ### Phase 3 — Token deployment & catch NFTs
-- Deploy the $TIDE SPL token (Token-2022 + metadata extension).
-- Bridge: claim button to mint in-game $TIDE → on-chain $TIDE.
+- Deploy the $SBF SPL token (Token-2022 + metadata extension).
+- Bridge: claim button to mint in-game $SBF → on-chain $SBF.
 - Bubblegum tree for catch cNFTs. Rare / epic / legendary mints auto-claim.
 - Gear NFTs minted when player purchases tier-2+ gear.
 

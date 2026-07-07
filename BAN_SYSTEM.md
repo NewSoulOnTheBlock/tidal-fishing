@@ -36,7 +36,7 @@ curl -X POST https://tidal-fishing.onrender.com/api/admin/ban/wallet \
   -H "Content-Type: application/json" \
   -d '{
     "walletAddress": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
-    "reason": "Exploiting refresh bug for free $TIDE",
+    "reason": "Exploiting refresh bug for free $SBF",
     "adminKey": "YOUR_ADMIN_SECRET"
   }'
 ```
