@@ -33,7 +33,7 @@ export const CHARACTERS = [
       idle: "/anim/fishing-idle.fbx",
       cast: "/anim/fishing-cast.fbx",
     },
-    height: 0.95,
+    height: 0.35,
     yawDeg: 0,
     x: 0,
     y: 0,

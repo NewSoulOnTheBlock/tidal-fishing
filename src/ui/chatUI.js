@@ -331,8 +331,12 @@ export class ChatUI {
         }
         return true;
       }
-      if (res.status === 403) {
-        events.emit("toast", { msg: "🚫 You're banned from the Fishermans Hole", kind: "warn" });
+      if (res.status === 403 && data.banned) {
+        events.emit("toast", { msg: `🚫 ${data.reason || "You're banned from the Fishermans Hole"}`, kind: "warn" });
+      } else if (data.code === "SESSION_REQUIRED" || data.code === "SESSION_INVALID" || data.code === "SESSION_MISMATCH") {
+        events.emit("toast", { msg: data.error || "Sign in again to chat", kind: "warn" });
+      } else if (res.status === 403) {
+        events.emit("toast", { msg: data.error || "Chat permission check failed", kind: "warn" });
       } else if (data.code === "RATE_LIMIT") {
         events.emit("toast", { msg: "💬 Easy there — slow down a sec", kind: "info" });
       } else if (data.code === "NAME_REQUIRED") {

@@ -650,6 +650,11 @@ const cacheControl = (value) => (req, res, next) => { res.set('Cache-Control', v
 
 // Ban check middleware
 async function checkBans(req, res, next) {
+  // Keep global chat reachable even for players who tripped gameplay/catch IP
+  // protections. Chat has its own auth + write limiter, and false-positive bans
+  // here are worse than letting the lightweight chat fallback work.
+  if (req.path === '/chat') return next();
+
   const ip = getClientIP(req);
   const walletAddress = req.body.walletAddress || req.query.walletAddress;
   

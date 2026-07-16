@@ -34,6 +34,8 @@ test('Robin Hood and Little John are free starting-roster characters', () => {
   assert.equal(robin.anims.cast, '/anim/fishing-cast.fbx');
   assert.equal(littleJohn.anims.idle, '/anim/fishing-idle.fbx');
   assert.equal(littleJohn.anims.cast, '/anim/fishing-cast.fbx');
+  assert.equal(robin.height, 0.35);
+  assert.equal(robin.yawDeg, 0);
   assert.equal(DEFAULT_CHARACTER, 'robin-hood');
 });
 
