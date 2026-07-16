@@ -103,6 +103,8 @@ export async function recordCatch(catchInfo = {}) {
     weightKg,
     value,
     perfectHook = false,
+    baitId = null,
+    baitTier = null,
   } = catchInfo;
 
   try {
@@ -121,6 +123,8 @@ export async function recordCatch(catchInfo = {}) {
           weightKg,
           value,
           perfectHook,
+          baitId,
+          baitTier,
         }
       }),
     });

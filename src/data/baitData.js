@@ -33,7 +33,7 @@ const odds = (rarity, chance, multiplier, label) => ({ rarity, chance, multiplie
 
 export const BAITS = [
   {
-    id: "bait_basic", name: "Basic Grubs", tier: 1,
+    id: "bait_basic", name: "Basic Grubs", tier: 1, packId: 1, tokenPrice: 1, packSize: 1, maxPayoutMultiplier: 8, targetRtpBps: 7800,
     solPrice: 0.001, biteSpeed: 1.0,
     settlement: BAIT_SETTLEMENT.SERVER,
     rarityOdds: { uncommon: 0.18, rare: 0.06 },
@@ -46,7 +46,7 @@ export const BAITS = [
     lookIdx: 0,
   },
   {
-    id: "bait_fine", name: "Fine Shrimp", tier: 2,
+    id: "bait_fine", name: "Fine Shrimp", tier: 2, packId: 2, tokenPrice: 5, packSize: 1, maxPayoutMultiplier: 15, targetRtpBps: 8000,
     solPrice: 0.003, biteSpeed: 0.92,
     settlement: BAIT_SETTLEMENT.SERVER,
     rarityOdds: { uncommon: 0.24, rare: 0.12, epic: 0.025 },
@@ -60,7 +60,7 @@ export const BAITS = [
     lookIdx: 3,
   },
   {
-    id: "bait_prime", name: "Prime Spinners", tier: 3,
+    id: "bait_prime", name: "Prime Spinners", tier: 3, packId: 3, tokenPrice: 10, packSize: 1, maxPayoutMultiplier: 20, targetRtpBps: 8100,
     solPrice: 0.006, biteSpeed: 0.84,
     settlement: BAIT_SETTLEMENT.SERVER,
     rarityOdds: { uncommon: 0.28, rare: 0.18, epic: 0.06, legendary: 0.008 },
@@ -75,7 +75,7 @@ export const BAITS = [
     lookIdx: 6,
   },
   {
-    id: "bait_exotic", name: "Exotic Lures", tier: 4,
+    id: "bait_exotic", name: "Exotic Lures", tier: 4, packId: 4, tokenPrice: 25, packSize: 1, maxPayoutMultiplier: 35, targetRtpBps: 8200,
     solPrice: 0.01, biteSpeed: 0.76,
     settlement: BAIT_SETTLEMENT.GAMBA,
     rarityOdds: { uncommon: 0.32, rare: 0.22, epic: 0.10, legendary: 0.025, mythic: 0.003 },
@@ -91,7 +91,7 @@ export const BAITS = [
     lookIdx: 10,
   },
   {
-    id: "bait_mythic", name: "Mythic Chum", tier: 5,
+    id: "bait_mythic", name: "Mythic Chum", tier: 5, packId: 5, tokenPrice: 50, packSize: 1, maxPayoutMultiplier: 60, targetRtpBps: 8350,
     solPrice: 0.015, biteSpeed: 0.68,
     settlement: BAIT_SETTLEMENT.GAMBA,
     rarityOdds: { uncommon: 0.34, rare: 0.25, epic: 0.14, legendary: 0.05, mythic: 0.012, ultramythic: 0.002 },
@@ -108,7 +108,7 @@ export const BAITS = [
     lookIdx: 14,
   },
   {
-    id: "bait_celestial", name: "Celestial Essence", tier: 6,
+    id: "bait_celestial", name: "Celestial Essence", tier: 6, packId: 6, tokenPrice: 100, packSize: 1, maxPayoutMultiplier: 100, targetRtpBps: 8500,
     solPrice: 0.025, biteSpeed: 0.6,
     settlement: BAIT_SETTLEMENT.GAMBA,
     rarityOdds: { uncommon: 0.36, rare: 0.28, epic: 0.18, legendary: 0.075, mythic: 0.025, ultramythic: 0.006 },
@@ -167,7 +167,7 @@ export function baitStatLines(b) {
   const bite = b.biteSpeed === 1 ? "normal" : `+${Math.round((1 - b.biteSpeed) * 100)}% faster bites`;
   return [
     baitSettlementLabel(b),
-    `ETH wager ${b.solPrice} per bait`,
+    `${b.tokenPrice ?? "—"} USDG per bait · max payout ${b.maxPayoutMultiplier ?? "—"}×`,
     baitRtpLabel(b),
     `Bite speed ${bite}`,
     `Rare ladder: ${rareOdds}`,

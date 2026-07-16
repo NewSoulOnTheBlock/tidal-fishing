@@ -17,6 +17,8 @@ import { isSolPayEnabled, paySol, formatSol, tideToSol } from "../web3/solPaymen
 import { solToTideLive, tideToSolLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
 import { explorerTxUrl, shortAddress } from "../web3/chain.js";
 import { currentWalletAddress } from "../web3/wallet.js";
+import { buyBaitPackOnChain } from "../web3/baitStore.js";
+import { verifyBaitPurchase } from "../web3/purchases.js";
 import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets, buyPackWithFish } from "../web3/raffle.js";
 
 const $ = (id) => document.getElementById(id);
@@ -262,6 +264,7 @@ export class ShopUI {
       const count = economy.baitCount(b.id);
       const isActive = selected === b.id;
       const solCost = Number((b.solPrice * qty).toFixed(6));
+      const usdCost = Number((Number(b.tokenPrice || 0) * qty).toFixed(2));
 
       const row = document.createElement("div");
       row.className = `shop-item${isActive ? " equipped" : ""}`;
@@ -314,6 +317,20 @@ export class ShopUI {
         solBtn.title = walletConnected ? "ETH payment unavailable" : "Connect wallet to buy bait with ETH";
       }
       paymentOptions.appendChild(solBtn);
+
+      const usdgBtn = document.createElement("button");
+      usdgBtn.className = `btn btn-tide ${walletConnected ? "" : "btn-disabled"}`;
+      usdgBtn.innerHTML = `
+        <span class="pay-label">Buy ×${qty} bait · USDG onchain</span>
+        <span class="pay-amount">${formatMoney(usdCost)}</span>
+      `;
+      if (walletConnected) {
+        usdgBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-onchain", solCost, usdCost));
+      } else {
+        usdgBtn.disabled = true;
+        usdgBtn.title = "Connect wallet to buy bait with USDG";
+      }
+      paymentOptions.appendChild(usdgBtn);
       action.appendChild(paymentOptions);
       this.contentEl.appendChild(row);
     });
@@ -811,20 +828,23 @@ export class ShopUI {
       }
     } else if (method === "tide-onchain") {
       try {
-        events.emit("toast", { msg: "Processing USDG transfer...", kind: "info" });
-        const sig = await payTide(tideCost, { memo: `tidal:bait:${id}:${qty}` });
-        economy.grantBaitOnChain(id, qty, sig);
+        events.emit("toast", { msg: "Approve USDG if needed, then confirm BaitStore purchase...", kind: "info" });
+        const txHash = await buyBaitPackOnChain(b, qty);
+        events.emit("toast", { msg: "Verifying bait purchase on Robinhood Chain...", kind: "info", href: explorerTxUrl(txHash) });
+        const verified = await verifyBaitPurchase(txHash);
+        const creditedQty = Number(verified.quantity || qty);
+        economy.grantBaitOnChain(id, creditedQty, txHash);
         audio.play("buy");
         events.emit("toast", {
-          msg: `Bought ×${qty} ${b.name} with USDG · ${shortAddress(sig, 6, 6)}`,
+          msg: `Verified ×${creditedQty} ${b.name} from BaitStore · ${shortAddress(txHash, 6, 6)}`,
           kind: "gold",
-          href: explorerTxUrl(sig),
+          href: explorerTxUrl(txHash),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain USDG bait payment failed", e);
+        console.error("[tidal] verified BaitStore purchase failed", e);
         audio.play("error");
-        events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
+        events.emit("toast", { msg: e?.message ?? "BaitStore purchase failed", kind: "warn" });
       } finally {
         this.render();
       }

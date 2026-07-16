@@ -12,7 +12,7 @@ const CACHE_DURATION = 30_000; // 30 seconds
  * Validate a catch with the server before allowing it to be registered.
  * Returns { allowed: boolean, error?: string }
  */
-export async function validateCatch(speciesId, value) {
+export async function validateCatch(speciesId, value, baitId = null) {
   const walletAccount = currentWalletAddress();
   
   // Require wallet connection
@@ -32,7 +32,8 @@ export async function validateCatch(speciesId, value) {
       body: JSON.stringify({ 
         walletAddress, 
         speciesId, 
-        value 
+        value,
+        baitId,
       }),
     });
 

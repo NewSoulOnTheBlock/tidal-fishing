@@ -159,7 +159,7 @@ export async function registerCatch(fish) {
 
   if (!casual) {
     // SERVER VALIDATION CHECK (prevents offline fishing)
-    const validation = await validateCatch(fish.speciesId, fish.value);
+    const validation = await validateCatch(fish.speciesId, fish.value, fish.baitId || null);
     if (!validation.allowed) {
       console.warn("[economy] Catch blocked by server:", validation.error);
 
@@ -274,6 +274,8 @@ export async function registerCatch(fish) {
       weightKg: fish.weightKg,
       value: fish.value,
       perfectHook: fish.isPerfect || false,
+      baitId: fish.baitId || null,
+      baitTier: fish.baitTier || null,
     }).catch(err => {
       console.error('[economy] Failed to record catch to DB:', err);
       return null;

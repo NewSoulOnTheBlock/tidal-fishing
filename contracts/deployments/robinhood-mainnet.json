@@ -43,5 +43,68 @@
     "houseReserveVault": "0x388b04d8957b5205813cb36d375a54e22f01222331230a5e74b214e66dd88d15",
     "tournamentVault": "0x3fa29e8311c6c0c6ce281d4013b2876e9c6fa0f860346c76b408c7e6be5601c6",
     "sponsoredHotspots": "0x834ab4a9639746e128bf12b48db09f4951f7e9210c9f3e25ffea3095d652225c"
+  },
+  "baitPacks": [
+    {
+      "packId": 1,
+      "baitId": "bait_basic",
+      "priceUi": "1",
+      "active": true,
+      "setPackTx": "0x9edc736aa5c833c6bcf0f4e9dd97cebbfd5f78485a600062ebddf777fdefb276"
+    },
+    {
+      "packId": 2,
+      "baitId": "bait_fine",
+      "priceUi": "5",
+      "active": true,
+      "setPackTx": "0xca6130258fc2bd34c8d39893855717e8ad00379c053ae5d0e6e5613d304397c6"
+    },
+    {
+      "packId": 3,
+      "baitId": "bait_prime",
+      "priceUi": "10",
+      "active": true,
+      "setPackTx": "0xa796dabd4ad71de2a5150ddc911a850b1f464315bf4c2253abb38e72c45a46b3"
+    },
+    {
+      "packId": 4,
+      "baitId": "bait_exotic",
+      "priceUi": "25",
+      "active": true,
+      "setPackTx": "0xf64a0eec8ffe086b0dd8902e70d05602fbb565ef7bc2116360b7d77734b39226"
+    },
+    {
+      "packId": 5,
+      "baitId": "bait_mythic",
+      "priceUi": "50",
+      "active": true,
+      "setPackTx": "0x396afe5fc735e73a33fed81b7562153793d407314ad4e88fa86a8b0cf2df03a2"
+    },
+    {
+      "packId": 6,
+      "baitId": "bait_celestial",
+      "priceUi": "100",
+      "active": true,
+      "setPackTx": "0xbff92f16c630f1b41426c9e007c77a941840f2336814342ea562ec20107c2256"
+    }
+  ],
+  "rewardEscrowFunding": {
+    "status": "unfunded",
+    "reason": "deployer USDG balance was 0 at configuration time"
+  },
+  "sourceVerification": {
+    "blockscoutApi": "https://robinhoodchain.blockscout.com/api",
+    "status": "attempted_failed",
+    "attemptedAt": "2026-07-16T07:09:47Z",
+    "compiler": "v0.8.36+commit.8a079791",
+    "codeformat": "solidity-standard-json-input",
+    "results": {
+      "baitStore": "Fail - Unable to verify",
+      "rewardEscrow": "Fail - Unable to verify",
+      "houseReserveVault": "Fail - Unable to verify",
+      "tournamentVault": "Fail - Unable to verify",
+      "sponsoredHotspots": "Fail - Unable to verify"
+    },
+    "bytecodeVerification": "eth_getCode returned non-empty bytecode for all deployed contracts; source verification API accepted jobs but returned generic failure."
   }
 }
