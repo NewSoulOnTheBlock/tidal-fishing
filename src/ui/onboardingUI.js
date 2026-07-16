@@ -9,7 +9,7 @@ import { updateProfile } from "../web3/database.js";
 import { saveGame } from "../state/saveLoad.js";
 import { isTelegram, tgSuggestedName } from "../platform/telegram.js";
 import { mountCharacterChooser } from "./characterChooser.js";
-import { getCharacter } from "../data/characters.js";
+import { getCharacter, DEFAULT_CHARACTER } from "../data/characters.js";
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -143,7 +143,7 @@ export class OnboardingUI {
     const modal = this.panel.querySelector(".onboarding-modal");
     if (!modal) {
       // Defensive: if the modal shell is gone, skip straight to the tutorial.
-      this.finishCharacter(S.profile.character || "robin-hood");
+      this.finishCharacter(S.profile.character || DEFAULT_CHARACTER);
       return;
     }
     const name = S.profile.username || "angler";
@@ -159,10 +159,10 @@ export class OnboardingUI {
     `;
     const mount = modal.querySelector(".onboarding-character-body");
     this.chooser = mountCharacterChooser(mount, {
-      initial: S.profile.character || "robin-hood",
+      initial: S.profile.character || DEFAULT_CHARACTER,
       confirmLabel: "Fish as {name} →",
       cancelLabel: "Skip for now",
-      onCancel: () => this.finishCharacter(S.profile.character || "robin-hood"),
+      onCancel: () => this.finishCharacter(S.profile.character || DEFAULT_CHARACTER),
       onConfirm: (id) => this.finishCharacter(id),
     });
   }

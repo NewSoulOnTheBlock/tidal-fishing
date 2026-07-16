@@ -6,37 +6,21 @@ import { CHARACTERS, DEFAULT_CHARACTER } from '../src/data/characters.js';
 const requiredAssets = [
   'public/brand/tidal-robinhood-logo.png',
   'public/music/robin-hood-and-the-tanner.mp3',
-  'public/models/characters/robin-hood.glb',
-  'public/models/characters/little-john.glb',
 ];
 
-test('Robin Hood sign-in/logo/music/model assets are shipped from public', () => {
+test('Robinhood sign-in/logo/music assets are shipped from public', () => {
   for (const path of requiredAssets) {
     assert.equal(existsSync(path), true, `${path} should exist`);
     assert.ok(statSync(path).size > 1000, `${path} should not be empty`);
   }
-  assert.equal(readFileSync('public/models/characters/robin-hood.glb').subarray(0, 4).toString('utf8'), 'glTF');
-  assert.equal(readFileSync('public/models/characters/little-john.glb').subarray(0, 4).toString('utf8'), 'glTF');
 });
 
-test('Robin Hood and Little John are free starting-roster characters', () => {
-  const robin = CHARACTERS.find((c) => c.id === 'robin-hood');
-  const littleJohn = CHARACTERS.find((c) => c.id === 'little-john');
-  assert.ok(robin, 'Robin Hood character exists');
-  assert.ok(littleJohn, 'Little John character exists');
-  assert.equal(robin.premium, undefined);
-  assert.equal(littleJohn.premium, undefined);
-  assert.equal(robin.url, '/models/characters/robin-hood.glb');
-  assert.equal(littleJohn.url, '/models/characters/little-john.glb');
-  assert.equal(robin.glbAnims, true);
-  assert.equal(littleJohn.glbAnims, true);
-  assert.equal(robin.anims.idle, '/anim/fishing-idle.fbx');
-  assert.equal(robin.anims.cast, '/anim/fishing-cast.fbx');
-  assert.equal(littleJohn.anims.idle, '/anim/fishing-idle.fbx');
-  assert.equal(littleJohn.anims.cast, '/anim/fishing-cast.fbx');
-  assert.equal(robin.height, 0.35);
-  assert.equal(robin.yawDeg, 0);
-  assert.equal(DEFAULT_CHARACTER, 'robin-hood');
+test('Robin Hood and Little John are removed from the playable roster', () => {
+  assert.equal(CHARACTERS.some((c) => c.id === 'robin-hood'), false);
+  assert.equal(CHARACTERS.some((c) => c.id === 'little-john'), false);
+  assert.notEqual(DEFAULT_CHARACTER, 'robin-hood');
+  assert.notEqual(DEFAULT_CHARACTER, 'little-john');
+  assert.equal(DEFAULT_CHARACTER, 'r2d2');
 });
 
 test('Robin Hood folk song is first background music track', () => {

@@ -26,10 +26,9 @@ const BASE = {
   z: 0,
 };
 
-// Robin Hood / Little John are GLB skinned meshes with generated Bip001 bone
-// names, while the shared fishing clips are Mixamo FBXs. SkeletonUtils expects a
-// target-bone-name -> source-bone-name map, so build one by matching stable bone
-// substrings and ignoring generated numeric suffixes.
+// Some GLB skinned meshes use generated Bip001 bone names, while the shared
+// fishing clips are Mixamo FBXs. SkeletonUtils expects a target-bone-name ->
+// source-bone-name map, so build one by matching stable bone suffixes.
 const MIXAMO_TO_BIP_PATTERNS = [
   ["mixamorigHips", /Pelvis/i],
   ["mixamorigSpine", /Spine1/i],
