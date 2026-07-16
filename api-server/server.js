@@ -1418,44 +1418,25 @@ app.post('/api/player/auth', writeLimiter, async (req, res) => {
   }
 });
 
-// SIWS: verify a wallet signature and issue a session token used to authorize
-// the write endpoints. Banned wallets are already rejected by checkBans.
+// EVM SIWE-lite: verify a wallet signature and issue a session token used to authorize
+// write endpoints. Banned wallets are already rejected by checkBans.
 app.post('/api/auth/session', writeLimiter, async (req, res) => {
   const { walletAddress, message, signature } = req.body;
 
-  if (typeof walletAddress !== 'string' || walletAddress.length < 32) {
-    return res.status(400).json({ error: 'walletAddress required' });
+  const normalizedWallet = normalizeEvmAddress(walletAddress);
+  if (!normalizedWallet) {
+    return res.status(400).json({ error: 'Invalid EVM wallet address' });
   }
   if (typeof message !== 'string' || typeof signature !== 'string') {
     return res.status(400).json({ error: 'message and signature required' });
   }
 
-  let pk;
-  try { pk = new PublicKey(walletAddress); }
-  catch { return res.status(400).json({ error: 'Invalid wallet address' }); }
-
-  let sigBytes;
-  try { sigBytes = Buffer.from(signature, 'base64'); }
-  catch { return res.status(401).json({ error: 'Malformed signature' }); }
-  if (sigBytes.length !== 64) {
-    return res.status(401).json({ error: 'Invalid signature' });
-  }
-  const verified = nacl.sign.detached.verify(
-    new Uint8Array(Buffer.from(message, 'utf8')),
-    new Uint8Array(sigBytes),
-    pk.toBytes()
-  );
-  if (!verified) {
+  if (!verifyEvmLogin({ walletAddress: normalizedWallet, message, signature, maxAgeMs: SIWS_MAX_AGE_MS })) {
     return res.status(401).json({ error: 'Signature verification failed' });
   }
 
-  // The signed message must bind to THIS wallet and be fresh (replay guard).
-  const fields = {};
-  for (const line of message.split('\n')) {
-    const idx = line.indexOf(':');
-    if (idx > -1) fields[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
-  }
-  if (fields.wallet !== walletAddress) {
+  const fields = parseSignedMessageFields(message);
+  if (normalizeEvmAddress(fields.wallet) !== normalizedWallet) {
     return res.status(401).json({ error: 'Signed message wallet mismatch' });
   }
   const issued = Number(fields.issued);
@@ -1464,7 +1445,7 @@ app.post('/api/auth/session', writeLimiter, async (req, res) => {
   }
 
   const { token, expiresAt } = issueSessionToken(normalizedWallet);
-  res.json({ token, expiresAt });
+  res.json({ token, expiresAt, walletAddress: normalizedWallet });
 });
 
 // Coerce to a bounded non-negative integer; rejects NaN/Infinity/negatives.
