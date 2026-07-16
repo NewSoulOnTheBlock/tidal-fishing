@@ -38,6 +38,11 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const LOGIN_MAX_AGE_MS = 15 * 60 * 1000;
 const DECIMALS = Number(process.env.GAME_TOKEN_DECIMALS || 18);
 const pool = process.env.DATABASE_URL ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: false } }) : null;
+if (pool) {
+  pool.on('error', (err) => {
+    console.error('[tidal-api] postgres idle client error', err?.message || err);
+  });
+}
 
 const sessions = new Map();
 const players = new Map();
