@@ -28,6 +28,11 @@ export const CHARACTERS = [
     emoji: "🏹",
     blurb: "Sherwood's legendary outlaw-angler — precise casts, clean steals, and big green-water catches.",
     url: "/models/characters/robin-hood.glb",
+    glbAnims: true,
+    anims: {
+      idle: "/anim/fishing-idle.fbx",
+      cast: "/anim/fishing-cast.fbx",
+    },
     height: 1.8,
     yawDeg: 180,
     x: 0,
@@ -40,6 +45,11 @@ export const CHARACTERS = [
     emoji: "🪵",
     blurb: "Robin's towering right hand. Built like a bridge and calm enough to land monsters.",
     url: "/models/characters/little-john.glb",
+    glbAnims: true,
+    anims: {
+      idle: "/anim/fishing-idle.fbx",
+      cast: "/anim/fishing-cast.fbx",
+    },
     height: 1.9,
     yawDeg: 180,
     x: 0,

@@ -28,6 +28,12 @@ test('Robin Hood and Little John are free starting-roster characters', () => {
   assert.equal(littleJohn.premium, undefined);
   assert.equal(robin.url, '/models/characters/robin-hood.glb');
   assert.equal(littleJohn.url, '/models/characters/little-john.glb');
+  assert.equal(robin.glbAnims, true);
+  assert.equal(littleJohn.glbAnims, true);
+  assert.equal(robin.anims.idle, '/anim/fishing-idle.fbx');
+  assert.equal(robin.anims.cast, '/anim/fishing-cast.fbx');
+  assert.equal(littleJohn.anims.idle, '/anim/fishing-idle.fbx');
+  assert.equal(littleJohn.anims.cast, '/anim/fishing-cast.fbx');
   assert.equal(DEFAULT_CHARACTER, 'robin-hood');
 });
 

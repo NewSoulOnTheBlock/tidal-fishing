@@ -329,6 +329,30 @@ function onlineWallets() {
 
 // Post a system "live feed" line into the global chat. Fire-and-forget so it
 // never blocks a gameplay response; periodically prunes the table.
+let _chatSchemaReady = null;
+function ensureChatSchema() {
+  if (_chatSchemaReady) return _chatSchemaReady;
+  _chatSchemaReady = (async () => {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id SERIAL PRIMARY KEY,
+        wallet_address VARCHAR(64) NOT NULL,
+        username VARCHAR(50),
+        message VARCHAR(280) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    await pool.query('ALTER TABLE chat_messages ALTER COLUMN wallet_address TYPE VARCHAR(64)');
+    await pool.query("ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS kind VARCHAR(16) DEFAULT 'user'");
+    await pool.query('ALTER TABLE chat_messages ADD COLUMN IF NOT EXISTS level INT DEFAULT 0');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_chat_created ON chat_messages(id DESC)');
+  })().catch((err) => {
+    _chatSchemaReady = null;
+    throw err;
+  });
+  return _chatSchemaReady;
+}
+
 let _sysChatCount = 0;
 async function insertSystemChat(message, kind = 'system') {
   const msg = String(message)
@@ -1808,6 +1832,7 @@ app.get('/api/chat', cacheControl('no-store'), async (req, res) => {
   const since = parseInt(req.query.since, 10);
   const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
   try {
+    await ensureChatSchema();
     let result;
     if (Number.isFinite(since) && since > 0) {
       result = await pool.query(
@@ -1853,6 +1878,7 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
   }
 
   try {
+    await ensureChatSchema();
     // Authoritative identity: take the poster's display name (and level flair)
     // from the DB, NOT the request body, so a tampered client can't post under
     // another angler's name in the global feed.

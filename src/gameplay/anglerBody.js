@@ -14,6 +14,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { retargetClip } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { getCharacter, DEFAULT_CHARACTER } from "../data/characters.js";
 import { disposeObject3D } from "../core/disposal.js";
 
@@ -24,6 +25,60 @@ const BASE = {
   y: 0,
   z: 0,
 };
+
+// Robin Hood / Little John are GLB skinned meshes with generated Bip001 bone
+// names, while the shared fishing clips are Mixamo FBXs. SkeletonUtils expects a
+// target-bone-name -> source-bone-name map, so build one by matching stable bone
+// substrings and ignoring generated numeric suffixes.
+const MIXAMO_TO_BIP_PATTERNS = [
+  ["mixamorigHips", /Pelvis/i],
+  ["mixamorigSpine", /Spine1/i],
+  ["mixamorigSpine1", /Spine2|Spine1/i],
+  ["mixamorigSpine2", /Spine2|Spine1/i],
+  ["mixamorigNeck", /Neck/i],
+  ["mixamorigHead", /Head/i],
+  ["mixamorigLeftShoulder", /L_Clavicle/i],
+  ["mixamorigLeftArm", /L_UpperArm/i],
+  ["mixamorigLeftForeArm", /L_Forearm/i],
+  ["mixamorigLeftHand", /L_Hand/i],
+  ["mixamorigRightShoulder", /R_Clavicle/i],
+  ["mixamorigRightArm", /R_UpperArm/i],
+  ["mixamorigRightForeArm", /R_Forearm/i],
+  ["mixamorigRightHand", /R_Hand/i],
+  ["mixamorigLeftUpLeg", /L_Thigh/i],
+  ["mixamorigLeftLeg", /L_Calf/i],
+  ["mixamorigLeftFoot", /L_Foot/i],
+  ["mixamorigRightUpLeg", /R_Thigh/i],
+  ["mixamorigRightLeg", /R_Calf/i],
+  ["mixamorigRightFoot", /R_Foot/i],
+];
+
+function firstSkinnedMesh(root) {
+  let found = null;
+  root?.traverse?.((o) => {
+    if (!found && o.isSkinnedMesh && o.skeleton?.bones?.length) found = o;
+  });
+  return found;
+}
+
+function findBone(root, patterns = []) {
+  let found = null;
+  root?.traverse?.((o) => {
+    if (found || !o.isBone) return;
+    if (patterns.some((rx) => rx.test(o.name))) found = o;
+  });
+  return found;
+}
+
+function bipToMixamoMap(targetMesh, sourceMesh) {
+  const sourceNames = new Set(sourceMesh?.skeleton?.bones?.map((b) => b.name) || []);
+  const names = {};
+  for (const bone of targetMesh?.skeleton?.bones || []) {
+    const hit = MIXAMO_TO_BIP_PATTERNS.find(([sourceName, rx]) => sourceNames.has(sourceName) && rx.test(bone.name));
+    if (hit) names[bone.name] = hit[0];
+  }
+  return names;
+}
 
 let loader = null;
 function gltfLoader() {
@@ -154,18 +209,94 @@ export function createAnglerBody(parent, character) {
   function loadGLB(token) {
     gltfLoader().load(
       cfg.url,
-      (gltf) => {
+      async (gltf) => {
         if (token !== loadToken) {
           disposeObject3D(gltf.scene); // superseded by a newer load — don't leak it
           return;
         }
         mountModel(gltf.scene);
+
+        if (cfg.glbAnims && (cfg.anims?.idle || cfg.anims?.cast)) {
+          await loadGLBAnimations(gltf.scene, token);
+        } else {
+          // Skinned-but-static GLBs can still expose a hand bone for rod anchoring.
+          handBone = findBone(gltf.scene, [/R_Hand/i, /RightHand/i, /rightHand/i]);
+        }
       },
       undefined,
       (err) => {
         if (token === loadToken) console.warn("[angler] failed to load body model:", err);
       }
     );
+  }
+
+  async function loadGLBAnimations(scene, token) {
+    const targetMesh = firstSkinnedMesh(scene);
+    if (!targetMesh) {
+      handBone = findBone(scene, [/R_Hand/i, /RightHand/i, /rightHand/i]);
+      return;
+    }
+    handBone =
+      findBone(scene, [cfg.rodHand ? new RegExp(cfg.rodHand, "i") : /R_Hand/i, /R_Hand/i, /RightHand/i, /rightHand/i]) ||
+      null;
+
+    const idleUrl = cfg.anims?.idle;
+    const castUrl = cfg.anims?.cast;
+    const idleAsset = idleUrl ? await getFbxLoader().loadAsync(idleUrl) : null;
+    if (token !== loadToken) {
+      if (idleAsset) disposeObject3D(idleAsset);
+      return;
+    }
+
+    const sourceMesh = firstSkinnedMesh(idleAsset);
+    const names = bipToMixamoMap(targetMesh, sourceMesh);
+    const mapped = Object.keys(names).length;
+    if (!sourceMesh || mapped < 8) {
+      if (idleAsset) disposeObject3D(idleAsset);
+      console.warn(`[angler] ${cfg.id || "GLB"} animation retarget skipped — only ${mapped} mapped bones.`);
+      return;
+    }
+
+    mixer = new THREE.AnimationMixer(targetMesh);
+    if (idleAsset?.animations?.[0]) {
+      const idleClip = retargetClip(targetMesh, sourceMesh, idleAsset.animations[0], {
+        names,
+        hip: "mixamorigHips",
+        hipInfluence: new THREE.Vector3(0, 0, 0),
+        useFirstFramePosition: true,
+        fps: 24,
+      });
+      idleAction = mixer.clipAction(idleClip);
+      idleAction.setLoop(THREE.LoopRepeat, Infinity);
+      idleAction.play();
+    }
+
+    if (castUrl) {
+      const castAsset = await getFbxLoader().loadAsync(castUrl);
+      if (token !== loadToken) {
+        disposeObject3D(castAsset);
+        if (idleAsset) disposeObject3D(idleAsset);
+        return;
+      }
+      const castSourceMesh = firstSkinnedMesh(castAsset) || sourceMesh;
+      const castClip = castAsset.animations?.[0];
+      if (castClip) {
+        const retargetedCast = retargetClip(targetMesh, castSourceMesh, castClip, {
+          names: bipToMixamoMap(targetMesh, castSourceMesh),
+          hip: "mixamorigHips",
+          hipInfluence: new THREE.Vector3(0, 0, 0),
+          useFirstFramePosition: true,
+          fps: 24,
+        });
+        castAction = mixer.clipAction(retargetedCast);
+        castAction.setLoop(THREE.LoopOnce, 1);
+        castAction.clampWhenFinished = true;
+        mixer.addEventListener("finished", onCastFinished);
+      }
+      disposeObject3D(castAsset);
+    }
+
+    if (idleAsset) disposeObject3D(idleAsset);
   }
 
   // Animated FBX character: the main FBX is both the visible rig/model and the
