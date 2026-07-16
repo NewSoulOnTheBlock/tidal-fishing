@@ -1,0 +1,47 @@
+{
+  "network": "Robinhood Chain",
+  "chainId": 4663,
+  "deployedAt": "2026-07-16T06:50:48.737Z",
+  "asset": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "operatorTreasury": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
+  "rewardSigner": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
+  "contracts": {
+    "baitStore": {
+      "address": "0x760b0b30a69763516dD46167F9a6211Ed172cc35",
+      "txHash": "0xfc7fa5d57e3b9a486e0ae34f8a64e9cc2d43ff508fb922d29215c58c173dfdee",
+      "blockNumber": 11054886,
+      "gasUsed": "879419"
+    },
+    "rewardEscrow": {
+      "address": "0xCe81b8730D897Bf4B3581C541a9A3B788402E565",
+      "txHash": "0x50dcadf4399ecc93fab6f2f46fff58bfa16eb271d0e4dc685efe3f0b1d5baa28",
+      "blockNumber": 11054698,
+      "gasUsed": "653357"
+    },
+    "houseReserveVault": {
+      "address": "0xf6F25BC8E234C5a58B791fbF22cBA2D43AffB67f",
+      "txHash": "0x388b04d8957b5205813cb36d375a54e22f01222331230a5e74b214e66dd88d15",
+      "blockNumber": 11054745,
+      "gasUsed": "503860"
+    },
+    "tournamentVault": {
+      "address": "0x484fF0082f2F3B2a185423848d2927B3fA765ECd",
+      "txHash": "0x3fa29e8311c6c0c6ce281d4013b2876e9c6fa0f860346c76b408c7e6be5601c6",
+      "blockNumber": 11054792,
+      "gasUsed": "504894"
+    },
+    "sponsoredHotspots": {
+      "address": "0x54be4CCe1641B802aD4A410227873d1b9F3859E4",
+      "txHash": "0x834ab4a9639746e128bf12b48db09f4951f7e9210c9f3e25ffea3095d652225c",
+      "blockNumber": 11054839,
+      "gasUsed": "419979"
+    }
+  },
+  "txHashes": {
+    "baitStore": "0xfc7fa5d57e3b9a486e0ae34f8a64e9cc2d43ff508fb922d29215c58c173dfdee",
+    "rewardEscrow": "0x50dcadf4399ecc93fab6f2f46fff58bfa16eb271d0e4dc685efe3f0b1d5baa28",
+    "houseReserveVault": "0x388b04d8957b5205813cb36d375a54e22f01222331230a5e74b214e66dd88d15",
+    "tournamentVault": "0x3fa29e8311c6c0c6ce281d4013b2876e9c6fa0f860346c76b408c7e6be5601c6",
+    "sponsoredHotspots": "0x834ab4a9639746e128bf12b48db09f4951f7e9210c9f3e25ffea3095d652225c"
+  }
+}
