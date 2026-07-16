@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #387 - Mossglow Thornback",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Mossglow Thornback species file; traits and rarity score make this edition unique.",
+  "image": "/thornback-mossglow.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Mossglow Thornback"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "thornback_mossglow"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "rare"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 5,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Royal"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "pier"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 457,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 304,
+      "display_type": "number"
+    }
+  ]
+}

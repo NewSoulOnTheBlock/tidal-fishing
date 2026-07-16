@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #125 - Stormreaver",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Stormreaver species file; traits and rarity score make this edition unique.",
+  "image": "/stormreaver.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Stormreaver"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "stormreaver"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "legendary"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "tide"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Trophy"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Heavy"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dawn"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Top 50 Rarity"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1384,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 41,
+      "display_type": "number"
+    }
+  ]
+}

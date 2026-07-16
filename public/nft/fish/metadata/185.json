@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #185 - Nightblossom Moonveil",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Nightblossom Moonveil species file; traits and rarity score make this edition unique.",
+  "image": "/moonveil-nightblossom.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Nightblossom Moonveil"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "moonveil_nightblossom"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "uncommon"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dawn"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 527,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 265,
+      "display_type": "number"
+    }
+  ]
+}

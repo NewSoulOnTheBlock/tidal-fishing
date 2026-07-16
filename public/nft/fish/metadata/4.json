@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #4 - Jadeveil Oracleray",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Jadeveil Oracleray species file; traits and rarity score make this edition unique.",
+  "image": "/oracleray-jadeveil.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Jadeveil Oracleray"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "oracleray_jadeveil"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "legendary"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "ancient"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "abyssal"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Wild"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Genesis Ten"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 2250,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 16,
+      "display_type": "number"
+    }
+  ]
+}

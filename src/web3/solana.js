@@ -1,80 +1,37 @@
-// Central Solana RPC client + on-chain config for Tidal.
-//
-// Network: mainnet-beta (live). Override with VITE_SOLANA_RPC_URL for a private
-// RPC (Helius / QuickNode / Triton) — public endpoints rate-limit aggressively.
-//
-// Phase 1 is READ-ONLY: balance lookups + NFT inventory. No write transactions
-// are signed without an explicit user confirm modal (Phase 2+).
+// Robinhood Chain config kept behind the legacy solana.js import path so the
+// older game UI can be migrated incrementally without touching every import.
 
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+const ENV = import.meta.env || {};
 
-const DEFAULT_RPC = clusterApiUrl("mainnet-beta");
+export const NETWORK = "Robinhood Chain";
+export const CHAIN_ID = 4663;
+export const CHAIN_ID_HEX = "0x1237";
+export const RPC_URL = ENV.VITE_ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
+export const EXPLORER_BASE = "https://robinhoodchain.blockscout.com";
 
-export const NETWORK = "mainnet-beta";
-export const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || DEFAULT_RPC;
-export const EXPLORER_BASE = "https://solscan.io";
-
-// On-chain Tidal mints. These addresses are set in Phase 2 when the $SBF
-// token + cNFT trees are deployed. For now we expose a single source of truth.
-//
-// Override via env (VITE_TIDE_MINT, VITE_GEAR_COLLECTION) for staging tests.
-const RAW_TIDE_MINT = import.meta.env.VITE_TIDE_MINT || "HBibqRqqzAbnvZ4ogkcma6nzaoNWgpEimajVjHA3pump";
-const RAW_GEAR_COLLECTION = import.meta.env.VITE_GEAR_COLLECTION || "";
-const RAW_CATCH_TREE = import.meta.env.VITE_CATCH_TREE || "";
-
-// Treasury wallet that holds $SBF tokens for user withdrawals
-const RAW_TIDE_TREASURY = import.meta.env.VITE_TIDE_TREASURY || "CYV4qsTPCDNfo9acpL7ni9jTzxZoZLbkjSQ7C25smror";
-
-export const TIDE_MINT = parsePubkeyOrNull(RAW_TIDE_MINT);
-export const GEAR_COLLECTION = parsePubkeyOrNull(RAW_GEAR_COLLECTION);
-export const CATCH_TREE = parsePubkeyOrNull(RAW_CATCH_TREE);
-export const TIDE_TREASURY = parsePubkeyOrNull(RAW_TIDE_TREASURY);
-
-function parsePubkeyOrNull(s) {
-  if (!s) return null;
-  try {
-    return new PublicKey(s);
-  } catch {
-    console.warn("[tidal] invalid pubkey in env:", s);
-    return null;
-  }
-}
-
-export const connection = new Connection(RPC_URL, {
-  commitment: "confirmed",
-  disableRetryOnRateLimit: false,
-});
+// Canonical Robinhood Chain core assets from docs. Override for staging.
+export const WETH_ADDRESS = "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73";
+export const USDG_ADDRESS = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
+export const TIDE_MINT = ENV.VITE_GAME_TOKEN_ADDRESS || USDG_ADDRESS;
+export const TIDE_TREASURY = ENV.VITE_GAME_TREASURY || "";
+export const TIDE_SYMBOL = ENV.VITE_GAME_TOKEN_SYMBOL || "USDG";
+export const NATIVE_SYMBOL = "ETH";
 
 export function explorerAddressUrl(address) {
-  return `${EXPLORER_BASE}/account/${address}`;
+  return `${EXPLORER_BASE}/address/${address}`;
 }
 
-export function explorerTxUrl(sig) {
-  return `${EXPLORER_BASE}/tx/${sig}`;
+export function explorerTxUrl(hash) {
+  return `${EXPLORER_BASE}/tx/${hash}`;
 }
 
 export function shortAddress(addr, head = 4, tail = 4) {
-  const s = typeof addr === "string" ? addr : addr?.toBase58?.();
+  const s = typeof addr === "string" ? addr : addr?.address || addr?.toString?.();
   if (!s) return "—";
   if (s.length <= head + tail + 1) return s;
   return `${s.slice(0, head)}…${s.slice(-tail)}`;
 }
 
-// Base58 encoder (Bitcoin/Solana alphabet). Used to stringify the raw signature
-// bytes that some wallet adapters return from signAndSend. Lives here so the
-// $SBF and SOL payment paths share one implementation instead of duplicating it.
-const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-export function base58Encode(bytes) {
-  let num = 0n;
-  for (const byte of bytes) num = num * 256n + BigInt(byte);
-  let result = num === 0n ? BASE58_ALPHABET[0] : "";
-  while (num > 0n) {
-    result = BASE58_ALPHABET[Number(num % 58n)] + result;
-    num = num / 58n;
-  }
-  for (const byte of bytes) {
-    if (byte !== 0) break;
-    result = BASE58_ALPHABET[0] + result;
-  }
-  return result;
+export function toChecksumish(address) {
+  return typeof address === "string" ? address : address?.toString?.() || "";
 }

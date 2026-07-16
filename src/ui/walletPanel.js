@@ -11,19 +11,18 @@ import {
   formatSol,
   formatTokens,
 } from "../web3/token.js";
-import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT } from "../web3/solana.js";
+import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT, TIDE_SYMBOL, NATIVE_SYMBOL } from "../web3/solana.js";
 import { withdrawTide, withdrawSol } from "../web3/withdraw.js";
 import { tideToSolLive } from "../web3/priceConvert.js";
 import { onWalletConnect, onWalletDisconnect } from "../web3/databaseIntegration.js";
-import { PublicKey } from "@solana/web3.js";
 import { S, events } from "../state/gameState.js";
 import * as economy from "../economy/economy.js";
 import { formatMoney } from "../utils/utils.js";
 
 const REFRESH_INTERVAL_MS = 60_000;
 
-// Players must HOLD this much $SBF in their connected wallet before the
-// earned-$SBF withdraw faucet unlocks. Enforced on the withdraw tap (splash
+// Players must HOLD this much game token in their connected wallet before the
+// earned-token withdraw faucet unlocks. Enforced on the withdraw tap (splash
 // popup when unmet); the disclaimer also shows on the wallet-connect screen.
 const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $SBF
 
@@ -100,7 +99,7 @@ export class WalletPanel {
       const mintConfigured = !!TIDE_MINT;
 
       // Compact withdraw button only — no permanent disclaimer (that lives on the
-      // connect screen now). The 1M-$SBF hold gate is enforced on tap via a
+      // connect screen now). The hold gate is enforced on tap via a
       // splash popup so the HUD stays small.
       let withdrawHtml = "";
       if (mintConfigured && earned > 0) {
@@ -121,8 +120,8 @@ export class WalletPanel {
           <button class="wallet-disconnect" title="Disconnect">×</button>
         </div>
         <div class="wallet-balances">
-          <div class="wallet-bal"><span class="wallet-bal-tag">SOL</span><span class="wallet-bal-val" data-bal="sol">—</span></div>
-          <div class="wallet-bal"><span class="wallet-bal-tag">$SBF</span><span class="wallet-bal-val" data-bal="tide">—</span></div>
+          <div class="wallet-bal"><span class="wallet-bal-tag">${NATIVE_SYMBOL}</span><span class="wallet-bal-val" data-bal="sol">—</span></div>
+          <div class="wallet-bal"><span class="wallet-bal-tag">${TIDE_SYMBOL}</span><span class="wallet-bal-val" data-bal="tide">—</span></div>
         </div>
         ${withdrawHtml}
       `;
@@ -141,7 +140,7 @@ export class WalletPanel {
           <span class="wallet-net">${NETWORK}</span>
           <button class="btn btn-primary wallet-connect">Connect Wallet</button>
         </div>
-        <div class="wallet-sub">Earn $SBF · own your catches · withdraw to wallet</div>
+        <div class="wallet-sub">Earn ${TIDE_SYMBOL} · own your catches · withdraw to wallet</div>
       `;
       this.root.querySelector(".wallet-connect").addEventListener("click", () => this.openModal());
     }
@@ -221,7 +220,7 @@ export class WalletPanel {
   handleHudWithdrawRequest() {
     const earned = Math.floor(S.profile.money);
     if (earned <= 0) {
-      events.emit("toast", { msg: "Earn $SBF before withdrawing", kind: "warn" });
+      events.emit("toast", { msg: `Earn ${TIDE_SYMBOL} before withdrawing`, kind: "warn" });
       return;
     }
     if (!this.account) {
@@ -230,14 +229,14 @@ export class WalletPanel {
       return;
     }
     if (!TIDE_MINT) {
-      events.emit("toast", { msg: "Withdrawals activate once $SBF goes live", kind: "warn" });
+      events.emit("toast", { msg: `Withdrawals activate once ${TIDE_SYMBOL} is configured`, kind: "warn" });
       return;
     }
     this.handleWithdrawClick(earned);
   }
 
   /**
-   * Withdraw tap handler. Enforces the 1,000,000-$SBF wallet-hold requirement:
+   * Withdraw tap handler. Enforces the wallet-hold requirement:
    * if the connected wallet holds less, a splash popup explains it instead of
    * starting a withdraw. Otherwise the withdraw proceeds.
    */
@@ -261,12 +260,12 @@ export class WalletPanel {
       <div class="panel panel-narrow withdraw-splash-panel">
         <div class="withdraw-splash-icon">💧🔒</div>
         <h2 class="panel-title">Withdrawals Locked</h2>
-        <p class="withdraw-splash-text">Hold <strong>${MIN_HOLD_REQUIREMENT.toLocaleString()} $SBF</strong> in your connected wallet to unlock withdrawals of your earned $SBF.</p>
+        <p class="withdraw-splash-text">Hold <strong>${MIN_HOLD_REQUIREMENT.toLocaleString()} ${TIDE_SYMBOL}</strong> in your connected wallet to unlock withdrawals of your earned ${TIDE_SYMBOL}.</p>
         <div class="withdraw-splash-stats">
           <div class="ws-stat"><span class="ws-num">${formatTokens(tideUi, 0, 0)}</span><span class="ws-lbl">You hold</span></div>
           <div class="ws-stat"><span class="ws-num">${formatTokens(remaining, 0, 0)}</span><span class="ws-lbl">More needed</span></div>
         </div>
-        <p class="withdraw-splash-sub">Your earned $SBF is safe — keep fishing and stacking. Withdrawals open the moment your wallet crosses the threshold.</p>
+        <p class="withdraw-splash-sub">Your earned ${TIDE_SYMBOL} is safe — keep fishing and stacking. Withdrawals open the moment your wallet crosses the threshold.</p>
         <button class="btn btn-primary withdraw-splash-close">Got it</button>
       </div>
     `;
@@ -299,20 +298,15 @@ export class WalletPanel {
       : isMobile
         ? `<p class="wallet-empty wallet-mobile-hint">
             <strong>No wallets detected!</strong><br><br>
-            On <strong>Android</strong>, tap Connect again — your installed wallet appears as a <strong>Mobile Wallet Adapter</strong> option.<br><br>
-            On <strong>iOS</strong>, open <strong>tidalfishing.fun</strong> in your wallet's built-in browser:<br><br>
-            📱 <strong>Phantom:</strong> Tap Browser → enter URL<br>
-            📱 <strong>Solflare:</strong> Tap DApp Browser → enter URL<br>
-            📱 <strong>Backpack:</strong> Tap Browser → enter URL<br><br>
-            Or install a mobile wallet app first!
+            Open this site inside an EVM wallet browser (MetaMask, Rabby, Coinbase Wallet) or install a browser wallet first.
           </p>`
-        : `<p class="wallet-empty">No Solana wallets detected. Install <a href="https://phantom.app" target="_blank" rel="noopener">Phantom</a>, <a href="https://solflare.com" target="_blank" rel="noopener">Solflare</a> or <a href="https://backpack.app" target="_blank" rel="noopener">Backpack</a> and reload.</p>`;
+        : `<p class="wallet-empty">No EVM wallet detected. Install <a href="https://metamask.io" target="_blank" rel="noopener">MetaMask</a>, <a href="https://rabby.io" target="_blank" rel="noopener">Rabby</a>, or <a href="https://www.coinbase.com/wallet" target="_blank" rel="noopener">Coinbase Wallet</a> and reload.</p>`;
     
     this.modal.innerHTML = `
       <div class="panel panel-narrow wallet-pick-panel">
-        <h2 class="panel-title">Connect a Solana Wallet</h2>
-        <p class="wallet-warn">Mainnet — your transactions are real. Tidal will never ask you to sign anything you didn't initiate.</p>
-        <p class="wallet-withdraw-note">💧 Withdrawals of earned $SBF unlock once you <strong>hold ${MIN_HOLD_REQUIREMENT.toLocaleString()} $SBF</strong> in your wallet.</p>
+        <h2 class="panel-title">Connect a Robinhood Chain Wallet</h2>
+        <p class="wallet-warn">${NETWORK} mainnet — your transactions are real. Tidal will never ask you to sign anything you didn't initiate.</p>
+        <p class="wallet-withdraw-note">💧 Withdrawals of earned ${TIDE_SYMBOL} unlock once you <strong>hold ${MIN_HOLD_REQUIREMENT.toLocaleString()} ${TIDE_SYMBOL}</strong> in your wallet.</p>
         <div class="wallet-pick-list">${list}</div>
         <button class="btn wallet-pick-cancel">Cancel</button>
       </div>
@@ -353,9 +347,9 @@ export class WalletPanel {
       this.refreshTimer = setTimeout(() => this.refreshBalances(), REFRESH_INTERVAL_MS);
       return;
     }
-    const pubkey = safePubkey(this.account.address);
-    if (!pubkey) return;
-    const [sol, tide] = await Promise.all([fetchSolBalance(pubkey), fetchTideBalance(pubkey)]);
+    const address = this.account.address;
+    if (!address) return;
+    const [sol, tide] = await Promise.all([fetchSolBalance(address), fetchTideBalance(address)]);
     if (!this.account) return; // disconnected mid-flight
     const solEl = this.root.querySelector('[data-bal="sol"]');
     const tideEl = this.root.querySelector('[data-bal="tide"]');
@@ -366,14 +360,6 @@ export class WalletPanel {
     this.lastTideBalanceUi = tide ? tide.ui : 0;
     
     this.refreshTimer = setTimeout(() => this.refreshBalances(), REFRESH_INTERVAL_MS);
-  }
-}
-
-function safePubkey(s) {
-  try {
-    return new PublicKey(s);
-  } catch {
-    return null;
   }
 }
 

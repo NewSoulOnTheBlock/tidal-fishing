@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #295 - Frostfire Royalcrest",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Frostfire Royalcrest species file; traits and rarity score make this edition unique.",
+  "image": "/royalcrest-frostfire.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Frostfire Royalcrest"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "royalcrest_frostfire"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "mythic"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Deepwater"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "ancient"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "abyssal"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Top 10 Rarity"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 2750,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 4,
+      "display_type": "number"
+    }
+  ]
+}

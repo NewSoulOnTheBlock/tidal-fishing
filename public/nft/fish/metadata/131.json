@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #131 - Emerald Crownfin",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Emerald Crownfin species file; traits and rarity score make this edition unique.",
+  "image": "/crownfin-emerald.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Emerald Crownfin"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "crownfin_emerald"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "uncommon"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 4,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "golden"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "lunar"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 830,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 141,
+      "display_type": "number"
+    }
+  ]
+}

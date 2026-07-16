@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #284 - Reefsteel Bladejaw",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Reefsteel Bladejaw species file; traits and rarity score make this edition unique.",
+  "image": "/bladejaw-reefsteel.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Reefsteel Bladejaw"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "bladejaw_reefsteel"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "uncommon"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 7,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Deepwater"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Ancient"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 317,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 403,
+      "display_type": "number"
+    }
+  ]
+}

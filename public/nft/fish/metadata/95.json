@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #95 - Emberbloom Oracleray",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Emberbloom Oracleray species file; traits and rarity score make this edition unique.",
+  "image": "/oracleray-emberbloom.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Emberbloom Oracleray"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "oracleray_emberbloom"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "epic"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Deepwater"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "albino"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "tide"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Trophy"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Heavy"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Calm"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1154,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 68,
+      "display_type": "number"
+    }
+  ]
+}

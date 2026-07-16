@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #158 - Oracleray",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Oracleray species file; traits and rarity score make this edition unique.",
+  "image": "/oracleray.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Oracleray"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "oracleray"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "epic"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 4,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Sunlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Fingerling"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Light"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Trickster"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 622,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 218,
+      "display_type": "number"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #393 - Aurora Moonveil",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Aurora Moonveil species file; traits and rarity score make this edition unique.",
+  "image": "/moonveil-aurora.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Aurora Moonveil"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "moonveil_aurora"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "uncommon"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 9,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Classic"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "golden"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "storm"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Trophy"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Heavy"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "night"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Ancient"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 714,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 188,
+      "display_type": "number"
+    }
+  ]
+}

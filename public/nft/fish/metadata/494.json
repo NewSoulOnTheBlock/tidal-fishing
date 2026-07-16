@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #494 - Jadefire Thornback",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Jadefire Thornback species file; traits and rarity score make this edition unique.",
+  "image": "/thornback-jadefire.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Jadefire Thornback"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "thornback_jadefire"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "rare"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 12,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Deepwater"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Fingerling"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Light"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "pier"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Ancient"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 352,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 377,
+      "display_type": "number"
+    }
+  ]
+}

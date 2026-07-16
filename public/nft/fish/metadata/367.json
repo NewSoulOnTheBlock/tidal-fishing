@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #367 - Roseglow Moonveil",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Roseglow Moonveil species file; traits and rarity score make this edition unique.",
+  "image": "/moonveil-roseglow.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Roseglow Moonveil"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "moonveil_roseglow"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "rare"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 5,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Trickster"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 457,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 301,
+      "display_type": "number"
+    }
+  ]
+}

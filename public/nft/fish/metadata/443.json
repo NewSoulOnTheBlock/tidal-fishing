@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #443 - Prismacrown",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Prismacrown species file; traits and rarity score make this edition unique.",
+  "image": "/prismacrown.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Prismacrown"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "prismacrown"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "rare"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 8,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "pier"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 457,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 311,
+      "display_type": "number"
+    }
+  ]
+}

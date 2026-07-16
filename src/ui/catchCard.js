@@ -15,6 +15,7 @@ import {
   catchTweetText,
 } from "./catchShare.js";
 import { events } from "../state/gameState.js";
+import { claimFishNft } from "../web3/fishNft.js";
 import { S } from "../state/gameState.js";
 import html2canvas from "html2canvas";
 
@@ -85,6 +86,16 @@ export class CatchCard {
       ? `<div class="catch-wager-meta">Bait wager: ${fish.baitName}${fish.baitTier ? ` · Tier ${fish.baitTier}` : ""}${fish.baitSettlement ? ` · ${fish.baitSettlement === "gamba-premium" ? "Gamba premium" : "server/provably-fair"}` : ""}</div>`
       : "";
 
+    const nftOpportunity = flags.nftOpportunity;
+    const nftLine = nftOpportunity?.status === "eligible"
+      ? `<div class="catch-nft-opportunity eligible"><strong>Fish NFT unlocked!</strong><span>Token #${nftOpportunity.tokenId || nftOpportunity.token_id} is ready to claim.</span></div>`
+      : nftOpportunity?.status === "active"
+      ? `<div class="catch-nft-opportunity"><strong>NFT Hunt started</strong><span>Catch ${nftOpportunity.token?.speciesName || nftOpportunity.targetSpeciesId || nftOpportunity.target_species_id} before it expires.</span></div>`
+      : "";
+    const nftButton = nftOpportunity?.status === "eligible"
+      ? `<button class="btn btn-nft-mint" title="Create your server-verified Fish NFT mint claim">🐟 Mint Fish NFT Free</button>`
+      : "";
+
     overlay.innerHTML = `
       <div class="catch-card ${flags.isJackpot ? "catch-card-jackpot" : ""}" style="--rarity:${rarity.color}">
         ${ribbon}
@@ -98,9 +109,11 @@ export class CatchCard {
         ${valueLine}
         ${baitMeta}
         <div class="catch-xp">+${flags.xpGained} XP${flags.isNew ? " (first catch bonus)" : ""}</div>
+        ${nftLine}
         <div class="catch-collection">📖 ${S.journal ? Object.keys(S.journal).length : 0} / ${FISH_SPECIES.length} species collected</div>
         <div class="catch-actions">
           <button class="btn btn-primary btn-big">${flags.isJackpot ? "I'm rich" : flags.casual ? "Release" : "Keep it"}</button>
+          ${nftButton}
           <button class="btn btn-share" title="Share your catch as a video">🎥 Share</button>
         </div>
       </div>
@@ -109,6 +122,8 @@ export class CatchCard {
     try {
       overlay.querySelector(".btn-primary").addEventListener("click", () => this.dismiss());
       overlay.querySelector(".btn-share").addEventListener("click", (e) => this.shareCatch(e.currentTarget));
+      const nftMintBtn = overlay.querySelector(".btn-nft-mint");
+      if (nftMintBtn) nftMintBtn.addEventListener("click", (e) => this.claimNft(e.currentTarget));
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) this.dismiss();
       });
@@ -137,6 +152,23 @@ export class CatchCard {
       console.error("[CatchCard] Error showing card:", error);
       this.active = false;
       if (this.onDone) this.onDone();
+    }
+  }
+
+  async claimNft(btnEl) {
+    if (!btnEl) return;
+    const original = btnEl.textContent;
+    btnEl.disabled = true;
+    btnEl.textContent = "Minting claim…";
+    try {
+      const result = await claimFishNft();
+      const tokenId = result?.claim?.tokenId;
+      btnEl.textContent = tokenId ? `Claim ready #${tokenId}` : "Claim ready";
+      events.emit("toast", { msg: tokenId ? `🐟 Fish NFT #${tokenId} claim ready` : "🐟 Fish NFT claim ready", kind: "success" });
+    } catch (error) {
+      btnEl.disabled = false;
+      btnEl.textContent = original || "🐟 Mint Fish NFT Free";
+      events.emit("toast", { msg: error?.message || "Fish NFT mint failed", kind: "warn" });
     }
   }
 

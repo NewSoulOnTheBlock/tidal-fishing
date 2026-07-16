@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #239 - Berryplum Creekfish",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Berryplum Creekfish species file; traits and rarity score make this edition unique.",
+  "image": "/creekfish-berryplum.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Berryplum Creekfish"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "creekfish_berryplum"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "common"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 2,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Classic"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "obsidian"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "lunar"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "lake"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Sovereign"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 870,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 134,
+      "display_type": "number"
+    }
+  ]
+}

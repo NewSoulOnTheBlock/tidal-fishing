@@ -40,7 +40,8 @@ export function weightedPick(entries, getWeight) {
   return entries[entries.length - 1];
 }
 
-export const formatMoney = (n) => `${Math.round(n).toLocaleString("en-US")} $SBF`;
+const MONEY_SYMBOL = import.meta.env.VITE_GAME_TOKEN_SYMBOL || "USDG";
+export const formatMoney = (n) => `${Math.round(n).toLocaleString("en-US")} ${MONEY_SYMBOL}`;
 export const formatLength = (cm) => `${Math.round(cm)} cm`;
 export const formatWeight = (kg) =>
   kg < 1 ? `${Math.round(kg * 1000)} g` : `${kg.toFixed(kg < 10 ? 2 : 1)} kg`;

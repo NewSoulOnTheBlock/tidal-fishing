@@ -12,15 +12,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           three: ['three'],
-          solana: ['@solana/web3.js'],
-          wallet: [
-            '@wallet-standard/app',
-            '@wallet-standard/base',
-            '@wallet-standard/features',
-            '@solana/wallet-standard-features',
-            '@solana/wallet-standard-util',
-            '@solana-mobile/wallet-standard-mobile',
-          ],
         },
       },
     },
@@ -30,9 +21,6 @@ export default defineConfig({
       'three',
       'three/examples/jsm/objects/Water.js',
       'three/examples/jsm/objects/Sky.js',
-      '@solana/web3.js',
-      '@wallet-standard/app',
-      '@solana/wallet-standard-features',
     ],
   },
 });

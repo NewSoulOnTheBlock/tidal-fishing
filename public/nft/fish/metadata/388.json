@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #388 - Amberleaf Deepfin",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Amberleaf Deepfin species file; traits and rarity score make this edition unique.",
+  "image": "/deepfin-amberleaf.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Amberleaf Deepfin"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "deepfin_amberleaf"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "common"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 5,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Classic"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "lake"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Trickster"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 237,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 471,
+      "display_type": "number"
+    }
+  ]
+}

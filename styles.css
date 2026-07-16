@@ -2519,3 +2519,37 @@ body.ui-screen-open .weather-widget {
   .quest-row { grid-template-columns: 40px 1fr; }
   .quest-check { grid-column: 2; justify-self: end; min-height: 28px; }
 }
+
+.catch-nft-opportunity {
+  margin: 12px auto 0;
+  max-width: 420px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 200, 87, 0.45);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.16), rgba(95, 212, 255, 0.08));
+  color: #fff8dc;
+  display: grid;
+  gap: 3px;
+  text-align: center;
+  box-shadow: 0 0 24px rgba(255, 200, 87, 0.14);
+}
+.catch-nft-opportunity strong {
+  color: #ffc857;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.catch-nft-opportunity span {
+  color: rgba(255,255,255,0.86);
+  font-size: 0.9rem;
+}
+.catch-nft-opportunity.eligible {
+  border-color: rgba(98, 217, 139, 0.65);
+  background: linear-gradient(135deg, rgba(98, 217, 139, 0.18), rgba(255, 200, 87, 0.14));
+}
+.btn-nft-mint {
+  background: linear-gradient(135deg, #ffc857, #62d98b);
+  color: #101010;
+  border: 0;
+  font-weight: 900;
+}
+.btn-nft-mint:disabled { opacity: 0.75; }

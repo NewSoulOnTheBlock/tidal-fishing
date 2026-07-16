@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #390 - Tidejade Crownfin",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Tidejade Crownfin species file; traits and rarity score make this edition unique.",
+  "image": "/crownfin-tidejade.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Tidejade Crownfin"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "crownfin_tidejade"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "uncommon"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 9,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Royal"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Trophy"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "river"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "night"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Sovereign"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 369,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 376,
+      "display_type": "number"
+    }
+  ]
+}

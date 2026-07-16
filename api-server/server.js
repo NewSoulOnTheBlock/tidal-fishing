@@ -23,6 +23,10 @@ import { dirname, join } from 'node:path';
 import { evaluateCatch } from './catchRules.js';
 import { makeSkrResolver } from './skrNames.js';
 import { installRaffleSystem } from './raffle/routes.js';
+import manifest from '../shared/fish-nft-manifest.json' with { type: 'json' };
+import { normalizeEvmAddress, verifyEvmLogin, parseSignedMessageFields } from './auth/evmAuth.js';
+import { createOpportunityIfDue, getActiveOpportunity, tokenEntryForId, applyCatchToOpportunity } from './nft/opportunities.js';
+import { signFishClaim } from './nft/mintClaim.js';
 
 dotenv.config();
 
@@ -62,6 +66,7 @@ pool.query('SELECT NOW()', (err, res) => {
 // otherwise causes /api/catch/validate to 500 and breaks all fishing.
 async function initDatabase() {
   const ddl = `
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
     CREATE TABLE IF NOT EXISTS banned_wallets (
       id SERIAL PRIMARY KEY,
       wallet_address VARCHAR(44) UNIQUE NOT NULL,
@@ -106,6 +111,21 @@ async function initDatabase() {
       created_at TIMESTAMP DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_withdrawals_wallet ON withdrawals(wallet_address, created_at DESC);
+    CREATE TABLE IF NOT EXISTS nft_mint_opportunities (
+      id SERIAL PRIMARY KEY,
+      wallet_address VARCHAR(44) NOT NULL,
+      token_id INTEGER UNIQUE NOT NULL,
+      target_species_id VARCHAR(80) NOT NULL,
+      trigger_catch_count INTEGER NOT NULL DEFAULT 0,
+      catches_after_trigger INTEGER NOT NULL DEFAULT 0,
+      status VARCHAR(20) NOT NULL DEFAULT 'active',
+      claim_nonce VARCHAR(80) UNIQUE,
+      claimed_tx_hash VARCHAR(80),
+      expires_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_nft_opp_wallet_status ON nft_mint_opportunities(wallet_address, status, created_at DESC);
   `;
   try {
     await pool.query(ddl);
@@ -191,8 +211,10 @@ const DEFAULT_TRUSTED_ORIGINS = [
   'https://tidalfishing.fun',
   'http://localhost:8642',
   'http://localhost:8643',
+  'http://localhost:8644',
   'http://127.0.0.1:8642',
   'http://127.0.0.1:8643',
+  'http://127.0.0.1:8644',
 ];
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
 const CORS_ORIGINS = [
@@ -1278,6 +1300,80 @@ app.get('/api/player/profile/:wallet', cacheControl('no-store'), async (req, res
   }
 });
 
+
+function publicOpportunity(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    walletAddress: row.wallet_address,
+    tokenId: row.token_id,
+    targetSpeciesId: row.target_species_id,
+    triggerCatchCount: row.trigger_catch_count,
+    catchesAfterTrigger: row.catches_after_trigger,
+    status: row.status,
+    expiresAt: row.expires_at,
+    token: tokenEntryForId(manifest, row.token_id),
+  };
+}
+
+app.get('/api/nft/manifest', cacheControl('public, max-age=300'), async (req, res) => {
+  res.json(manifest);
+});
+
+app.get('/api/nft/opportunity/:wallet', cacheControl('no-store'), async (req, res) => {
+  try {
+    const wallet = normalizeEvmAddress(req.params.wallet);
+    if (!wallet) return res.status(400).json({ error: 'Invalid EVM wallet address' });
+    const row = await getActiveOpportunity(pool, wallet);
+    res.json({ opportunity: publicOpportunity(row) });
+  } catch (error) {
+    console.error('[nft] opportunity fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch NFT opportunity' });
+  }
+});
+
+app.post('/api/nft/mint-claim', writeLimiter, requireSession, async (req, res) => {
+  try {
+    const wallet = normalizeEvmAddress(req.body?.walletAddress || req.authWallet);
+    if (!wallet) return res.status(400).json({ error: 'Invalid EVM wallet address' });
+    const { rows } = await pool.query(
+      `UPDATE nft_mint_opportunities
+       SET claim_nonce = COALESCE(claim_nonce, encode(gen_random_bytes(16), 'hex')), updated_at=NOW()
+       WHERE wallet_address=$1 AND status='eligible'
+       RETURNING *`,
+      [wallet],
+    );
+    const opp = rows[0];
+    if (!opp) return res.status(404).json({ error: 'No eligible Fish NFT opportunity' });
+    const token = tokenEntryForId(manifest, opp.token_id);
+    const signature = await signFishClaim({
+      signerPrivateKey: process.env.FISH_NFT_SIGNER_PRIVATE_KEY,
+      contractAddress: process.env.FISH_NFT_CONTRACT_ADDRESS,
+      chainId: 4663,
+      wallet,
+      tokenId: opp.token_id,
+      nonce: `0x${opp.claim_nonce}`,
+    });
+    res.json({
+      success: true,
+      claim: {
+        wallet,
+        tokenId: opp.token_id,
+        metadata: token?.metadata,
+        contractAddress: process.env.FISH_NFT_CONTRACT_ADDRESS || null,
+        chainId: 4663,
+        nonce: `0x${opp.claim_nonce}`,
+        signature,
+        mode: signature ? 'signed-onchain-mint' : 'server-verified-local-claim',
+      },
+      opportunity: publicOpportunity(opp),
+    });
+  } catch (error) {
+    console.error('[nft] mint claim error:', error);
+    res.status(500).json({ error: 'Failed to create NFT mint claim' });
+  }
+});
+
 // ============================================================================
 // EXISTING ENDPOINTS
 // ============================================================================
@@ -1367,7 +1463,7 @@ app.post('/api/auth/session', writeLimiter, async (req, res) => {
     return res.status(401).json({ error: 'Login message expired — try again' });
   }
 
-  const { token, expiresAt } = issueSessionToken(walletAddress);
+  const { token, expiresAt } = issueSessionToken(normalizedWallet);
   res.json({ token, expiresAt });
 });
 
@@ -1552,6 +1648,35 @@ app.post('/api/player/catch', catchLimiter, requireSession, async (req, res) => 
       `UPDATE players SET total_earned = total_earned + $2, total_catches = total_catches + 1 WHERE id = $1`,
       [playerId, value]
     );
+
+    let nftOpportunity = null;
+    const activeOpp = await getActiveOpportunity(client, walletAddress);
+    const updatedOpp = applyCatchToOpportunity({ opportunity: activeOpp, speciesId });
+    if (updatedOpp && activeOpp && updatedOpp.status !== activeOpp.status) {
+      await client.query(
+        `UPDATE nft_mint_opportunities
+         SET status=$2, catches_after_trigger=$3, updated_at=NOW()
+         WHERE id=$1`,
+        [activeOpp.id, updatedOpp.status, updatedOpp.catches_after_trigger || 0]
+      );
+      nftOpportunity = { ...updatedOpp, token: tokenEntryForId(manifest, updatedOpp.token_id) };
+    } else if (updatedOpp && activeOpp && updatedOpp.catches_after_trigger !== activeOpp.catches_after_trigger) {
+      await client.query(
+        `UPDATE nft_mint_opportunities
+         SET catches_after_trigger=$2, updated_at=NOW()
+         WHERE id=$1`,
+        [activeOpp.id, updatedOpp.catches_after_trigger || 0]
+      );
+      nftOpportunity = { ...updatedOpp, token: tokenEntryForId(manifest, updatedOpp.token_id) };
+    } else {
+      const createdOpp = await createOpportunityIfDue({
+        pool: client,
+        wallet: walletAddress,
+        verifiedCatchCount: recordedCatches + 1,
+        manifest,
+      });
+      if (createdOpp) nftOpportunity = { ...createdOpp, token: tokenEntryForId(manifest, createdOpp.token_id) };
+    }
 
     await client.query('COMMIT');
 
@@ -1996,246 +2121,7 @@ app.get('/api/player/stats/:walletAddress', cacheControl('no-store'), async (req
   }
 });
 
-// 6. Get player journal
-app.get('/api/player/journal/:walletAddress', cacheControl('no-store'), async (req, res) => {
-  try {
-    const player = await pool.query(
-      'SELECT id FROM players WHERE wallet_address = $1',
-      [req.params.walletAddress]
-    );
-
-    if (player.rows.length === 0) {
-      return res.status(404).json({ error: 'Player not found' });
-    }
-
-    const journal = await pool.query(
-      `SELECT * FROM journal_entries 
-       WHERE player_id = $1 
-       ORDER BY first_caught_at DESC`,
-      [player.rows[0].id]
-    );
-
-    res.json({ journal: journal.rows });
-  } catch (error) {
-    console.error('[journal] Error:', error);
-    res.status(500).json({ error: 'Failed to fetch journal' });
-  }
-});
-
-
-// Prune the ip_activity audit table hourly so it can't grow without bound
-// (every catch-validate inserts a row). Keep ~2 days for rate-limit windows.
-const pruneTimer = setInterval(() => {
-  pool.query(`DELETE FROM ip_activity WHERE timestamp < NOW() - INTERVAL '2 days'`).catch(() => {});
-  const cutoff = Date.now() - 300_000;
-  for (const [ip, e] of _catchFlood) if (e.since < cutoff) _catchFlood.delete(ip);
-}, 3_600_000);
-pruneTimer.unref?.();
-
-// ============================================================================
-// BAN SYSTEM & CATCH VALIDATION
-// ============================================================================
-
-// Validate catch (prevents offline fishing)
-app.post('/api/catch/validate', catchLimiter, async (req, res) => {
-  const { walletAddress, speciesId, value } = req.body;
-  const ip = getClientIP(req);
-  
-  if (!walletAddress || !speciesId) {
-    return res.status(400).json({ error: 'Missing required fields', allowed: false });
-  }
-
-  // Reject globally-unreachable species up front (defense-in-depth; the
-  // authoritative gate is /api/player/catch). A species that appears in no
-  // spawn table can never be caught legitimately — only a tampered client
-  // would claim one (e.g. the high-value "fantasy" legendaries).
-  const spec = FISH_VALUES.species[String(speciesId).slice(0, 50)];
-  if (!spec || !spec.spawn || Object.keys(spec.spawn).length === 0) {
-    console.warn(`[catch-validate] REJECT unreachable species=${speciesId} wallet=${walletAddress}`);
-    return res.json({ allowed: false, error: 'That fish cannot be caught here' });
-  }
-  
-  try {
-    // Cross-instance soft cap: how many catches this WALLET has ALREADY been
-    // cleared for in the last minute. Keyed by wallet (not IP) so honest players
-    // who share an IP — a household, phones behind carrier-grade NAT, a cafe —
-    // never throttle each other. We COUNT first and only record an attempt when
-    // we actually allow it, so a rejected flood writes nothing to the audit
-    // table. The ceiling sits far above any human catch cadence but still sheds
-    // a scripted single-wallet flood; the authoritative gate is /api/player/catch.
-    const recent = await pool.query(
-      `SELECT COUNT(*) AS count FROM ip_activity
-       WHERE wallet_address = $1 AND action = 'catch_validate'
-       AND timestamp > NOW() - INTERVAL '1 minute'`,
-      [walletAddress]
-    );
-    if (parseInt(recent.rows[0].count, 10) >= CATCH_VALIDATE_SOFT_MAX) {
-      return res.json({ allowed: false, error: 'Too many catches. Please slow down.' });
-    }
-
-    // Cleared — record the allowed attempt so it counts toward the window.
-    await trackActivity(ip, walletAddress, 'catch_validate', { speciesId, value });
-    res.json({ allowed: true });
-  } catch (error) {
-    console.error('[catch-validate] Error:', error);
-    // Fail closed - don't allow catch on error
-    res.status(500).json({ error: 'Validation failed', allowed: false });
-  }
-});
-
-// Admin: Ban wallet
-app.post('/api/admin/ban/wallet', adminLimiter, async (req, res) => {
-  const { walletAddress, reason, adminKey } = req.body;
-  
-  if (!adminKeyValid(adminKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  if (!walletAddress) {
-    return res.status(400).json({ error: 'Wallet address required' });
-  }
-  
-  try {
-    await pool.query(
-      'INSERT INTO banned_wallets (wallet_address, reason) VALUES ($1, $2) ON CONFLICT (wallet_address) DO UPDATE SET reason = $2',
-      [walletAddress, reason || 'Violation of terms']
-    );
-    console.log(`[admin] Banned wallet: ${walletAddress}`);
-    res.json({ success: true, message: `Wallet ${walletAddress} has been banned` });
-  } catch (error) {
-    console.error('[admin] Ban wallet error:', error);
-    res.status(500).json({ error: 'Failed to ban wallet' });
-  }
-});
-
-// Admin: Ban IP
-app.post('/api/admin/ban/ip', adminLimiter, async (req, res) => {
-  const { ipAddress, reason, adminKey } = req.body;
-  
-  if (!adminKeyValid(adminKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  if (!ipAddress) {
-    return res.status(400).json({ error: 'IP address required' });
-  }
-  
-  try {
-    await pool.query(
-      'INSERT INTO banned_ips (ip_address, reason) VALUES ($1, $2) ON CONFLICT (ip_address) DO UPDATE SET reason = $2',
-      [ipAddress, reason || 'Violation of terms']
-    );
-    clearBanCache(ipAddress);
-    console.log(`[admin] Banned IP: ${ipAddress}`);
-    res.json({ success: true, message: `IP ${ipAddress} has been banned` });
-  } catch (error) {
-    console.error('[admin] Ban IP error:', error);
-    res.status(500).json({ error: 'Failed to ban IP' });
-  }
-});
-
-// Admin: Unban wallet
-app.post('/api/admin/unban/wallet', adminLimiter, async (req, res) => {
-  const { walletAddress, adminKey } = req.body;
-  
-  if (!adminKeyValid(adminKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  try {
-    await pool.query('DELETE FROM banned_wallets WHERE wallet_address = $1', [walletAddress]);
-    console.log(`[admin] Unbanned wallet: ${walletAddress}`);
-    res.json({ success: true, message: `Wallet ${walletAddress} has been unbanned` });
-  } catch (error) {
-    console.error('[admin] Unban wallet error:', error);
-    res.status(500).json({ error: 'Failed to unban wallet' });
-  }
-});
-
-// Admin: Unban IP
-app.post('/api/admin/unban/ip', adminLimiter, async (req, res) => {
-  const { ipAddress, adminKey } = req.body;
-  
-  if (!adminKeyValid(adminKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  try {
-    await pool.query('DELETE FROM banned_ips WHERE ip_address = $1', [ipAddress]);
-    clearBanCache(ipAddress);
-    console.log(`[admin] Unbanned IP: ${ipAddress}`);
-    res.json({ success: true, message: `IP ${ipAddress} has been unbanned` });
-  } catch (error) {
-    console.error('[admin] Unban IP error:', error);
-    res.status(500).json({ error: 'Failed to unban IP' });
-  }
-});
-
-// Admin: List bans
-app.get('/api/admin/bans', adminLimiter, async (req, res) => {
-  const { adminKey } = req.query;
-  
-  if (!adminKeyValid(adminKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  
-  try {
-    const wallets = await pool.query('SELECT * FROM banned_wallets ORDER BY banned_at DESC LIMIT 100');
-    const ips = await pool.query('SELECT * FROM banned_ips ORDER BY banned_at DESC LIMIT 100');
-    
-    res.json({
-      bannedWallets: wallets.rows,
-      bannedIPs: ips.rows
-    });
-  } catch (error) {
-    console.error('[admin] List bans error:', error);
-    res.status(500).json({ error: 'Failed to list bans' });
-  }
-});
-
-// ============================================================================
-// 24-HOUR FISH RAFFLE → GACHA PRIZE SYSTEM
-// Players exchange caught fish (their server-recorded catches) for weighted
-// raffle tickets; every 24h a winner is auto-selected and an admin manually
-// fulfills the Collector Crypt gacha prize (treasury pays USDC, NFT → winner).
-// Self-contained in ./raffle/* — this wires it into the app + Solana infra.
-// ============================================================================
-installRaffleSystem({
-  app,
-  pool,
-  connection,
-  treasuryKeypair,
-  requireSession,
-  adminKeyValid,
-  writeLimiter,
-  cacheControl,
-  announce: (msg, kind) => { insertSystemChat(msg, kind).catch(() => {}); },
-  logger: console,
-});
-
-// Serve the Vite frontend from the same Render web service. This makes the
-// Render/default/custom domain load the game at `/` instead of Express' default
-// "Cannot GET /" response, while keeping all `/api/*` routes handled above.
-const staticDir = join(__dirname, '..', 'dist');
-const indexHtml = join(staticDir, 'index.html');
-if (existsSync(indexHtml)) {
-  app.use(express.static(staticDir));
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'API route not found' });
-    res.sendFile(indexHtml);
-  });
-  console.log(`[server] Serving frontend from ${staticDir}`);
-} else {
-  app.get('/', (req, res) => {
-    res.type('html').send('<!doctype html><title>Bull Fish Blitz API</title><h1>Bull Fish Blitz API is live</h1><p>The frontend build was not found on this service. API routes are available under <code>/api/*</code>.</p>');
-  });
-}
-
-// Start server after every API/static route is registered.
 app.listen(PORT, () => {
-  console.log(`[server] Bull Fish Blitz listening on port ${PORT}`);
-  console.log(`[server] CORS origins: ${CORS_ORIGINS.join(', ')}`);
-  console.log(`[server] Treasury: ${treasuryKeypair ? '✅ Loaded' : '❌ Not configured'}`);
-  console.log(`[server] $SBF Mint: ${TIDE_MINT_STR}`);
-  console.log(`[server] Database: ${process.env.DATABASE_URL ? '✅ Connected' : '❌ Not configured'}`);
+  console.log(`Server running on port ${PORT}`);
 });
+

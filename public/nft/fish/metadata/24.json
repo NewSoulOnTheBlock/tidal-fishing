@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #24 - Redtrout Creekfish",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Redtrout Creekfish species file; traits and rarity score make this edition unique.",
+  "image": "/creekfish-redtrout.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Redtrout Creekfish"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "creekfish_redtrout"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "common"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 2,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Sunlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Fingerling"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Light"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "lake"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dawn"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Aggressive"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 252,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 437,
+      "display_type": "number"
+    }
+  ]
+}

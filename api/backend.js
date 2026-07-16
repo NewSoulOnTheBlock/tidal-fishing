@@ -1,4 +1,5 @@
 import https from "node:https";
+import manifest from "../shared/fish-nft-manifest.json" with { type: "json" };
 
 const DEFAULT_RENDER_API_BASE = "https://tidal-fishing-d1sn.onrender.com";
 
@@ -95,6 +96,10 @@ export default function handler(req, res) {
 
   const path = backendPath(req);
   if (!path) return res.status(400).json({ error: "Backend API path required", code: "BAD_BACKEND_PATH" });
+  if (req.method === "GET" && path === "/api/nft/manifest") {
+    res.setHeader("Cache-Control", "public, max-age=300");
+    return res.status(200).json(manifest);
+  }
 
   const base = (process.env.RENDER_API_BASE || DEFAULT_RENDER_API_BASE).replace(/\/+$/, "");
   const query = { ...(req.query || {}) };

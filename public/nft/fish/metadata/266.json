@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #266 - Shockflare Stormreaver",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Shockflare Stormreaver species file; traits and rarity score make this edition unique.",
+  "image": "/stormreaver-shockflare.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Shockflare Stormreaver"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "stormreaver_shockflare"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "legendary"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 2,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Sunlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "albino"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "tide"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Trophy"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Heavy"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dusk"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Trickster"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Top 50 Rarity"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1374,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 43,
+      "display_type": "number"
+    }
+  ]
+}

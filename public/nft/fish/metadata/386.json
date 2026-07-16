@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #386 - Thornback",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Thornback species file; traits and rarity score make this edition unique.",
+  "image": "/thornback.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Thornback"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "thornback"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "rare"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 6,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Royal"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "prismatic"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "solar"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "pier"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Wild"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1210,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 58,
+      "display_type": "number"
+    }
+  ]
+}

@@ -8,11 +8,10 @@
 import { TIDE_MINT_ADDRESS, fetchTideMarket, formatUsdCompact, formatUsdPrice } from "../web3/marketcap.js";
 
 const REFRESH_MS = 60_000;
-const DEXSCREENER_PAGE = `https://dexscreener.com/solana/${TIDE_MINT_ADDRESS}`;
-const SOLSCAN_TOKEN = `https://solscan.io/token/${TIDE_MINT_ADDRESS}`;
+const DEXSCREENER_PAGE = `https://dexscreener.com/robinhood/${TIDE_MINT_ADDRESS}`;
+const BLOCKSCOUT_TOKEN = `https://robinhoodchain.blockscout.com/token/${TIDE_MINT_ADDRESS}`;
 
-// Local short-address helper (avoids importing web3/solana.js, which would pull
-// the @solana/web3.js + wallet-standard graph into this lightweight UI module).
+// Local short-address helper kept dependency-free for this lazy widget.
 function shortAddr(s, head = 6, tail = 6) {
   if (!s) return "—";
   if (s.length <= head + tail + 1) return s;
@@ -111,7 +110,7 @@ export class MarketCapUI {
       addrEl.title = TIDE_MINT_ADDRESS;
     }
     if (dexLink) dexLink.href = DEXSCREENER_PAGE;
-    if (scanLink) scanLink.href = SOLSCAN_TOKEN;
+    if (scanLink) scanLink.href = BLOCKSCOUT_TOKEN;
 
     if (copyBtn) {
       copyBtn.addEventListener("click", () => this.copyAddress());

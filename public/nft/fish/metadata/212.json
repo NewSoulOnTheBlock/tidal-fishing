@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #212 - Albino Creekfish",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Albino Creekfish species file; traits and rarity score make this edition unique.",
+  "image": "/creekfish-albino.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Albino Creekfish"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "creekfish_albino"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "common"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 8,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Royal"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Keeper"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Solid"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "lake"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dawn"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Wild"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Collection"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 237,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 453,
+      "display_type": "number"
+    }
+  ]
+}

@@ -263,8 +263,9 @@ export async function registerCatch(fish) {
   // Record catch in database (async, best-effort). Casual catches carry no
   // value and need no wallet, so they're never persisted server-side.
   const publicKey = currentPublicKey();
+  let serverRecord = null;
   if (!casual && publicKey) {
-    recordCatchDB({
+    serverRecord = await recordCatchDB({
       walletAddress: publicKey.toString(),
       speciesId: fish.speciesId,
       location: S.world.current,
@@ -273,7 +274,10 @@ export async function registerCatch(fish) {
       weightKg: fish.weightKg,
       value: fish.value,
       perfectHook: fish.isPerfect || false,
-    }).catch(err => console.error('[economy] Failed to record catch to DB:', err));
+    }).catch(err => {
+      console.error('[economy] Failed to record catch to DB:', err);
+      return null;
+    });
   }
   
   // Check achievements. Skipped in Casual — achievement rewards pay $SBF, which
@@ -287,8 +291,11 @@ export async function registerCatch(fish) {
   }
 
   events.emit("inventory");
+  if (serverRecord?.nftOpportunity) {
+    events.emit("nft:opportunity", serverRecord.nftOpportunity);
+  }
   saveGame();
-  return { isNew, isRecord, xpGained, levels, isJackpot, casual };
+  return { isNew, isRecord, xpGained, levels, isJackpot, casual, nftOpportunity: serverRecord?.nftOpportunity || null };
 }
 
 export const inventoryValue = () =>

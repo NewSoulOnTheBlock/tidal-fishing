@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #322 - Aetherwing",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Aetherwing species file; traits and rarity score make this edition unique.",
+  "image": "/aetherwing.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Aetherwing"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "aetherwing"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "epic"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 8,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Royal"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "prismatic"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "solar"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Leviathan"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Record Mass"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "pier"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "day"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Ancient"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Top 50 Rarity"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1440,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 38,
+      "display_type": "number"
+    }
+  ]
+}

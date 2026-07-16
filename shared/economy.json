@@ -1,0 +1,23 @@
+{
+  "currencySymbol": "USDG",
+  "targetHouseEdgeBps": 1800,
+  "minHouseEdgeBps": 1200,
+  "platformFeeBps": 2500,
+  "rewardPoolBps": 6500,
+  "lpFeeBps": 700,
+  "sponsorBps": 300,
+  "minWithdrawalUi": 10,
+  "maxWithdrawalUiPerDay": 500,
+  "maxRewardPoolUtilizationBps": 7500,
+  "defaultBaitQty": 10,
+  "nftHunt": {
+    "enabled": true,
+    "collectionSize": 500,
+    "catchesPerOpportunity": 25,
+    "firstOpportunityAfterCatches": 10,
+    "opportunityExpiresAfterCatches": 15,
+    "opportunityExpiresAfterMs": 604800000,
+    "maxPendingOpportunitiesPerWallet": 1,
+    "mintPriceWei": "0"
+  }
+}

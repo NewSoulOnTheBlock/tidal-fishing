@@ -1,178 +1,52 @@
-// SOL payment helper - direct Solana native token transfers
-// Used as an alternative to $SBF token payments
+// Robinhood Chain native ETH payment helper. Function names retain the old
+// Solana API so the shop can be converted incrementally.
 
-import {
-  PublicKey,
-  Transaction,
-  SystemProgram,
-  ComputeBudgetProgram,
-  TransactionInstruction,
-} from "@solana/web3.js";
-import { connection, TIDE_TREASURY, base58Encode } from "./solana.js";
-import { signAndSendTransaction, currentPublicKey, signTransaction } from "./wallet.js";
+import { TIDE_TREASURY, NATIVE_SYMBOL } from "./solana.js";
+import { currentPublicKey, sendTransaction, rpc } from "./wallet.js";
 
-// Conversion rate: 1 SOL = X $SBF
-// Adjust based on your token economics
-const SOL_TO_TIDE_RATE = 50000; // 1 SOL = 50,000 $SBF
-const LAMPORTS_PER_SOL = 1_000_000_000;
+const SOL_TO_TIDE_RATE = 3500; // legacy name: USDG-equivalent per ETH fallback
+const WEI_PER_ETH = 10n ** 18n;
 
-/**
- * Convert $SBF amount to SOL equivalent
- * @param {number} tideAmount - Amount in $SBF
- * @returns {number} Amount in SOL
- */
-export function tideToSol(tideAmount) {
-  return tideAmount / SOL_TO_TIDE_RATE;
+export function tideToSol(tideAmount) { return Number(tideAmount) / SOL_TO_TIDE_RATE; }
+export function solToTide(solAmount) { return Number(solAmount) * SOL_TO_TIDE_RATE; }
+export function getConversionRate() { return SOL_TO_TIDE_RATE; }
+
+function parseEth(amount) {
+  const [whole, frac = ""] = String(amount).split(".");
+  return BigInt(whole || "0") * WEI_PER_ETH + BigInt((frac + "0".repeat(18)).slice(0, 18) || "0");
 }
+function hexQuantity(v) { return `0x${BigInt(v).toString(16)}`; }
 
-/**
- * Convert SOL amount to $SBF equivalent
- * @param {number} solAmount - Amount in SOL
- * @returns {number} Amount in $SBF
- */
-export function solToTide(solAmount) {
-  return solAmount * SOL_TO_TIDE_RATE;
-}
-
-/**
- * Get the conversion rate
- * @returns {number} How much $SBF equals 1 SOL
- */
-export function getConversionRate() {
-  return SOL_TO_TIDE_RATE;
-}
-
-/**
- * Transfer SOL from connected wallet to the treasury wallet, optionally splitting
- * a portion to a second recipient.
- * @param {number} solAmount - Total amount in SOL (e.g., 0.001)
- * @param {Object} options
- * @param {string} [options.memo]
- * @param {{to: (PublicKey|string), ratio?: number}} [options.split] - Send
- *   `ratio` (0..1, default 0.5) of the total to `to`; the remainder goes to the
- *   treasury. The payer is still debited the same total `solAmount`.
- * @returns {Promise<string>} Transaction signature
- */
 export async function paySol(solAmount, { memo, split } = {}) {
-  if (!TIDE_TREASURY) {
-    throw new Error("Treasury wallet not configured");
-  }
-  
+  if (!TIDE_TREASURY) throw new Error("Treasury wallet not configured");
   const payer = currentPublicKey();
-  if (!payer) throw new Error("Wallet not connected");
-  
-  // Convert SOL to lamports
-  const lamports = BigInt(Math.floor(solAmount * LAMPORTS_PER_SOL));
-  
-  // Check balance
-  const balance = await connection.getBalance(payer);
-  const requiredWithFee = lamports + 10_000n; // Add 0.00001 SOL for fees
-  
-  if (BigInt(balance) < requiredWithFee) {
-    const required = Number(requiredWithFee) / LAMPORTS_PER_SOL;
-    const have = balance / LAMPORTS_PER_SOL;
-    throw new Error(`Not enough SOL (have ${have.toFixed(6)}, need ${required.toFixed(6)})`);
-  }
-  
-  const ixs = [];
-  
-  // Set compute budget
-  ixs.push(ComputeBudgetProgram.setComputeUnitLimit({ units: 50_000 }));
+  const from = payer?.address || payer?.toString?.();
+  if (!from) throw new Error("Wallet not connected");
+  const totalWei = parseEth(solAmount);
+  if (totalWei <= 0n) throw new Error("Invalid ETH amount");
 
-  // Optionally split a portion to a second recipient; the remainder (and the
-  // full amount when there's no split) goes to the treasury. Total debited from
-  // the payer is unchanged.
-  let splitLamports = 0n;
-  let splitKey = null;
-  if (split && split.to) {
-    splitKey = split.to instanceof PublicKey ? split.to : new PublicKey(split.to);
+  const balanceHex = await rpc("eth_getBalance", [from, "latest"]);
+  if (BigInt(balanceHex) <= totalWei) throw new Error(`Not enough ${NATIVE_SYMBOL} for payment plus gas`);
+
+  let splitWei = 0n;
+  let splitTo = split?.to ? String(split.to) : "";
+  if (splitTo && /^0x[a-fA-F0-9]{40}$/.test(splitTo)) {
     const ratio = Number.isFinite(split.ratio) ? Math.min(1, Math.max(0, split.ratio)) : 0.5;
-    splitLamports = BigInt(Math.floor(Number(lamports) * ratio));
-    if (splitKey.equals(TIDE_TREASURY)) { splitKey = null; splitLamports = 0n; } // no-op self-split
+    splitWei = BigInt(Math.floor(Number(totalWei) * ratio));
+    if (splitTo.toLowerCase() === TIDE_TREASURY.toLowerCase()) splitWei = 0n;
   }
-  const treasuryLamports = lamports - splitLamports;
-
-  // Transfer the treasury portion (the full amount when there's no split).
-  if (treasuryLamports > 0n) {
-    ixs.push(
-      SystemProgram.transfer({
-        fromPubkey: payer,
-        toPubkey: TIDE_TREASURY,
-        lamports: Number(treasuryLamports),
-      })
-    );
-  }
-
-  // Transfer the split portion to the secondary recipient.
-  if (splitKey && splitLamports > 0n) {
-    ixs.push(
-      SystemProgram.transfer({
-        fromPubkey: payer,
-        toPubkey: splitKey,
-        lamports: Number(splitLamports),
-      })
-    );
-  }
-  
-  // Add memo if provided
-  if (memo) {
-    const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
-    ixs.push(new TransactionInstruction({
-      programId: MEMO_PROGRAM_ID,
-      keys: [],
-      data: new TextEncoder().encode(memo),
-    }));
-  }
-  
-  // Build transaction
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
-  const tx = new Transaction({
-    feePayer: payer,
-    blockhash,
-    lastValidBlockHeight,
-  });
-  tx.add(...ixs);
-  
-  // Sign and send
-  const serialized = tx.serialize({ requireAllSignatures: false });
-  let signature;
-  
-  try {
-    const sigBytes = await signAndSendTransaction(serialized);
-    signature = typeof sigBytes === 'string' ? sigBytes : base58Encode(sigBytes);
-  } catch (e) {
-    if (!/signAndSend/.test(e?.message ?? "")) throw e;
-    const signed = await signTransaction(serialized);
-    signature = await connection.sendRawTransaction(signed, { maxRetries: 3 });
-  }
-  
-  // Confirm
-  await connection.confirmTransaction(
-    { signature, blockhash, lastValidBlockHeight },
-    "confirmed"
-  );
-  
-  return signature;
+  const treasuryWei = totalWei - splitWei;
+  let firstHash = null;
+  if (treasuryWei > 0n) firstHash = await sendTransaction({ to: TIDE_TREASURY, value: hexQuantity(treasuryWei) });
+  if (splitWei > 0n) await sendTransaction({ to: splitTo, value: hexQuantity(splitWei) });
+  return firstHash;
 }
 
-/**
- * Check if SOL payment is available (wallet connected)
- */
-export function isSolPayEnabled() {
-  return Boolean(currentPublicKey() && TIDE_TREASURY);
-}
-
-/**
- * Format SOL amount for display
- * @param {number} solAmount - Amount in SOL
- * @returns {string} Formatted string like "0.001 SOL"
- */
+export function isSolPayEnabled() { return Boolean(currentPublicKey() && TIDE_TREASURY); }
 export function formatSol(solAmount) {
-  if (solAmount >= 1) {
-    return `${solAmount.toFixed(3)} SOL`;
-  } else if (solAmount >= 0.001) {
-    return `${solAmount.toFixed(4)} SOL`;
-  } else {
-    return `${solAmount.toFixed(6)} SOL`;
-  }
+  const n = Number(solAmount);
+  if (!Number.isFinite(n)) return `— ${NATIVE_SYMBOL}`;
+  if (n >= 1) return `${n.toFixed(3)} ${NATIVE_SYMBOL}`;
+  if (n >= 0.001) return `${n.toFixed(4)} ${NATIVE_SYMBOL}`;
+  return `${n.toFixed(6)} ${NATIVE_SYMBOL}`;
 }

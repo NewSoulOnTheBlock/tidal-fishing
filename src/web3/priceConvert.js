@@ -1,90 +1,35 @@
-// Live SOL <-> $SBF conversion via the Jupiter Price API v3.
-//
-// Bait (and anything else priced in SOL) shows a $SBF alternative price that
-// must equal the SOL cost's real market value. Rather than a fixed rate, we ask
-// Jupiter for the live USD price of both SOL and $SBF and derive how many $SBF
-// equal 1 SOL: tidePerSol = usd(SOL) / usd(TIDE).
-//
-// The result is cached (60s) so the synchronous shop UI can read it instantly;
-// `refreshRate()` is fire-and-forget and self-throttles. If Jupiter is ever
-// unreachable we fall back to a conservative constant so the shop never breaks.
-
-import { TIDE_MINT_ADDRESS } from "./marketcap.js";
-
-const SOL_MINT = "So11111111111111111111111111111111111111112";
-const JUPITER_URL = `https://lite-api.jup.ag/price/v3?ids=${SOL_MINT},${TIDE_MINT_ADDRESS}`;
+// Live ETH <-> USDG conversion for Robinhood Chain game pricing. The legacy
+// function names keep existing shop/economy code working during migration.
 
 const CACHE_TTL_MS = 60_000;
 const REQUEST_TIMEOUT_MS = 8000;
-
-// Only used if the live price can't be fetched at all. Intentionally rough.
-const FALLBACK_TIDE_PER_SOL = 4_000_000;
-
-let cachedRate = 0; // $SBF per 1 SOL; 0 = not yet loaded
+const FALLBACK_TIDE_PER_SOL = 3500; // USDG per ETH fallback
+let cachedRate = 0;
 let cachedAt = 0;
 let inflight = null;
 
-/** True once a live rate has been fetched at least once. */
-export function isRateLoaded() {
-  return cachedRate > 0;
-}
+export function isRateLoaded() { return cachedRate > 0; }
+export function tidePerSol() { return cachedRate > 0 ? cachedRate : FALLBACK_TIDE_PER_SOL; }
+export function solToTideLive(ethAmount) { const v = Number(ethAmount); return Number.isFinite(v) && v > 0 ? Math.max(1, Math.round(v * tidePerSol())) : 0; }
+export function tideToSolLive(usdgAmount) { const v = Number(usdgAmount); return Number.isFinite(v) && v > 0 ? v / tidePerSol() : 0; }
 
-/** Current $SBF-per-SOL rate (live cache, or the fallback if never loaded). */
-export function tidePerSol() {
-  return cachedRate > 0 ? cachedRate : FALLBACK_TIDE_PER_SOL;
-}
-
-/** Convert a SOL amount to its live $SBF-equivalent, rounded to a whole token. */
-export function solToTideLive(solAmount) {
-  const v = Number(solAmount);
-  if (!Number.isFinite(v) || v <= 0) return 0;
-  return Math.max(1, Math.round(v * tidePerSol()));
-}
-
-/** Convert a $SBF-equivalent fish value to live SOL for SOL sale displays. */
-export function tideToSolLive(tideAmount) {
-  const v = Number(tideAmount);
-  if (!Number.isFinite(v) || v <= 0) return 0;
-  return v / tidePerSol();
-}
-
-/**
- * Refresh the cached rate from Jupiter. Resolves to the ($SBF per SOL) rate.
- * Self-throttling: returns the cache immediately while it's fresh, and dedupes
- * concurrent callers onto a single in-flight request.
- */
 export async function refreshRate() {
   if (cachedRate > 0 && Date.now() - cachedAt < CACHE_TTL_MS) return cachedRate;
   if (inflight) return inflight;
-
   inflight = (async () => {
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
-      let data;
       try {
-        const res = await fetch(JUPITER_URL, {
-          signal: ctrl.signal,
-          headers: { accept: "application/json" },
-        });
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd", { signal: ctrl.signal, headers: { accept: "application/json" } });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        data = await res.json();
-      } finally {
-        clearTimeout(t);
-      }
-      const solUsd = Number(data?.[SOL_MINT]?.usdPrice);
-      const tideUsd = Number(data?.[TIDE_MINT_ADDRESS]?.usdPrice);
-      if (solUsd > 0 && tideUsd > 0) {
-        cachedRate = solUsd / tideUsd;
-        cachedAt = Date.now();
-      }
-    } catch (err) {
-      console.warn("[priceConvert] Jupiter rate failed:", err?.message || err);
-    } finally {
-      inflight = null;
-    }
+        const data = await res.json();
+        const ethUsd = Number(data?.ethereum?.usd);
+        if (ethUsd > 0) { cachedRate = ethUsd; cachedAt = Date.now(); }
+      } finally { clearTimeout(t); }
+    } catch (err) { console.warn("[priceConvert] ETH/USD rate failed:", err?.message || err); }
+    finally { inflight = null; }
     return tidePerSol();
   })();
-
   return inflight;
 }

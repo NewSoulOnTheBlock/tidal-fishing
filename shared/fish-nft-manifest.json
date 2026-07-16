@@ -1,0 +1,4507 @@
+{
+  "collectionSize": 500,
+  "speciesCount": 73,
+  "generatedAt": "2026-07-16T04:23:09.861Z",
+  "tokens": [
+    {
+      "tokenId": 1,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 584,
+      "rarityRank": 235,
+      "metadata": "/nft/fish/metadata/1.json"
+    },
+    {
+      "tokenId": 2,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 447,
+      "rarityRank": 328,
+      "metadata": "/nft/fish/metadata/2.json"
+    },
+    {
+      "tokenId": 3,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 447,
+      "rarityRank": 329,
+      "metadata": "/nft/fish/metadata/3.json"
+    },
+    {
+      "tokenId": 4,
+      "speciesId": "oracleray_jadeveil",
+      "speciesName": "Jadeveil Oracleray",
+      "image": "/oracleray-jadeveil.png",
+      "rarityScore": 2250,
+      "rarityRank": 16,
+      "metadata": "/nft/fish/metadata/4.json"
+    },
+    {
+      "tokenId": 5,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 1154,
+      "rarityRank": 67,
+      "metadata": "/nft/fish/metadata/5.json"
+    },
+    {
+      "tokenId": 6,
+      "speciesId": "royalcrest_obsidian",
+      "speciesName": "Obsidian Royalcrest",
+      "image": "/royalcrest-obsidian.png",
+      "rarityScore": 2547,
+      "rarityRank": 7,
+      "metadata": "/nft/fish/metadata/6.json"
+    },
+    {
+      "tokenId": 7,
+      "speciesId": "emperorray",
+      "speciesName": "Emperorray",
+      "image": "/emperorray.png",
+      "rarityScore": 1247,
+      "rarityRank": 52,
+      "metadata": "/nft/fish/metadata/7.json"
+    },
+    {
+      "tokenId": 8,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 969,
+      "rarityRank": 112,
+      "metadata": "/nft/fish/metadata/8.json"
+    },
+    {
+      "tokenId": 9,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 614,
+      "rarityRank": 225,
+      "metadata": "/nft/fish/metadata/9.json"
+    },
+    {
+      "tokenId": 10,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 527,
+      "rarityRank": 262,
+      "metadata": "/nft/fish/metadata/10.json"
+    },
+    {
+      "tokenId": 11,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 397,
+      "rarityRank": 342,
+      "metadata": "/nft/fish/metadata/11.json"
+    },
+    {
+      "tokenId": 12,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 744,
+      "rarityRank": 176,
+      "metadata": "/nft/fish/metadata/12.json"
+    },
+    {
+      "tokenId": 13,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 382,
+      "rarityRank": 360,
+      "metadata": "/nft/fish/metadata/13.json"
+    },
+    {
+      "tokenId": 14,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 447,
+      "rarityRank": 330,
+      "metadata": "/nft/fish/metadata/14.json"
+    },
+    {
+      "tokenId": 15,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 499,
+      "rarityRank": 271,
+      "metadata": "/nft/fish/metadata/15.json"
+    },
+    {
+      "tokenId": 16,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 889,
+      "rarityRank": 129,
+      "metadata": "/nft/fish/metadata/16.json"
+    },
+    {
+      "tokenId": 17,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 382,
+      "rarityRank": 361,
+      "metadata": "/nft/fish/metadata/17.json"
+    },
+    {
+      "tokenId": 18,
+      "speciesId": "royalcrest_emerald",
+      "speciesName": "Emerald Royalcrest",
+      "image": "/royalcrest-emerald.png",
+      "rarityScore": 1747,
+      "rarityRank": 21,
+      "metadata": "/nft/fish/metadata/18.json"
+    },
+    {
+      "tokenId": 19,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 534,
+      "rarityRank": 253,
+      "metadata": "/nft/fish/metadata/19.json"
+    },
+    {
+      "tokenId": 20,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 252,
+      "rarityRank": 436,
+      "metadata": "/nft/fish/metadata/20.json"
+    },
+    {
+      "tokenId": 21,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 614,
+      "rarityRank": 226,
+      "metadata": "/nft/fish/metadata/21.json"
+    },
+    {
+      "tokenId": 22,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 369,
+      "rarityRank": 371,
+      "metadata": "/nft/fish/metadata/22.json"
+    },
+    {
+      "tokenId": 23,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 447,
+      "rarityRank": 331,
+      "metadata": "/nft/fish/metadata/23.json"
+    },
+    {
+      "tokenId": 24,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 252,
+      "rarityRank": 437,
+      "metadata": "/nft/fish/metadata/24.json"
+    },
+    {
+      "tokenId": 25,
+      "speciesId": "royalcrest_obsidian",
+      "speciesName": "Obsidian Royalcrest",
+      "image": "/royalcrest-obsidian.png",
+      "rarityScore": 2814,
+      "rarityRank": 3,
+      "metadata": "/nft/fish/metadata/25.json"
+    },
+    {
+      "tokenId": 26,
+      "speciesId": "emperorray",
+      "speciesName": "Emperorray",
+      "image": "/emperorray.png",
+      "rarityScore": 1169,
+      "rarityRank": 64,
+      "metadata": "/nft/fish/metadata/26.json"
+    },
+    {
+      "tokenId": 27,
+      "speciesId": "oracleray_jadeveil",
+      "speciesName": "Jadeveil Oracleray",
+      "image": "/oracleray-jadeveil.png",
+      "rarityScore": 1117,
+      "rarityRank": 71,
+      "metadata": "/nft/fish/metadata/27.json"
+    },
+    {
+      "tokenId": 28,
+      "speciesId": "thornback_emberstone",
+      "speciesName": "Emberstone Thornback",
+      "image": "/thornback-emberstone.png",
+      "rarityScore": 1220,
+      "rarityRank": 55,
+      "metadata": "/nft/fish/metadata/28.json"
+    },
+    {
+      "tokenId": 29,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 664,
+      "rarityRank": 209,
+      "metadata": "/nft/fish/metadata/29.json"
+    },
+    {
+      "tokenId": 30,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 602,
+      "rarityRank": 229,
+      "metadata": "/nft/fish/metadata/30.json"
+    },
+    {
+      "tokenId": 31,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 667,
+      "rarityRank": 207,
+      "metadata": "/nft/fish/metadata/31.json"
+    },
+    {
+      "tokenId": 32,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 949,
+      "rarityRank": 116,
+      "metadata": "/nft/fish/metadata/32.json"
+    },
+    {
+      "tokenId": 33,
+      "speciesId": "dreadmaw",
+      "speciesName": "Dreadmaw",
+      "image": "/dreadmaw.png",
+      "rarityScore": 1194,
+      "rarityRank": 62,
+      "metadata": "/nft/fish/metadata/33.json"
+    },
+    {
+      "tokenId": 34,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 462,
+      "rarityRank": 289,
+      "metadata": "/nft/fish/metadata/34.json"
+    },
+    {
+      "tokenId": 35,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 527,
+      "rarityRank": 263,
+      "metadata": "/nft/fish/metadata/35.json"
+    },
+    {
+      "tokenId": 36,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 754,
+      "rarityRank": 173,
+      "metadata": "/nft/fish/metadata/36.json"
+    },
+    {
+      "tokenId": 37,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 1109,
+      "rarityRank": 75,
+      "metadata": "/nft/fish/metadata/37.json"
+    },
+    {
+      "tokenId": 38,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 1320,
+      "rarityRank": 45,
+      "metadata": "/nft/fish/metadata/38.json"
+    },
+    {
+      "tokenId": 39,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 317,
+      "rarityRank": 385,
+      "metadata": "/nft/fish/metadata/39.json"
+    },
+    {
+      "tokenId": 40,
+      "speciesId": "oracleray_jadeveil",
+      "speciesName": "Jadeveil Oracleray",
+      "image": "/oracleray-jadeveil.png",
+      "rarityScore": 1254,
+      "rarityRank": 51,
+      "metadata": "/nft/fish/metadata/40.json"
+    },
+    {
+      "tokenId": 41,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 767,
+      "rarityRank": 165,
+      "metadata": "/nft/fish/metadata/41.json"
+    },
+    {
+      "tokenId": 42,
+      "speciesId": "royalcrest_obsidian",
+      "speciesName": "Obsidian Royalcrest",
+      "image": "/royalcrest-obsidian.png",
+      "rarityScore": 2352,
+      "rarityRank": 12,
+      "metadata": "/nft/fish/metadata/42.json"
+    },
+    {
+      "tokenId": 43,
+      "speciesId": "emperorray",
+      "speciesName": "Emperorray",
+      "image": "/emperorray.png",
+      "rarityScore": 1599,
+      "rarityRank": 27,
+      "metadata": "/nft/fish/metadata/43.json"
+    },
+    {
+      "tokenId": 44,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 804,
+      "rarityRank": 151,
+      "metadata": "/nft/fish/metadata/44.json"
+    },
+    {
+      "tokenId": 45,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 667,
+      "rarityRank": 208,
+      "metadata": "/nft/fish/metadata/45.json"
+    },
+    {
+      "tokenId": 46,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 870,
+      "rarityRank": 131,
+      "metadata": "/nft/fish/metadata/46.json"
+    },
+    {
+      "tokenId": 47,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 1220,
+      "rarityRank": 56,
+      "metadata": "/nft/fish/metadata/47.json"
+    },
+    {
+      "tokenId": 48,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 499,
+      "rarityRank": 272,
+      "metadata": "/nft/fish/metadata/48.json"
+    },
+    {
+      "tokenId": 49,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 317,
+      "rarityRank": 386,
+      "metadata": "/nft/fish/metadata/49.json"
+    },
+    {
+      "tokenId": 50,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 950,
+      "rarityRank": 113,
+      "metadata": "/nft/fish/metadata/50.json"
+    },
+    {
+      "tokenId": 51,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 500,
+      "rarityRank": 269,
+      "metadata": "/nft/fish/metadata/51.json"
+    },
+    {
+      "tokenId": 52,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 397,
+      "rarityRank": 343,
+      "metadata": "/nft/fish/metadata/52.json"
+    },
+    {
+      "tokenId": 53,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 534,
+      "rarityRank": 254,
+      "metadata": "/nft/fish/metadata/53.json"
+    },
+    {
+      "tokenId": 54,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 1019,
+      "rarityRank": 99,
+      "metadata": "/nft/fish/metadata/54.json"
+    },
+    {
+      "tokenId": 55,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 472,
+      "rarityRank": 285,
+      "metadata": "/nft/fish/metadata/55.json"
+    },
+    {
+      "tokenId": 56,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 397,
+      "rarityRank": 344,
+      "metadata": "/nft/fish/metadata/56.json"
+    },
+    {
+      "tokenId": 57,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 804,
+      "rarityRank": 152,
+      "metadata": "/nft/fish/metadata/57.json"
+    },
+    {
+      "tokenId": 58,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 1164,
+      "rarityRank": 66,
+      "metadata": "/nft/fish/metadata/58.json"
+    },
+    {
+      "tokenId": 59,
+      "speciesId": "oracleray_jadeveil",
+      "speciesName": "Jadeveil Oracleray",
+      "image": "/oracleray-jadeveil.png",
+      "rarityScore": 972,
+      "rarityRank": 110,
+      "metadata": "/nft/fish/metadata/59.json"
+    },
+    {
+      "tokenId": 60,
+      "speciesId": "skyspear",
+      "speciesName": "Skyspear",
+      "image": "/skyspear.png",
+      "rarityScore": 602,
+      "rarityRank": 230,
+      "metadata": "/nft/fish/metadata/60.json"
+    },
+    {
+      "tokenId": 61,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 934,
+      "rarityRank": 123,
+      "metadata": "/nft/fish/metadata/61.json"
+    },
+    {
+      "tokenId": 62,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 754,
+      "rarityRank": 174,
+      "metadata": "/nft/fish/metadata/62.json"
+    },
+    {
+      "tokenId": 63,
+      "speciesId": "thornback_emberstone",
+      "speciesName": "Emberstone Thornback",
+      "image": "/thornback-emberstone.png",
+      "rarityScore": 537,
+      "rarityRank": 246,
+      "metadata": "/nft/fish/metadata/63.json"
+    },
+    {
+      "tokenId": 64,
+      "speciesId": "royalcrest",
+      "speciesName": "Royalcrest",
+      "image": "/royalcrest.png",
+      "rarityScore": 1682,
+      "rarityRank": 22,
+      "metadata": "/nft/fish/metadata/64.json"
+    },
+    {
+      "tokenId": 65,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1544,
+      "rarityRank": 32,
+      "metadata": "/nft/fish/metadata/65.json"
+    },
+    {
+      "tokenId": 66,
+      "speciesId": "oracleray_abyssglow",
+      "speciesName": "Abyssglow Oracleray",
+      "image": "/oracleray-abyssglow.png",
+      "rarityScore": 949,
+      "rarityRank": 117,
+      "metadata": "/nft/fish/metadata/66.json"
+    },
+    {
+      "tokenId": 67,
+      "speciesId": "skyspear_voidfrost",
+      "speciesName": "Voidfrost Skyspear",
+      "image": "/skyspear-voidfrost.png",
+      "rarityScore": 897,
+      "rarityRank": 126,
+      "metadata": "/nft/fish/metadata/67.json"
+    },
+    {
+      "tokenId": 68,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 370,
+      "rarityRank": 370,
+      "metadata": "/nft/fish/metadata/68.json"
+    },
+    {
+      "tokenId": 69,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 1040,
+      "rarityRank": 89,
+      "metadata": "/nft/fish/metadata/69.json"
+    },
+    {
+      "tokenId": 70,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 317,
+      "rarityRank": 387,
+      "metadata": "/nft/fish/metadata/70.json"
+    },
+    {
+      "tokenId": 71,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 369,
+      "rarityRank": 372,
+      "metadata": "/nft/fish/metadata/71.json"
+    },
+    {
+      "tokenId": 72,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 714,
+      "rarityRank": 184,
+      "metadata": "/nft/fish/metadata/72.json"
+    },
+    {
+      "tokenId": 73,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 332,
+      "rarityRank": 379,
+      "metadata": "/nft/fish/metadata/73.json"
+    },
+    {
+      "tokenId": 74,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 397,
+      "rarityRank": 345,
+      "metadata": "/nft/fish/metadata/74.json"
+    },
+    {
+      "tokenId": 75,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 449,
+      "rarityRank": 325,
+      "metadata": "/nft/fish/metadata/75.json"
+    },
+    {
+      "tokenId": 76,
+      "speciesId": "thornback_emberstone",
+      "speciesName": "Emberstone Thornback",
+      "image": "/thornback-emberstone.png",
+      "rarityScore": 834,
+      "rarityRank": 138,
+      "metadata": "/nft/fish/metadata/76.json"
+    },
+    {
+      "tokenId": 77,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 472,
+      "rarityRank": 286,
+      "metadata": "/nft/fish/metadata/77.json"
+    },
+    {
+      "tokenId": 78,
+      "speciesId": "emperorray",
+      "speciesName": "Emperorray",
+      "image": "/emperorray.png",
+      "rarityScore": 1037,
+      "rarityRank": 90,
+      "metadata": "/nft/fish/metadata/78.json"
+    },
+    {
+      "tokenId": 79,
+      "speciesId": "royalcrest_obsidian",
+      "speciesName": "Obsidian Royalcrest",
+      "image": "/royalcrest-obsidian.png",
+      "rarityScore": 2474,
+      "rarityRank": 9,
+      "metadata": "/nft/fish/metadata/79.json"
+    },
+    {
+      "tokenId": 80,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 527,
+      "rarityRank": 264,
+      "metadata": "/nft/fish/metadata/80.json"
+    },
+    {
+      "tokenId": 81,
+      "speciesId": "crownfin",
+      "speciesName": "Crownfin",
+      "image": "/crownfin.png",
+      "rarityScore": 1280,
+      "rarityRank": 49,
+      "metadata": "/nft/fish/metadata/81.json"
+    },
+    {
+      "tokenId": 82,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 534,
+      "rarityRank": 255,
+      "metadata": "/nft/fish/metadata/82.json"
+    },
+    {
+      "tokenId": 83,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 397,
+      "rarityRank": 346,
+      "metadata": "/nft/fish/metadata/83.json"
+    },
+    {
+      "tokenId": 84,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 510,
+      "rarityRank": 267,
+      "metadata": "/nft/fish/metadata/84.json"
+    },
+    {
+      "tokenId": 85,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 1090,
+      "rarityRank": 76,
+      "metadata": "/nft/fish/metadata/85.json"
+    },
+    {
+      "tokenId": 86,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 624,
+      "rarityRank": 216,
+      "metadata": "/nft/fish/metadata/86.json"
+    },
+    {
+      "tokenId": 87,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 537,
+      "rarityRank": 247,
+      "metadata": "/nft/fish/metadata/87.json"
+    },
+    {
+      "tokenId": 88,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 317,
+      "rarityRank": 388,
+      "metadata": "/nft/fish/metadata/88.json"
+    },
+    {
+      "tokenId": 89,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 252,
+      "rarityRank": 438,
+      "metadata": "/nft/fish/metadata/89.json"
+    },
+    {
+      "tokenId": 90,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 317,
+      "rarityRank": 389,
+      "metadata": "/nft/fish/metadata/90.json"
+    },
+    {
+      "tokenId": 91,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 494,
+      "rarityRank": 273,
+      "metadata": "/nft/fish/metadata/91.json"
+    },
+    {
+      "tokenId": 92,
+      "speciesId": "stormreaver_tideflare",
+      "speciesName": "Tideflare Stormreaver",
+      "image": "/stormreaver-tideflare.png",
+      "rarityScore": 2250,
+      "rarityRank": 17,
+      "metadata": "/nft/fish/metadata/92.json"
+    },
+    {
+      "tokenId": 93,
+      "speciesId": "royalcrest_emerald",
+      "speciesName": "Emerald Royalcrest",
+      "image": "/royalcrest-emerald.png",
+      "rarityScore": 1617,
+      "rarityRank": 25,
+      "metadata": "/nft/fish/metadata/93.json"
+    },
+    {
+      "tokenId": 94,
+      "speciesId": "dreadmaw",
+      "speciesName": "Dreadmaw",
+      "image": "/dreadmaw.png",
+      "rarityScore": 767,
+      "rarityRank": 166,
+      "metadata": "/nft/fish/metadata/94.json"
+    },
+    {
+      "tokenId": 95,
+      "speciesId": "oracleray_emberbloom",
+      "speciesName": "Emberbloom Oracleray",
+      "image": "/oracleray-emberbloom.png",
+      "rarityScore": 1154,
+      "rarityRank": 68,
+      "metadata": "/nft/fish/metadata/95.json"
+    },
+    {
+      "tokenId": 96,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 472,
+      "rarityRank": 287,
+      "metadata": "/nft/fish/metadata/96.json"
+    },
+    {
+      "tokenId": 97,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 767,
+      "rarityRank": 167,
+      "metadata": "/nft/fish/metadata/97.json"
+    },
+    {
+      "tokenId": 98,
+      "speciesId": "crownfin",
+      "speciesName": "Crownfin",
+      "image": "/crownfin.png",
+      "rarityScore": 397,
+      "rarityRank": 347,
+      "metadata": "/nft/fish/metadata/98.json"
+    },
+    {
+      "tokenId": 99,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 484,
+      "rarityRank": 283,
+      "metadata": "/nft/fish/metadata/99.json"
+    },
+    {
+      "tokenId": 100,
+      "speciesId": "stormreaver_tideflare",
+      "speciesName": "Tideflare Stormreaver",
+      "image": "/stormreaver-tideflare.png",
+      "rarityScore": 1559,
+      "rarityRank": 29,
+      "metadata": "/nft/fish/metadata/100.json"
+    },
+    {
+      "tokenId": 101,
+      "speciesId": "royalcrest_emerald",
+      "speciesName": "Emerald Royalcrest",
+      "image": "/royalcrest-emerald.png",
+      "rarityScore": 1552,
+      "rarityRank": 30,
+      "metadata": "/nft/fish/metadata/101.json"
+    },
+    {
+      "tokenId": 102,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 237,
+      "rarityRank": 446,
+      "metadata": "/nft/fish/metadata/102.json"
+    },
+    {
+      "tokenId": 103,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 289,
+      "rarityRank": 429,
+      "metadata": "/nft/fish/metadata/103.json"
+    },
+    {
+      "tokenId": 104,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 1090,
+      "rarityRank": 77,
+      "metadata": "/nft/fish/metadata/104.json"
+    },
+    {
+      "tokenId": 105,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 832,
+      "rarityRank": 140,
+      "metadata": "/nft/fish/metadata/105.json"
+    },
+    {
+      "tokenId": 106,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 897,
+      "rarityRank": 127,
+      "metadata": "/nft/fish/metadata/106.json"
+    },
+    {
+      "tokenId": 107,
+      "speciesId": "oracleray_emberbloom",
+      "speciesName": "Emberbloom Oracleray",
+      "image": "/oracleray-emberbloom.png",
+      "rarityScore": 854,
+      "rarityRank": 137,
+      "metadata": "/nft/fish/metadata/107.json"
+    },
+    {
+      "tokenId": 108,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 990,
+      "rarityRank": 102,
+      "metadata": "/nft/fish/metadata/108.json"
+    },
+    {
+      "tokenId": 109,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 537,
+      "rarityRank": 248,
+      "metadata": "/nft/fish/metadata/109.json"
+    },
+    {
+      "tokenId": 110,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 579,
+      "rarityRank": 237,
+      "metadata": "/nft/fish/metadata/110.json"
+    },
+    {
+      "tokenId": 111,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 317,
+      "rarityRank": 390,
+      "metadata": "/nft/fish/metadata/111.json"
+    },
+    {
+      "tokenId": 112,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 252,
+      "rarityRank": 439,
+      "metadata": "/nft/fish/metadata/112.json"
+    },
+    {
+      "tokenId": 113,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 889,
+      "rarityRank": 130,
+      "metadata": "/nft/fish/metadata/113.json"
+    },
+    {
+      "tokenId": 114,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 404,
+      "rarityRank": 340,
+      "metadata": "/nft/fish/metadata/114.json"
+    },
+    {
+      "tokenId": 115,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 317,
+      "rarityRank": 391,
+      "metadata": "/nft/fish/metadata/115.json"
+    },
+    {
+      "tokenId": 116,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 172,
+      "rarityRank": 491,
+      "metadata": "/nft/fish/metadata/116.json"
+    },
+    {
+      "tokenId": 117,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 790,
+      "rarityRank": 159,
+      "metadata": "/nft/fish/metadata/117.json"
+    },
+    {
+      "tokenId": 118,
+      "speciesId": "royalcrest_emerald",
+      "speciesName": "Emerald Royalcrest",
+      "image": "/royalcrest-emerald.png",
+      "rarityScore": 1674,
+      "rarityRank": 24,
+      "metadata": "/nft/fish/metadata/118.json"
+    },
+    {
+      "tokenId": 119,
+      "speciesId": "stormreaver_tideflare",
+      "speciesName": "Tideflare Stormreaver",
+      "image": "/stormreaver-tideflare.png",
+      "rarityScore": 1117,
+      "rarityRank": 72,
+      "metadata": "/nft/fish/metadata/119.json"
+    },
+    {
+      "tokenId": 120,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 447,
+      "rarityRank": 332,
+      "metadata": "/nft/fish/metadata/120.json"
+    },
+    {
+      "tokenId": 121,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 374,
+      "rarityRank": 362,
+      "metadata": "/nft/fish/metadata/121.json"
+    },
+    {
+      "tokenId": 122,
+      "speciesId": "royalcrest_amethyst",
+      "speciesName": "Amethyst Royalcrest",
+      "image": "/royalcrest-amethyst.png",
+      "rarityScore": 2340,
+      "rarityRank": 14,
+      "metadata": "/nft/fish/metadata/122.json"
+    },
+    {
+      "tokenId": 123,
+      "speciesId": "bullfishblitz",
+      "speciesName": "Bull Fish Blitz",
+      "image": "/bull-fish-blitz-fish.png",
+      "rarityScore": 2520,
+      "rarityRank": 8,
+      "metadata": "/nft/fish/metadata/123.json"
+    },
+    {
+      "tokenId": 124,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 897,
+      "rarityRank": 128,
+      "metadata": "/nft/fish/metadata/124.json"
+    },
+    {
+      "tokenId": 125,
+      "speciesId": "stormreaver",
+      "speciesName": "Stormreaver",
+      "image": "/stormreaver.png",
+      "rarityScore": 1384,
+      "rarityRank": 41,
+      "metadata": "/nft/fish/metadata/125.json"
+    },
+    {
+      "tokenId": 126,
+      "speciesId": "skyspear",
+      "speciesName": "Skyspear",
+      "image": "/skyspear.png",
+      "rarityScore": 1360,
+      "rarityRank": 44,
+      "metadata": "/nft/fish/metadata/126.json"
+    },
+    {
+      "tokenId": 127,
+      "speciesId": "skyspear_voidfrost",
+      "speciesName": "Voidfrost Skyspear",
+      "image": "/skyspear-voidfrost.png",
+      "rarityScore": 767,
+      "rarityRank": 168,
+      "metadata": "/nft/fish/metadata/127.json"
+    },
+    {
+      "tokenId": 128,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 397,
+      "rarityRank": 348,
+      "metadata": "/nft/fish/metadata/128.json"
+    },
+    {
+      "tokenId": 129,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 449,
+      "rarityRank": 326,
+      "metadata": "/nft/fish/metadata/129.json"
+    },
+    {
+      "tokenId": 130,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 252,
+      "rarityRank": 440,
+      "metadata": "/nft/fish/metadata/130.json"
+    },
+    {
+      "tokenId": 131,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 830,
+      "rarityRank": 141,
+      "metadata": "/nft/fish/metadata/131.json"
+    },
+    {
+      "tokenId": 132,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 624,
+      "rarityRank": 217,
+      "metadata": "/nft/fish/metadata/132.json"
+    },
+    {
+      "tokenId": 133,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 317,
+      "rarityRank": 392,
+      "metadata": "/nft/fish/metadata/133.json"
+    },
+    {
+      "tokenId": 134,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 602,
+      "rarityRank": 231,
+      "metadata": "/nft/fish/metadata/134.json"
+    },
+    {
+      "tokenId": 135,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 979,
+      "rarityRank": 109,
+      "metadata": "/nft/fish/metadata/135.json"
+    },
+    {
+      "tokenId": 136,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 819,
+      "rarityRank": 150,
+      "metadata": "/nft/fish/metadata/136.json"
+    },
+    {
+      "tokenId": 137,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 457,
+      "rarityRank": 291,
+      "metadata": "/nft/fish/metadata/137.json"
+    },
+    {
+      "tokenId": 138,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 237,
+      "rarityRank": 447,
+      "metadata": "/nft/fish/metadata/138.json"
+    },
+    {
+      "tokenId": 139,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 1320,
+      "rarityRank": 46,
+      "metadata": "/nft/fish/metadata/139.json"
+    },
+    {
+      "tokenId": 140,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 237,
+      "rarityRank": 448,
+      "metadata": "/nft/fish/metadata/140.json"
+    },
+    {
+      "tokenId": 141,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 494,
+      "rarityRank": 274,
+      "metadata": "/nft/fish/metadata/141.json"
+    },
+    {
+      "tokenId": 142,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 990,
+      "rarityRank": 103,
+      "metadata": "/nft/fish/metadata/142.json"
+    },
+    {
+      "tokenId": 143,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 317,
+      "rarityRank": 393,
+      "metadata": "/nft/fish/metadata/143.json"
+    },
+    {
+      "tokenId": 144,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 237,
+      "rarityRank": 449,
+      "metadata": "/nft/fish/metadata/144.json"
+    },
+    {
+      "tokenId": 145,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 454,
+      "rarityRank": 314,
+      "metadata": "/nft/fish/metadata/145.json"
+    },
+    {
+      "tokenId": 146,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 870,
+      "rarityRank": 132,
+      "metadata": "/nft/fish/metadata/146.json"
+    },
+    {
+      "tokenId": 147,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 290,
+      "rarityRank": 425,
+      "metadata": "/nft/fish/metadata/147.json"
+    },
+    {
+      "tokenId": 148,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 317,
+      "rarityRank": 394,
+      "metadata": "/nft/fish/metadata/148.json"
+    },
+    {
+      "tokenId": 149,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 454,
+      "rarityRank": 315,
+      "metadata": "/nft/fish/metadata/149.json"
+    },
+    {
+      "tokenId": 150,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 317,
+      "rarityRank": 395,
+      "metadata": "/nft/fish/metadata/150.json"
+    },
+    {
+      "tokenId": 151,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 1070,
+      "rarityRank": 81,
+      "metadata": "/nft/fish/metadata/151.json"
+    },
+    {
+      "tokenId": 152,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 574,
+      "rarityRank": 238,
+      "metadata": "/nft/fish/metadata/152.json"
+    },
+    {
+      "tokenId": 153,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 237,
+      "rarityRank": 450,
+      "metadata": "/nft/fish/metadata/153.json"
+    },
+    {
+      "tokenId": 154,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 430,
+      "rarityRank": 334,
+      "metadata": "/nft/fish/metadata/154.json"
+    },
+    {
+      "tokenId": 155,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 1090,
+      "rarityRank": 78,
+      "metadata": "/nft/fish/metadata/155.json"
+    },
+    {
+      "tokenId": 156,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 454,
+      "rarityRank": 316,
+      "metadata": "/nft/fish/metadata/156.json"
+    },
+    {
+      "tokenId": 157,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 397,
+      "rarityRank": 349,
+      "metadata": "/nft/fish/metadata/157.json"
+    },
+    {
+      "tokenId": 158,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 622,
+      "rarityRank": 218,
+      "metadata": "/nft/fish/metadata/158.json"
+    },
+    {
+      "tokenId": 159,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 1280,
+      "rarityRank": 50,
+      "metadata": "/nft/fish/metadata/159.json"
+    },
+    {
+      "tokenId": 160,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 457,
+      "rarityRank": 292,
+      "metadata": "/nft/fish/metadata/160.json"
+    },
+    {
+      "tokenId": 161,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 794,
+      "rarityRank": 157,
+      "metadata": "/nft/fish/metadata/161.json"
+    },
+    {
+      "tokenId": 162,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 1320,
+      "rarityRank": 47,
+      "metadata": "/nft/fish/metadata/162.json"
+    },
+    {
+      "tokenId": 163,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 317,
+      "rarityRank": 396,
+      "metadata": "/nft/fish/metadata/163.json"
+    },
+    {
+      "tokenId": 164,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 767,
+      "rarityRank": 169,
+      "metadata": "/nft/fish/metadata/164.json"
+    },
+    {
+      "tokenId": 165,
+      "speciesId": "dreadmaw",
+      "speciesName": "Dreadmaw",
+      "image": "/dreadmaw.png",
+      "rarityScore": 904,
+      "rarityRank": 125,
+      "metadata": "/nft/fish/metadata/165.json"
+    },
+    {
+      "tokenId": 166,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 1130,
+      "rarityRank": 69,
+      "metadata": "/nft/fish/metadata/166.json"
+    },
+    {
+      "tokenId": 167,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 457,
+      "rarityRank": 293,
+      "metadata": "/nft/fish/metadata/167.json"
+    },
+    {
+      "tokenId": 168,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 369,
+      "rarityRank": 373,
+      "metadata": "/nft/fish/metadata/168.json"
+    },
+    {
+      "tokenId": 169,
+      "speciesId": "deepfin",
+      "speciesName": "Teal Deepfin",
+      "image": "/deepfin.png",
+      "rarityScore": 744,
+      "rarityRank": 177,
+      "metadata": "/nft/fish/metadata/169.json"
+    },
+    {
+      "tokenId": 170,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 317,
+      "rarityRank": 397,
+      "metadata": "/nft/fish/metadata/170.json"
+    },
+    {
+      "tokenId": 171,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 210,
+      "rarityRank": 482,
+      "metadata": "/nft/fish/metadata/171.json"
+    },
+    {
+      "tokenId": 172,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 719,
+      "rarityRank": 182,
+      "metadata": "/nft/fish/metadata/172.json"
+    },
+    {
+      "tokenId": 173,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 454,
+      "rarityRank": 317,
+      "metadata": "/nft/fish/metadata/173.json"
+    },
+    {
+      "tokenId": 174,
+      "speciesId": "emperorray",
+      "speciesName": "Emperorray",
+      "image": "/emperorray.png",
+      "rarityScore": 1037,
+      "rarityRank": 91,
+      "metadata": "/nft/fish/metadata/174.json"
+    },
+    {
+      "tokenId": 175,
+      "speciesId": "oracleray_jadeveil",
+      "speciesName": "Jadeveil Oracleray",
+      "image": "/oracleray-jadeveil.png",
+      "rarityScore": 1037,
+      "rarityRank": 92,
+      "metadata": "/nft/fish/metadata/175.json"
+    },
+    {
+      "tokenId": 176,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 870,
+      "rarityRank": 133,
+      "metadata": "/nft/fish/metadata/176.json"
+    },
+    {
+      "tokenId": 177,
+      "speciesId": "royalcrest_obsidian",
+      "speciesName": "Obsidian Royalcrest",
+      "image": "/royalcrest-obsidian.png",
+      "rarityScore": 2474,
+      "rarityRank": 10,
+      "metadata": "/nft/fish/metadata/177.json"
+    },
+    {
+      "tokenId": 178,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 537,
+      "rarityRank": 249,
+      "metadata": "/nft/fish/metadata/178.json"
+    },
+    {
+      "tokenId": 179,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 537,
+      "rarityRank": 250,
+      "metadata": "/nft/fish/metadata/179.json"
+    },
+    {
+      "tokenId": 180,
+      "speciesId": "bastionray_royalplum",
+      "speciesName": "Royalplum Bastionray",
+      "image": "/bastionray-royalplum.png",
+      "rarityScore": 602,
+      "rarityRank": 232,
+      "metadata": "/nft/fish/metadata/180.json"
+    },
+    {
+      "tokenId": 181,
+      "speciesId": "skyspear",
+      "speciesName": "Skyspear",
+      "image": "/skyspear.png",
+      "rarityScore": 537,
+      "rarityRank": 251,
+      "metadata": "/nft/fish/metadata/181.json"
+    },
+    {
+      "tokenId": 182,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 767,
+      "rarityRank": 170,
+      "metadata": "/nft/fish/metadata/182.json"
+    },
+    {
+      "tokenId": 183,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 1024,
+      "rarityRank": 98,
+      "metadata": "/nft/fish/metadata/183.json"
+    },
+    {
+      "tokenId": 184,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 462,
+      "rarityRank": 290,
+      "metadata": "/nft/fish/metadata/184.json"
+    },
+    {
+      "tokenId": 185,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 527,
+      "rarityRank": 265,
+      "metadata": "/nft/fish/metadata/185.json"
+    },
+    {
+      "tokenId": 186,
+      "speciesId": "thornback_emberstone",
+      "speciesName": "Emberstone Thornback",
+      "image": "/thornback-emberstone.png",
+      "rarityScore": 509,
+      "rarityRank": 268,
+      "metadata": "/nft/fish/metadata/186.json"
+    },
+    {
+      "tokenId": 187,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 834,
+      "rarityRank": 139,
+      "metadata": "/nft/fish/metadata/187.json"
+    },
+    {
+      "tokenId": 188,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 830,
+      "rarityRank": 142,
+      "metadata": "/nft/fish/metadata/188.json"
+    },
+    {
+      "tokenId": 189,
+      "speciesId": "darttail",
+      "speciesName": "Blue Darttail",
+      "image": "/darttail.png",
+      "rarityScore": 420,
+      "rarityRank": 336,
+      "metadata": "/nft/fish/metadata/189.json"
+    },
+    {
+      "tokenId": 190,
+      "speciesId": "darttail",
+      "speciesName": "Blue Darttail",
+      "image": "/darttail.png",
+      "rarityScore": 574,
+      "rarityRank": 239,
+      "metadata": "/nft/fish/metadata/190.json"
+    },
+    {
+      "tokenId": 191,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 237,
+      "rarityRank": 451,
+      "metadata": "/nft/fish/metadata/191.json"
+    },
+    {
+      "tokenId": 192,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 317,
+      "rarityRank": 398,
+      "metadata": "/nft/fish/metadata/192.json"
+    },
+    {
+      "tokenId": 193,
+      "speciesId": "bullfishblitz",
+      "speciesName": "Bull Fish Blitz",
+      "image": "/bull-fish-blitz-fish.png",
+      "rarityScore": 2352,
+      "rarityRank": 13,
+      "metadata": "/nft/fish/metadata/193.json"
+    },
+    {
+      "tokenId": 194,
+      "speciesId": "royalcrest_amethyst",
+      "speciesName": "Amethyst Royalcrest",
+      "image": "/royalcrest-amethyst.png",
+      "rarityScore": 1914,
+      "rarityRank": 18,
+      "metadata": "/nft/fish/metadata/194.json"
+    },
+    {
+      "tokenId": 195,
+      "speciesId": "stormreaver",
+      "speciesName": "Stormreaver",
+      "image": "/stormreaver.png",
+      "rarityScore": 1169,
+      "rarityRank": 65,
+      "metadata": "/nft/fish/metadata/195.json"
+    },
+    {
+      "tokenId": 196,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 767,
+      "rarityRank": 171,
+      "metadata": "/nft/fish/metadata/196.json"
+    },
+    {
+      "tokenId": 197,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 702,
+      "rarityRank": 193,
+      "metadata": "/nft/fish/metadata/197.json"
+    },
+    {
+      "tokenId": 198,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 454,
+      "rarityRank": 318,
+      "metadata": "/nft/fish/metadata/198.json"
+    },
+    {
+      "tokenId": 199,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 317,
+      "rarityRank": 399,
+      "metadata": "/nft/fish/metadata/199.json"
+    },
+    {
+      "tokenId": 200,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 484,
+      "rarityRank": 284,
+      "metadata": "/nft/fish/metadata/200.json"
+    },
+    {
+      "tokenId": 201,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 447,
+      "rarityRank": 333,
+      "metadata": "/nft/fish/metadata/201.json"
+    },
+    {
+      "tokenId": 202,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 172,
+      "rarityRank": 492,
+      "metadata": "/nft/fish/metadata/202.json"
+    },
+    {
+      "tokenId": 203,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 830,
+      "rarityRank": 143,
+      "metadata": "/nft/fish/metadata/203.json"
+    },
+    {
+      "tokenId": 204,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 374,
+      "rarityRank": 363,
+      "metadata": "/nft/fish/metadata/204.json"
+    },
+    {
+      "tokenId": 205,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 237,
+      "rarityRank": 452,
+      "metadata": "/nft/fish/metadata/205.json"
+    },
+    {
+      "tokenId": 206,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 210,
+      "rarityRank": 483,
+      "metadata": "/nft/fish/metadata/206.json"
+    },
+    {
+      "tokenId": 207,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 830,
+      "rarityRank": 144,
+      "metadata": "/nft/fish/metadata/207.json"
+    },
+    {
+      "tokenId": 208,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 457,
+      "rarityRank": 294,
+      "metadata": "/nft/fish/metadata/208.json"
+    },
+    {
+      "tokenId": 209,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 457,
+      "rarityRank": 295,
+      "metadata": "/nft/fish/metadata/209.json"
+    },
+    {
+      "tokenId": 210,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1760,
+      "rarityRank": 20,
+      "metadata": "/nft/fish/metadata/210.json"
+    },
+    {
+      "tokenId": 211,
+      "speciesId": "royalcrest_aurora",
+      "speciesName": "Aurora Royalcrest",
+      "image": "/royalcrest-aurora.png",
+      "rarityScore": 1682,
+      "rarityRank": 23,
+      "metadata": "/nft/fish/metadata/211.json"
+    },
+    {
+      "tokenId": 212,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 237,
+      "rarityRank": 453,
+      "metadata": "/nft/fish/metadata/212.json"
+    },
+    {
+      "tokenId": 213,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 324,
+      "rarityRank": 384,
+      "metadata": "/nft/fish/metadata/213.json"
+    },
+    {
+      "tokenId": 214,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 1050,
+      "rarityRank": 86,
+      "metadata": "/nft/fish/metadata/214.json"
+    },
+    {
+      "tokenId": 215,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 660,
+      "rarityRank": 210,
+      "metadata": "/nft/fish/metadata/215.json"
+    },
+    {
+      "tokenId": 216,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 687,
+      "rarityRank": 196,
+      "metadata": "/nft/fish/metadata/216.json"
+    },
+    {
+      "tokenId": 217,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 824,
+      "rarityRank": 146,
+      "metadata": "/nft/fish/metadata/217.json"
+    },
+    {
+      "tokenId": 218,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 614,
+      "rarityRank": 227,
+      "metadata": "/nft/fish/metadata/218.json"
+    },
+    {
+      "tokenId": 219,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 332,
+      "rarityRank": 380,
+      "metadata": "/nft/fish/metadata/219.json"
+    },
+    {
+      "tokenId": 220,
+      "speciesId": "crownfin_sunburst",
+      "speciesName": "Sunburst Crownfin",
+      "image": "/crownfin-sunburst.png",
+      "rarityScore": 500,
+      "rarityRank": 270,
+      "metadata": "/nft/fish/metadata/220.json"
+    },
+    {
+      "tokenId": 221,
+      "speciesId": "crownfin_crimsoncrest",
+      "speciesName": "Crimsoncrest Crownfin",
+      "image": "/crownfin-crimsoncrest.png",
+      "rarityScore": 1080,
+      "rarityRank": 80,
+      "metadata": "/nft/fish/metadata/221.json"
+    },
+    {
+      "tokenId": 222,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 534,
+      "rarityRank": 256,
+      "metadata": "/nft/fish/metadata/222.json"
+    },
+    {
+      "tokenId": 223,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 397,
+      "rarityRank": 350,
+      "metadata": "/nft/fish/metadata/223.json"
+    },
+    {
+      "tokenId": 224,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 392,
+      "rarityRank": 354,
+      "metadata": "/nft/fish/metadata/224.json"
+    },
+    {
+      "tokenId": 225,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 970,
+      "rarityRank": 111,
+      "metadata": "/nft/fish/metadata/225.json"
+    },
+    {
+      "tokenId": 226,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 739,
+      "rarityRank": 178,
+      "metadata": "/nft/fish/metadata/226.json"
+    },
+    {
+      "tokenId": 227,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 457,
+      "rarityRank": 296,
+      "metadata": "/nft/fish/metadata/227.json"
+    },
+    {
+      "tokenId": 228,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 622,
+      "rarityRank": 219,
+      "metadata": "/nft/fish/metadata/228.json"
+    },
+    {
+      "tokenId": 229,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 1084,
+      "rarityRank": 79,
+      "metadata": "/nft/fish/metadata/229.json"
+    },
+    {
+      "tokenId": 230,
+      "speciesId": "crownfin_crimsoncrest",
+      "speciesName": "Crimsoncrest Crownfin",
+      "image": "/crownfin-crimsoncrest.png",
+      "rarityScore": 449,
+      "rarityRank": 327,
+      "metadata": "/nft/fish/metadata/230.json"
+    },
+    {
+      "tokenId": 231,
+      "speciesId": "crownfin_sunburst",
+      "speciesName": "Sunburst Crownfin",
+      "image": "/crownfin-sunburst.png",
+      "rarityScore": 794,
+      "rarityRank": 158,
+      "metadata": "/nft/fish/metadata/231.json"
+    },
+    {
+      "tokenId": 232,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 252,
+      "rarityRank": 441,
+      "metadata": "/nft/fish/metadata/232.json"
+    },
+    {
+      "tokenId": 233,
+      "speciesId": "bladejaw_venomgold",
+      "speciesName": "Venomgold Bladejaw",
+      "image": "/bladejaw-venomgold.png",
+      "rarityScore": 527,
+      "rarityRank": 266,
+      "metadata": "/nft/fish/metadata/233.json"
+    },
+    {
+      "tokenId": 234,
+      "speciesId": "deepfin",
+      "speciesName": "Teal Deepfin",
+      "image": "/deepfin.png",
+      "rarityScore": 454,
+      "rarityRank": 319,
+      "metadata": "/nft/fish/metadata/234.json"
+    },
+    {
+      "tokenId": 235,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 799,
+      "rarityRank": 153,
+      "metadata": "/nft/fish/metadata/235.json"
+    },
+    {
+      "tokenId": 236,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 210,
+      "rarityRank": 484,
+      "metadata": "/nft/fish/metadata/236.json"
+    },
+    {
+      "tokenId": 237,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 237,
+      "rarityRank": 454,
+      "metadata": "/nft/fish/metadata/237.json"
+    },
+    {
+      "tokenId": 238,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 374,
+      "rarityRank": 364,
+      "metadata": "/nft/fish/metadata/238.json"
+    },
+    {
+      "tokenId": 239,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 870,
+      "rarityRank": 134,
+      "metadata": "/nft/fish/metadata/239.json"
+    },
+    {
+      "tokenId": 240,
+      "speciesId": "royalcrest_sandstone",
+      "speciesName": "Sandstone Royalcrest",
+      "image": "/royalcrest-sandstone.png",
+      "rarityScore": 3029,
+      "rarityRank": 2,
+      "metadata": "/nft/fish/metadata/240.json"
+    },
+    {
+      "tokenId": 241,
+      "speciesId": "moonfang",
+      "speciesName": "Moonfang",
+      "image": "/moonfang.png",
+      "rarityScore": 1384,
+      "rarityRank": 42,
+      "metadata": "/nft/fish/metadata/241.json"
+    },
+    {
+      "tokenId": 242,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1117,
+      "rarityRank": 73,
+      "metadata": "/nft/fish/metadata/242.json"
+    },
+    {
+      "tokenId": 243,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 660,
+      "rarityRank": 211,
+      "metadata": "/nft/fish/metadata/243.json"
+    },
+    {
+      "tokenId": 244,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 634,
+      "rarityRank": 214,
+      "metadata": "/nft/fish/metadata/244.json"
+    },
+    {
+      "tokenId": 245,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 289,
+      "rarityRank": 430,
+      "metadata": "/nft/fish/metadata/245.json"
+    },
+    {
+      "tokenId": 246,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 317,
+      "rarityRank": 400,
+      "metadata": "/nft/fish/metadata/246.json"
+    },
+    {
+      "tokenId": 247,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 172,
+      "rarityRank": 493,
+      "metadata": "/nft/fish/metadata/247.json"
+    },
+    {
+      "tokenId": 248,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 1210,
+      "rarityRank": 57,
+      "metadata": "/nft/fish/metadata/248.json"
+    },
+    {
+      "tokenId": 249,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 574,
+      "rarityRank": 240,
+      "metadata": "/nft/fish/metadata/249.json"
+    },
+    {
+      "tokenId": 250,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 290,
+      "rarityRank": 426,
+      "metadata": "/nft/fish/metadata/250.json"
+    },
+    {
+      "tokenId": 251,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 457,
+      "rarityRank": 297,
+      "metadata": "/nft/fish/metadata/251.json"
+    },
+    {
+      "tokenId": 252,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 674,
+      "rarityRank": 206,
+      "metadata": "/nft/fish/metadata/252.json"
+    },
+    {
+      "tokenId": 253,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 939,
+      "rarityRank": 121,
+      "metadata": "/nft/fish/metadata/253.json"
+    },
+    {
+      "tokenId": 254,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 392,
+      "rarityRank": 355,
+      "metadata": "/nft/fish/metadata/254.json"
+    },
+    {
+      "tokenId": 255,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 767,
+      "rarityRank": 172,
+      "metadata": "/nft/fish/metadata/255.json"
+    },
+    {
+      "tokenId": 256,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 739,
+      "rarityRank": 179,
+      "metadata": "/nft/fish/metadata/256.json"
+    },
+    {
+      "tokenId": 257,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1514,
+      "rarityRank": 34,
+      "metadata": "/nft/fish/metadata/257.json"
+    },
+    {
+      "tokenId": 258,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 237,
+      "rarityRank": 455,
+      "metadata": "/nft/fish/metadata/258.json"
+    },
+    {
+      "tokenId": 259,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 237,
+      "rarityRank": 456,
+      "metadata": "/nft/fish/metadata/259.json"
+    },
+    {
+      "tokenId": 260,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 237,
+      "rarityRank": 457,
+      "metadata": "/nft/fish/metadata/260.json"
+    },
+    {
+      "tokenId": 261,
+      "speciesId": "royalcrest_aurora",
+      "speciesName": "Aurora Royalcrest",
+      "image": "/royalcrest-aurora.png",
+      "rarityScore": 2620,
+      "rarityRank": 6,
+      "metadata": "/nft/fish/metadata/261.json"
+    },
+    {
+      "tokenId": 262,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 494,
+      "rarityRank": 275,
+      "metadata": "/nft/fish/metadata/262.json"
+    },
+    {
+      "tokenId": 263,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 237,
+      "rarityRank": 458,
+      "metadata": "/nft/fish/metadata/263.json"
+    },
+    {
+      "tokenId": 264,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 687,
+      "rarityRank": 197,
+      "metadata": "/nft/fish/metadata/264.json"
+    },
+    {
+      "tokenId": 265,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 622,
+      "rarityRank": 220,
+      "metadata": "/nft/fish/metadata/265.json"
+    },
+    {
+      "tokenId": 266,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1374,
+      "rarityRank": 43,
+      "metadata": "/nft/fish/metadata/266.json"
+    },
+    {
+      "tokenId": 267,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 687,
+      "rarityRank": 198,
+      "metadata": "/nft/fish/metadata/267.json"
+    },
+    {
+      "tokenId": 268,
+      "speciesId": "crownfin",
+      "speciesName": "Crownfin",
+      "image": "/crownfin.png",
+      "rarityScore": 332,
+      "rarityRank": 381,
+      "metadata": "/nft/fish/metadata/268.json"
+    },
+    {
+      "tokenId": 269,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 870,
+      "rarityRank": 135,
+      "metadata": "/nft/fish/metadata/269.json"
+    },
+    {
+      "tokenId": 270,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 397,
+      "rarityRank": 351,
+      "metadata": "/nft/fish/metadata/270.json"
+    },
+    {
+      "tokenId": 271,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 714,
+      "rarityRank": 185,
+      "metadata": "/nft/fish/metadata/271.json"
+    },
+    {
+      "tokenId": 272,
+      "speciesId": "crownfin_sunburst",
+      "speciesName": "Sunburst Crownfin",
+      "image": "/crownfin-sunburst.png",
+      "rarityScore": 332,
+      "rarityRank": 382,
+      "metadata": "/nft/fish/metadata/272.json"
+    },
+    {
+      "tokenId": 273,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 397,
+      "rarityRank": 352,
+      "metadata": "/nft/fish/metadata/273.json"
+    },
+    {
+      "tokenId": 274,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 687,
+      "rarityRank": 199,
+      "metadata": "/nft/fish/metadata/274.json"
+    },
+    {
+      "tokenId": 275,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 824,
+      "rarityRank": 147,
+      "metadata": "/nft/fish/metadata/275.json"
+    },
+    {
+      "tokenId": 276,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 1460,
+      "rarityRank": 35,
+      "metadata": "/nft/fish/metadata/276.json"
+    },
+    {
+      "tokenId": 277,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 457,
+      "rarityRank": 298,
+      "metadata": "/nft/fish/metadata/277.json"
+    },
+    {
+      "tokenId": 278,
+      "speciesId": "royalcrest_aurora",
+      "speciesName": "Aurora Royalcrest",
+      "image": "/royalcrest-aurora.png",
+      "rarityScore": 1617,
+      "rarityRank": 26,
+      "metadata": "/nft/fish/metadata/278.json"
+    },
+    {
+      "tokenId": 279,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 374,
+      "rarityRank": 365,
+      "metadata": "/nft/fish/metadata/279.json"
+    },
+    {
+      "tokenId": 280,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 317,
+      "rarityRank": 401,
+      "metadata": "/nft/fish/metadata/280.json"
+    },
+    {
+      "tokenId": 281,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 317,
+      "rarityRank": 402,
+      "metadata": "/nft/fish/metadata/281.json"
+    },
+    {
+      "tokenId": 282,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 910,
+      "rarityRank": 124,
+      "metadata": "/nft/fish/metadata/282.json"
+    },
+    {
+      "tokenId": 283,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 574,
+      "rarityRank": 241,
+      "metadata": "/nft/fish/metadata/283.json"
+    },
+    {
+      "tokenId": 284,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 317,
+      "rarityRank": 403,
+      "metadata": "/nft/fish/metadata/284.json"
+    },
+    {
+      "tokenId": 285,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 237,
+      "rarityRank": 459,
+      "metadata": "/nft/fish/metadata/285.json"
+    },
+    {
+      "tokenId": 286,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 1240,
+      "rarityRank": 53,
+      "metadata": "/nft/fish/metadata/286.json"
+    },
+    {
+      "tokenId": 287,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 494,
+      "rarityRank": 276,
+      "metadata": "/nft/fish/metadata/287.json"
+    },
+    {
+      "tokenId": 288,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 237,
+      "rarityRank": 460,
+      "metadata": "/nft/fish/metadata/288.json"
+    },
+    {
+      "tokenId": 289,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 237,
+      "rarityRank": 461,
+      "metadata": "/nft/fish/metadata/289.json"
+    },
+    {
+      "tokenId": 290,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 494,
+      "rarityRank": 277,
+      "metadata": "/nft/fish/metadata/290.json"
+    },
+    {
+      "tokenId": 291,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 830,
+      "rarityRank": 145,
+      "metadata": "/nft/fish/metadata/291.json"
+    },
+    {
+      "tokenId": 292,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 237,
+      "rarityRank": 462,
+      "metadata": "/nft/fish/metadata/292.json"
+    },
+    {
+      "tokenId": 293,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 237,
+      "rarityRank": 463,
+      "metadata": "/nft/fish/metadata/293.json"
+    },
+    {
+      "tokenId": 294,
+      "speciesId": "stormreaver_tideflare",
+      "speciesName": "Tideflare Stormreaver",
+      "image": "/stormreaver-tideflare.png",
+      "rarityScore": 1294,
+      "rarityRank": 48,
+      "metadata": "/nft/fish/metadata/294.json"
+    },
+    {
+      "tokenId": 295,
+      "speciesId": "royalcrest_frostfire",
+      "speciesName": "Frostfire Royalcrest",
+      "image": "/royalcrest-frostfire.png",
+      "rarityScore": 2750,
+      "rarityRank": 4,
+      "metadata": "/nft/fish/metadata/295.json"
+    },
+    {
+      "tokenId": 296,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 197,
+      "rarityRank": 486,
+      "metadata": "/nft/fish/metadata/296.json"
+    },
+    {
+      "tokenId": 297,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 237,
+      "rarityRank": 464,
+      "metadata": "/nft/fish/metadata/297.json"
+    },
+    {
+      "tokenId": 298,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 754,
+      "rarityRank": 175,
+      "metadata": "/nft/fish/metadata/298.json"
+    },
+    {
+      "tokenId": 299,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 702,
+      "rarityRank": 194,
+      "metadata": "/nft/fish/metadata/299.json"
+    },
+    {
+      "tokenId": 300,
+      "speciesId": "deepfin",
+      "speciesName": "Teal Deepfin",
+      "image": "/deepfin.png",
+      "rarityScore": 317,
+      "rarityRank": 404,
+      "metadata": "/nft/fish/metadata/300.json"
+    },
+    {
+      "tokenId": 301,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 317,
+      "rarityRank": 405,
+      "metadata": "/nft/fish/metadata/301.json"
+    },
+    {
+      "tokenId": 302,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 494,
+      "rarityRank": 278,
+      "metadata": "/nft/fish/metadata/302.json"
+    },
+    {
+      "tokenId": 303,
+      "speciesId": "darttail_coralshock",
+      "speciesName": "Coralshock Darttail",
+      "image": "/darttail-coralshock.png",
+      "rarityScore": 990,
+      "rarityRank": 104,
+      "metadata": "/nft/fish/metadata/303.json"
+    },
+    {
+      "tokenId": 304,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 237,
+      "rarityRank": 465,
+      "metadata": "/nft/fish/metadata/304.json"
+    },
+    {
+      "tokenId": 305,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 237,
+      "rarityRank": 466,
+      "metadata": "/nft/fish/metadata/305.json"
+    },
+    {
+      "tokenId": 306,
+      "speciesId": "moonfang",
+      "speciesName": "Moonfang",
+      "image": "/moonfang.png",
+      "rarityScore": 1414,
+      "rarityRank": 40,
+      "metadata": "/nft/fish/metadata/306.json"
+    },
+    {
+      "tokenId": 307,
+      "speciesId": "royalcrest_sandstone",
+      "speciesName": "Sandstone Royalcrest",
+      "image": "/royalcrest-sandstone.png",
+      "rarityScore": 3192,
+      "rarityRank": 1,
+      "metadata": "/nft/fish/metadata/307.json"
+    },
+    {
+      "tokenId": 308,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 687,
+      "rarityRank": 200,
+      "metadata": "/nft/fish/metadata/308.json"
+    },
+    {
+      "tokenId": 309,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1037,
+      "rarityRank": 93,
+      "metadata": "/nft/fish/metadata/309.json"
+    },
+    {
+      "tokenId": 310,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 237,
+      "rarityRank": 467,
+      "metadata": "/nft/fish/metadata/310.json"
+    },
+    {
+      "tokenId": 311,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 172,
+      "rarityRank": 494,
+      "metadata": "/nft/fish/metadata/311.json"
+    },
+    {
+      "tokenId": 312,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 534,
+      "rarityRank": 257,
+      "metadata": "/nft/fish/metadata/312.json"
+    },
+    {
+      "tokenId": 313,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 237,
+      "rarityRank": 468,
+      "metadata": "/nft/fish/metadata/313.json"
+    },
+    {
+      "tokenId": 314,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 237,
+      "rarityRank": 469,
+      "metadata": "/nft/fish/metadata/314.json"
+    },
+    {
+      "tokenId": 315,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 172,
+      "rarityRank": 495,
+      "metadata": "/nft/fish/metadata/315.json"
+    },
+    {
+      "tokenId": 316,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 574,
+      "rarityRank": 242,
+      "metadata": "/nft/fish/metadata/316.json"
+    },
+    {
+      "tokenId": 317,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 317,
+      "rarityRank": 406,
+      "metadata": "/nft/fish/metadata/317.json"
+    },
+    {
+      "tokenId": 318,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 317,
+      "rarityRank": 407,
+      "metadata": "/nft/fish/metadata/318.json"
+    },
+    {
+      "tokenId": 319,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 1070,
+      "rarityRank": 82,
+      "metadata": "/nft/fish/metadata/319.json"
+    },
+    {
+      "tokenId": 320,
+      "speciesId": "bastionray_royalplum",
+      "speciesName": "Royalplum Bastionray",
+      "image": "/bastionray-royalplum.png",
+      "rarityScore": 537,
+      "rarityRank": 252,
+      "metadata": "/nft/fish/metadata/320.json"
+    },
+    {
+      "tokenId": 321,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 944,
+      "rarityRank": 118,
+      "metadata": "/nft/fish/metadata/321.json"
+    },
+    {
+      "tokenId": 322,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 1440,
+      "rarityRank": 38,
+      "metadata": "/nft/fish/metadata/322.json"
+    },
+    {
+      "tokenId": 323,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 687,
+      "rarityRank": 201,
+      "metadata": "/nft/fish/metadata/323.json"
+    },
+    {
+      "tokenId": 324,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 317,
+      "rarityRank": 408,
+      "metadata": "/nft/fish/metadata/324.json"
+    },
+    {
+      "tokenId": 325,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 614,
+      "rarityRank": 228,
+      "metadata": "/nft/fish/metadata/325.json"
+    },
+    {
+      "tokenId": 326,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 392,
+      "rarityRank": 356,
+      "metadata": "/nft/fish/metadata/326.json"
+    },
+    {
+      "tokenId": 327,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 457,
+      "rarityRank": 299,
+      "metadata": "/nft/fish/metadata/327.json"
+    },
+    {
+      "tokenId": 328,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 197,
+      "rarityRank": 487,
+      "metadata": "/nft/fish/metadata/328.json"
+    },
+    {
+      "tokenId": 329,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 374,
+      "rarityRank": 366,
+      "metadata": "/nft/fish/metadata/329.json"
+    },
+    {
+      "tokenId": 330,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 237,
+      "rarityRank": 470,
+      "metadata": "/nft/fish/metadata/330.json"
+    },
+    {
+      "tokenId": 331,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 950,
+      "rarityRank": 114,
+      "metadata": "/nft/fish/metadata/331.json"
+    },
+    {
+      "tokenId": 332,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 494,
+      "rarityRank": 279,
+      "metadata": "/nft/fish/metadata/332.json"
+    },
+    {
+      "tokenId": 333,
+      "speciesId": "creekfish_albino",
+      "speciesName": "Albino Creekfish",
+      "image": "/creekfish-albino.png",
+      "rarityScore": 197,
+      "rarityRank": 488,
+      "metadata": "/nft/fish/metadata/333.json"
+    },
+    {
+      "tokenId": 334,
+      "speciesId": "royalcrest_aurora",
+      "speciesName": "Aurora Royalcrest",
+      "image": "/royalcrest-aurora.png",
+      "rarityScore": 1537,
+      "rarityRank": 33,
+      "metadata": "/nft/fish/metadata/334.json"
+    },
+    {
+      "tokenId": 335,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1052,
+      "rarityRank": 85,
+      "metadata": "/nft/fish/metadata/335.json"
+    },
+    {
+      "tokenId": 336,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 984,
+      "rarityRank": 108,
+      "metadata": "/nft/fish/metadata/336.json"
+    },
+    {
+      "tokenId": 337,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 739,
+      "rarityRank": 180,
+      "metadata": "/nft/fish/metadata/337.json"
+    },
+    {
+      "tokenId": 338,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 252,
+      "rarityRank": 442,
+      "metadata": "/nft/fish/metadata/338.json"
+    },
+    {
+      "tokenId": 339,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 799,
+      "rarityRank": 154,
+      "metadata": "/nft/fish/metadata/339.json"
+    },
+    {
+      "tokenId": 340,
+      "speciesId": "bladejaw_venomgold",
+      "speciesName": "Venomgold Bladejaw",
+      "image": "/bladejaw-venomgold.png",
+      "rarityScore": 332,
+      "rarityRank": 383,
+      "metadata": "/nft/fish/metadata/340.json"
+    },
+    {
+      "tokenId": 341,
+      "speciesId": "crownfin_crimsoncrest",
+      "speciesName": "Crimsoncrest Crownfin",
+      "image": "/crownfin-crimsoncrest.png",
+      "rarityScore": 397,
+      "rarityRank": 353,
+      "metadata": "/nft/fish/metadata/341.json"
+    },
+    {
+      "tokenId": 342,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 454,
+      "rarityRank": 320,
+      "metadata": "/nft/fish/metadata/342.json"
+    },
+    {
+      "tokenId": 343,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 719,
+      "rarityRank": 183,
+      "metadata": "/nft/fish/metadata/343.json"
+    },
+    {
+      "tokenId": 344,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 252,
+      "rarityRank": 443,
+      "metadata": "/nft/fish/metadata/344.json"
+    },
+    {
+      "tokenId": 345,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 457,
+      "rarityRank": 300,
+      "metadata": "/nft/fish/metadata/345.json"
+    },
+    {
+      "tokenId": 346,
+      "speciesId": "crownfin_sunburst",
+      "speciesName": "Sunburst Crownfin",
+      "image": "/crownfin-sunburst.png",
+      "rarityScore": 369,
+      "rarityRank": 374,
+      "metadata": "/nft/fish/metadata/346.json"
+    },
+    {
+      "tokenId": 347,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 714,
+      "rarityRank": 186,
+      "metadata": "/nft/fish/metadata/347.json"
+    },
+    {
+      "tokenId": 348,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 622,
+      "rarityRank": 221,
+      "metadata": "/nft/fish/metadata/348.json"
+    },
+    {
+      "tokenId": 349,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 687,
+      "rarityRank": 202,
+      "metadata": "/nft/fish/metadata/349.json"
+    },
+    {
+      "tokenId": 350,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 1044,
+      "rarityRank": 87,
+      "metadata": "/nft/fish/metadata/350.json"
+    },
+    {
+      "tokenId": 351,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 739,
+      "rarityRank": 181,
+      "metadata": "/nft/fish/metadata/351.json"
+    },
+    {
+      "tokenId": 352,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1037,
+      "rarityRank": 94,
+      "metadata": "/nft/fish/metadata/352.json"
+    },
+    {
+      "tokenId": 353,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 622,
+      "rarityRank": 222,
+      "metadata": "/nft/fish/metadata/353.json"
+    },
+    {
+      "tokenId": 354,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 939,
+      "rarityRank": 122,
+      "metadata": "/nft/fish/metadata/354.json"
+    },
+    {
+      "tokenId": 355,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 454,
+      "rarityRank": 321,
+      "metadata": "/nft/fish/metadata/355.json"
+    },
+    {
+      "tokenId": 356,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 417,
+      "rarityRank": 337,
+      "metadata": "/nft/fish/metadata/356.json"
+    },
+    {
+      "tokenId": 357,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 392,
+      "rarityRank": 357,
+      "metadata": "/nft/fish/metadata/357.json"
+    },
+    {
+      "tokenId": 358,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 494,
+      "rarityRank": 280,
+      "metadata": "/nft/fish/metadata/358.json"
+    },
+    {
+      "tokenId": 359,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 197,
+      "rarityRank": 489,
+      "metadata": "/nft/fish/metadata/359.json"
+    },
+    {
+      "tokenId": 360,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 289,
+      "rarityRank": 431,
+      "metadata": "/nft/fish/metadata/360.json"
+    },
+    {
+      "tokenId": 361,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 534,
+      "rarityRank": 258,
+      "metadata": "/nft/fish/metadata/361.json"
+    },
+    {
+      "tokenId": 362,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 252,
+      "rarityRank": 444,
+      "metadata": "/nft/fish/metadata/362.json"
+    },
+    {
+      "tokenId": 363,
+      "speciesId": "crownfin",
+      "speciesName": "Crownfin",
+      "image": "/crownfin.png",
+      "rarityScore": 317,
+      "rarityRank": 409,
+      "metadata": "/nft/fish/metadata/363.json"
+    },
+    {
+      "tokenId": 364,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 317,
+      "rarityRank": 410,
+      "metadata": "/nft/fish/metadata/364.json"
+    },
+    {
+      "tokenId": 365,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 574,
+      "rarityRank": 243,
+      "metadata": "/nft/fish/metadata/365.json"
+    },
+    {
+      "tokenId": 366,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 1070,
+      "rarityRank": 83,
+      "metadata": "/nft/fish/metadata/366.json"
+    },
+    {
+      "tokenId": 367,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 457,
+      "rarityRank": 301,
+      "metadata": "/nft/fish/metadata/367.json"
+    },
+    {
+      "tokenId": 368,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 824,
+      "rarityRank": 148,
+      "metadata": "/nft/fish/metadata/368.json"
+    },
+    {
+      "tokenId": 369,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1550,
+      "rarityRank": 31,
+      "metadata": "/nft/fish/metadata/369.json"
+    },
+    {
+      "tokenId": 370,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 687,
+      "rarityRank": 203,
+      "metadata": "/nft/fish/metadata/370.json"
+    },
+    {
+      "tokenId": 371,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 457,
+      "rarityRank": 302,
+      "metadata": "/nft/fish/metadata/371.json"
+    },
+    {
+      "tokenId": 372,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 1460,
+      "rarityRank": 36,
+      "metadata": "/nft/fish/metadata/372.json"
+    },
+    {
+      "tokenId": 373,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 714,
+      "rarityRank": 187,
+      "metadata": "/nft/fish/metadata/373.json"
+    },
+    {
+      "tokenId": 374,
+      "speciesId": "royalcrest_sandstone",
+      "speciesName": "Sandstone Royalcrest",
+      "image": "/royalcrest-sandstone.png",
+      "rarityScore": 2417,
+      "rarityRank": 11,
+      "metadata": "/nft/fish/metadata/374.json"
+    },
+    {
+      "tokenId": 375,
+      "speciesId": "moonfang",
+      "speciesName": "Moonfang",
+      "image": "/moonfang.png",
+      "rarityScore": 1117,
+      "rarityRank": 74,
+      "metadata": "/nft/fish/metadata/375.json"
+    },
+    {
+      "tokenId": 376,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1790,
+      "rarityRank": 19,
+      "metadata": "/nft/fish/metadata/376.json"
+    },
+    {
+      "tokenId": 377,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 944,
+      "rarityRank": 119,
+      "metadata": "/nft/fish/metadata/377.json"
+    },
+    {
+      "tokenId": 378,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 369,
+      "rarityRank": 375,
+      "metadata": "/nft/fish/metadata/378.json"
+    },
+    {
+      "tokenId": 379,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 317,
+      "rarityRank": 411,
+      "metadata": "/nft/fish/metadata/379.json"
+    },
+    {
+      "tokenId": 380,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1037,
+      "rarityRank": 95,
+      "metadata": "/nft/fish/metadata/380.json"
+    },
+    {
+      "tokenId": 381,
+      "speciesId": "moonfang",
+      "speciesName": "Moonfang",
+      "image": "/moonfang.png",
+      "rarityScore": 1174,
+      "rarityRank": 63,
+      "metadata": "/nft/fish/metadata/381.json"
+    },
+    {
+      "tokenId": 382,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 1240,
+      "rarityRank": 54,
+      "metadata": "/nft/fish/metadata/382.json"
+    },
+    {
+      "tokenId": 383,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 660,
+      "rarityRank": 212,
+      "metadata": "/nft/fish/metadata/383.json"
+    },
+    {
+      "tokenId": 384,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 457,
+      "rarityRank": 303,
+      "metadata": "/nft/fish/metadata/384.json"
+    },
+    {
+      "tokenId": 385,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 594,
+      "rarityRank": 233,
+      "metadata": "/nft/fish/metadata/385.json"
+    },
+    {
+      "tokenId": 386,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 1210,
+      "rarityRank": 58,
+      "metadata": "/nft/fish/metadata/386.json"
+    },
+    {
+      "tokenId": 387,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 457,
+      "rarityRank": 304,
+      "metadata": "/nft/fish/metadata/387.json"
+    },
+    {
+      "tokenId": 388,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 237,
+      "rarityRank": 471,
+      "metadata": "/nft/fish/metadata/388.json"
+    },
+    {
+      "tokenId": 389,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 237,
+      "rarityRank": 472,
+      "metadata": "/nft/fish/metadata/389.json"
+    },
+    {
+      "tokenId": 390,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 369,
+      "rarityRank": 376,
+      "metadata": "/nft/fish/metadata/390.json"
+    },
+    {
+      "tokenId": 391,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 317,
+      "rarityRank": 412,
+      "metadata": "/nft/fish/metadata/391.json"
+    },
+    {
+      "tokenId": 392,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 392,
+      "rarityRank": 358,
+      "metadata": "/nft/fish/metadata/392.json"
+    },
+    {
+      "tokenId": 393,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 714,
+      "rarityRank": 188,
+      "metadata": "/nft/fish/metadata/393.json"
+    },
+    {
+      "tokenId": 394,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 457,
+      "rarityRank": 305,
+      "metadata": "/nft/fish/metadata/394.json"
+    },
+    {
+      "tokenId": 395,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 457,
+      "rarityRank": 306,
+      "metadata": "/nft/fish/metadata/395.json"
+    },
+    {
+      "tokenId": 396,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 622,
+      "rarityRank": 223,
+      "metadata": "/nft/fish/metadata/396.json"
+    },
+    {
+      "tokenId": 397,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 714,
+      "rarityRank": 189,
+      "metadata": "/nft/fish/metadata/397.json"
+    },
+    {
+      "tokenId": 398,
+      "speciesId": "creekfish_purple",
+      "speciesName": "Royal Creekfish",
+      "image": "/creekfish-purple.png",
+      "rarityScore": 334,
+      "rarityRank": 378,
+      "metadata": "/nft/fish/metadata/398.json"
+    },
+    {
+      "tokenId": 399,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 237,
+      "rarityRank": 473,
+      "metadata": "/nft/fish/metadata/399.json"
+    },
+    {
+      "tokenId": 400,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 990,
+      "rarityRank": 105,
+      "metadata": "/nft/fish/metadata/400.json"
+    },
+    {
+      "tokenId": 401,
+      "speciesId": "bullfishblitz",
+      "speciesName": "Bull Fish Blitz",
+      "image": "/bull-fish-blitz-fish.png",
+      "rarityScore": 2674,
+      "rarityRank": 5,
+      "metadata": "/nft/fish/metadata/401.json"
+    },
+    {
+      "tokenId": 402,
+      "speciesId": "darttail",
+      "speciesName": "Blue Darttail",
+      "image": "/darttail.png",
+      "rarityScore": 317,
+      "rarityRank": 413,
+      "metadata": "/nft/fish/metadata/402.json"
+    },
+    {
+      "tokenId": 403,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 237,
+      "rarityRank": 474,
+      "metadata": "/nft/fish/metadata/403.json"
+    },
+    {
+      "tokenId": 404,
+      "speciesId": "deepfin",
+      "speciesName": "Teal Deepfin",
+      "image": "/deepfin.png",
+      "rarityScore": 790,
+      "rarityRank": 160,
+      "metadata": "/nft/fish/metadata/404.json"
+    },
+    {
+      "tokenId": 405,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 374,
+      "rarityRank": 367,
+      "metadata": "/nft/fish/metadata/405.json"
+    },
+    {
+      "tokenId": 406,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 237,
+      "rarityRank": 475,
+      "metadata": "/nft/fish/metadata/406.json"
+    },
+    {
+      "tokenId": 407,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 210,
+      "rarityRank": 485,
+      "metadata": "/nft/fish/metadata/407.json"
+    },
+    {
+      "tokenId": 408,
+      "speciesId": "crownfin_crimsoncrest",
+      "speciesName": "Crimsoncrest Crownfin",
+      "image": "/crownfin-crimsoncrest.png",
+      "rarityScore": 799,
+      "rarityRank": 155,
+      "metadata": "/nft/fish/metadata/408.json"
+    },
+    {
+      "tokenId": 409,
+      "speciesId": "bladejaw_venomgold",
+      "speciesName": "Venomgold Bladejaw",
+      "image": "/bladejaw-venomgold.png",
+      "rarityScore": 534,
+      "rarityRank": 259,
+      "metadata": "/nft/fish/metadata/409.json"
+    },
+    {
+      "tokenId": 410,
+      "speciesId": "royalcrest_sandstone",
+      "speciesName": "Sandstone Royalcrest",
+      "image": "/royalcrest-sandstone.png",
+      "rarityScore": 2337,
+      "rarityRank": 15,
+      "metadata": "/nft/fish/metadata/410.json"
+    },
+    {
+      "tokenId": 411,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 374,
+      "rarityRank": 368,
+      "metadata": "/nft/fish/metadata/411.json"
+    },
+    {
+      "tokenId": 412,
+      "speciesId": "oracleray_sunoracle",
+      "speciesName": "Sunoracle Oracleray",
+      "image": "/oracleray-sunoracle.png",
+      "rarityScore": 1590,
+      "rarityRank": 28,
+      "metadata": "/nft/fish/metadata/412.json"
+    },
+    {
+      "tokenId": 413,
+      "speciesId": "moonfang",
+      "speciesName": "Moonfang",
+      "image": "/moonfang.png",
+      "rarityScore": 1010,
+      "rarityRank": 100,
+      "metadata": "/nft/fish/metadata/413.json"
+    },
+    {
+      "tokenId": 414,
+      "speciesId": "skyspear_solarflare",
+      "speciesName": "Solarflare Skyspear",
+      "image": "/skyspear-solarflare.png",
+      "rarityScore": 687,
+      "rarityRank": 204,
+      "metadata": "/nft/fish/metadata/414.json"
+    },
+    {
+      "tokenId": 415,
+      "speciesId": "oracleray",
+      "speciesName": "Oracleray",
+      "image": "/oracleray.png",
+      "rarityScore": 824,
+      "rarityRank": 149,
+      "metadata": "/nft/fish/metadata/415.json"
+    },
+    {
+      "tokenId": 416,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 1210,
+      "rarityRank": 59,
+      "metadata": "/nft/fish/metadata/416.json"
+    },
+    {
+      "tokenId": 417,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 457,
+      "rarityRank": 307,
+      "metadata": "/nft/fish/metadata/417.json"
+    },
+    {
+      "tokenId": 418,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 457,
+      "rarityRank": 308,
+      "metadata": "/nft/fish/metadata/418.json"
+    },
+    {
+      "tokenId": 419,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 714,
+      "rarityRank": 190,
+      "metadata": "/nft/fish/metadata/419.json"
+    },
+    {
+      "tokenId": 420,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1037,
+      "rarityRank": 96,
+      "metadata": "/nft/fish/metadata/420.json"
+    },
+    {
+      "tokenId": 421,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 620,
+      "rarityRank": 224,
+      "metadata": "/nft/fish/metadata/421.json"
+    },
+    {
+      "tokenId": 422,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 1200,
+      "rarityRank": 61,
+      "metadata": "/nft/fish/metadata/422.json"
+    },
+    {
+      "tokenId": 423,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 784,
+      "rarityRank": 163,
+      "metadata": "/nft/fish/metadata/423.json"
+    },
+    {
+      "tokenId": 424,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 417,
+      "rarityRank": 338,
+      "metadata": "/nft/fish/metadata/424.json"
+    },
+    {
+      "tokenId": 425,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 457,
+      "rarityRank": 309,
+      "metadata": "/nft/fish/metadata/425.json"
+    },
+    {
+      "tokenId": 426,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 1210,
+      "rarityRank": 60,
+      "metadata": "/nft/fish/metadata/426.json"
+    },
+    {
+      "tokenId": 427,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 574,
+      "rarityRank": 244,
+      "metadata": "/nft/fish/metadata/427.json"
+    },
+    {
+      "tokenId": 428,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 237,
+      "rarityRank": 476,
+      "metadata": "/nft/fish/metadata/428.json"
+    },
+    {
+      "tokenId": 429,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 172,
+      "rarityRank": 496,
+      "metadata": "/nft/fish/metadata/429.json"
+    },
+    {
+      "tokenId": 430,
+      "speciesId": "crownfin_sunburst",
+      "speciesName": "Sunburst Crownfin",
+      "image": "/crownfin-sunburst.png",
+      "rarityScore": 454,
+      "rarityRank": 322,
+      "metadata": "/nft/fish/metadata/430.json"
+    },
+    {
+      "tokenId": 431,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 870,
+      "rarityRank": 136,
+      "metadata": "/nft/fish/metadata/431.json"
+    },
+    {
+      "tokenId": 432,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 290,
+      "rarityRank": 427,
+      "metadata": "/nft/fish/metadata/432.json"
+    },
+    {
+      "tokenId": 433,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 417,
+      "rarityRank": 339,
+      "metadata": "/nft/fish/metadata/433.json"
+    },
+    {
+      "tokenId": 434,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 494,
+      "rarityRank": 281,
+      "metadata": "/nft/fish/metadata/434.json"
+    },
+    {
+      "tokenId": 435,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 990,
+      "rarityRank": 106,
+      "metadata": "/nft/fish/metadata/435.json"
+    },
+    {
+      "tokenId": 436,
+      "speciesId": "bladejaw_venomgold",
+      "speciesName": "Venomgold Bladejaw",
+      "image": "/bladejaw-venomgold.png",
+      "rarityScore": 317,
+      "rarityRank": 414,
+      "metadata": "/nft/fish/metadata/436.json"
+    },
+    {
+      "tokenId": 437,
+      "speciesId": "crownfin_crimsoncrest",
+      "speciesName": "Crimsoncrest Crownfin",
+      "image": "/crownfin-crimsoncrest.png",
+      "rarityScore": 317,
+      "rarityRank": 415,
+      "metadata": "/nft/fish/metadata/437.json"
+    },
+    {
+      "tokenId": 438,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 699,
+      "rarityRank": 195,
+      "metadata": "/nft/fish/metadata/438.json"
+    },
+    {
+      "tokenId": 439,
+      "speciesId": "stormreaver_shockflare",
+      "speciesName": "Shockflare Stormreaver",
+      "image": "/stormreaver-shockflare.png",
+      "rarityScore": 1434,
+      "rarityRank": 39,
+      "metadata": "/nft/fish/metadata/439.json"
+    },
+    {
+      "tokenId": 440,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 457,
+      "rarityRank": 310,
+      "metadata": "/nft/fish/metadata/440.json"
+    },
+    {
+      "tokenId": 441,
+      "speciesId": "thornback_mossglow",
+      "speciesName": "Mossglow Thornback",
+      "image": "/thornback-mossglow.png",
+      "rarityScore": 1460,
+      "rarityRank": 37,
+      "metadata": "/nft/fish/metadata/441.json"
+    },
+    {
+      "tokenId": 442,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 944,
+      "rarityRank": 120,
+      "metadata": "/nft/fish/metadata/442.json"
+    },
+    {
+      "tokenId": 443,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 457,
+      "rarityRank": 311,
+      "metadata": "/nft/fish/metadata/443.json"
+    },
+    {
+      "tokenId": 444,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 317,
+      "rarityRank": 416,
+      "metadata": "/nft/fish/metadata/444.json"
+    },
+    {
+      "tokenId": 445,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 252,
+      "rarityRank": 445,
+      "metadata": "/nft/fish/metadata/445.json"
+    },
+    {
+      "tokenId": 446,
+      "speciesId": "moonveil_roseglow",
+      "speciesName": "Roseglow Moonveil",
+      "image": "/moonveil-roseglow.png",
+      "rarityScore": 714,
+      "rarityRank": 191,
+      "metadata": "/nft/fish/metadata/446.json"
+    },
+    {
+      "tokenId": 447,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 317,
+      "rarityRank": 417,
+      "metadata": "/nft/fish/metadata/447.json"
+    },
+    {
+      "tokenId": 448,
+      "speciesId": "creekfish_sunrise",
+      "speciesName": "Sunrise Creekfish",
+      "image": "/creekfish-sunrise.png",
+      "rarityScore": 132,
+      "rarityRank": 500,
+      "metadata": "/nft/fish/metadata/448.json"
+    },
+    {
+      "tokenId": 449,
+      "speciesId": "creekfish_redtrout",
+      "speciesName": "Redtrout Creekfish",
+      "image": "/creekfish-redtrout.png",
+      "rarityScore": 790,
+      "rarityRank": 161,
+      "metadata": "/nft/fish/metadata/449.json"
+    },
+    {
+      "tokenId": 450,
+      "speciesId": "darttail",
+      "speciesName": "Blue Darttail",
+      "image": "/darttail.png",
+      "rarityScore": 237,
+      "rarityRank": 477,
+      "metadata": "/nft/fish/metadata/450.json"
+    },
+    {
+      "tokenId": 451,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 289,
+      "rarityRank": 432,
+      "metadata": "/nft/fish/metadata/451.json"
+    },
+    {
+      "tokenId": 452,
+      "speciesId": "creekfish_steelblue",
+      "speciesName": "Steelblue Creekfish",
+      "image": "/creekfish-steelblue.png",
+      "rarityScore": 634,
+      "rarityRank": 215,
+      "metadata": "/nft/fish/metadata/452.json"
+    },
+    {
+      "tokenId": 453,
+      "speciesId": "creekfish_berryplum",
+      "speciesName": "Berryplum Creekfish",
+      "image": "/creekfish-berryplum.png",
+      "rarityScore": 172,
+      "rarityRank": 497,
+      "metadata": "/nft/fish/metadata/453.json"
+    },
+    {
+      "tokenId": 454,
+      "speciesId": "bladejaw",
+      "speciesName": "Bladejaw",
+      "image": "/bladejaw.png",
+      "rarityScore": 237,
+      "rarityRank": 478,
+      "metadata": "/nft/fish/metadata/454.json"
+    },
+    {
+      "tokenId": 455,
+      "speciesId": "bladejaw_venomgold",
+      "speciesName": "Venomgold Bladejaw",
+      "image": "/bladejaw-venomgold.png",
+      "rarityScore": 317,
+      "rarityRank": 418,
+      "metadata": "/nft/fish/metadata/455.json"
+    },
+    {
+      "tokenId": 456,
+      "speciesId": "deepfin",
+      "speciesName": "Teal Deepfin",
+      "image": "/deepfin.png",
+      "rarityScore": 534,
+      "rarityRank": 260,
+      "metadata": "/nft/fish/metadata/456.json"
+    },
+    {
+      "tokenId": 457,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 172,
+      "rarityRank": 498,
+      "metadata": "/nft/fish/metadata/457.json"
+    },
+    {
+      "tokenId": 458,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 317,
+      "rarityRank": 419,
+      "metadata": "/nft/fish/metadata/458.json"
+    },
+    {
+      "tokenId": 459,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 317,
+      "rarityRank": 420,
+      "metadata": "/nft/fish/metadata/459.json"
+    },
+    {
+      "tokenId": 460,
+      "speciesId": "moonveil_glacierfin",
+      "speciesName": "Glacierfin Moonveil",
+      "image": "/moonveil-glacierfin.png",
+      "rarityScore": 454,
+      "rarityRank": 323,
+      "metadata": "/nft/fish/metadata/460.json"
+    },
+    {
+      "tokenId": 461,
+      "speciesId": "celestialcrest",
+      "speciesName": "Celestialcrest",
+      "image": "/celestialcrest.png",
+      "rarityScore": 317,
+      "rarityRank": 421,
+      "metadata": "/nft/fish/metadata/461.json"
+    },
+    {
+      "tokenId": 462,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 317,
+      "rarityRank": 422,
+      "metadata": "/nft/fish/metadata/462.json"
+    },
+    {
+      "tokenId": 463,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 1070,
+      "rarityRank": 84,
+      "metadata": "/nft/fish/metadata/463.json"
+    },
+    {
+      "tokenId": 464,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 594,
+      "rarityRank": 234,
+      "metadata": "/nft/fish/metadata/464.json"
+    },
+    {
+      "tokenId": 465,
+      "speciesId": "bastionray_moonjade",
+      "speciesName": "Moonjade Bastionray",
+      "image": "/bastionray-moonjade.png",
+      "rarityScore": 457,
+      "rarityRank": 312,
+      "metadata": "/nft/fish/metadata/465.json"
+    },
+    {
+      "tokenId": 466,
+      "speciesId": "thornback_sunstone",
+      "speciesName": "Sunstone Thornback",
+      "image": "/thornback-sunstone.png",
+      "rarityScore": 430,
+      "rarityRank": 335,
+      "metadata": "/nft/fish/metadata/466.json"
+    },
+    {
+      "tokenId": 467,
+      "speciesId": "thornback",
+      "speciesName": "Thornback",
+      "image": "/thornback.png",
+      "rarityScore": 1010,
+      "rarityRank": 101,
+      "metadata": "/nft/fish/metadata/467.json"
+    },
+    {
+      "tokenId": 468,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 494,
+      "rarityRank": 282,
+      "metadata": "/nft/fish/metadata/468.json"
+    },
+    {
+      "tokenId": 469,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 237,
+      "rarityRank": 479,
+      "metadata": "/nft/fish/metadata/469.json"
+    },
+    {
+      "tokenId": 470,
+      "speciesId": "creekfish_cave",
+      "speciesName": "Cave Creekfish",
+      "image": "/creekfish-cave.png",
+      "rarityScore": 950,
+      "rarityRank": 115,
+      "metadata": "/nft/fish/metadata/470.json"
+    },
+    {
+      "tokenId": 471,
+      "speciesId": "darttail_ice",
+      "speciesName": "Frost Darttail",
+      "image": "/darttail-ice.png",
+      "rarityScore": 197,
+      "rarityRank": 490,
+      "metadata": "/nft/fish/metadata/471.json"
+    },
+    {
+      "tokenId": 472,
+      "speciesId": "darttail_toxic",
+      "speciesName": "Toxic Darttail",
+      "image": "/darttail-toxic.png",
+      "rarityScore": 237,
+      "rarityRank": 480,
+      "metadata": "/nft/fish/metadata/472.json"
+    },
+    {
+      "tokenId": 473,
+      "speciesId": "deepfin_amberleaf",
+      "speciesName": "Amberleaf Deepfin",
+      "image": "/deepfin-amberleaf.png",
+      "rarityScore": 374,
+      "rarityRank": 369,
+      "metadata": "/nft/fish/metadata/473.json"
+    },
+    {
+      "tokenId": 474,
+      "speciesId": "deepfin_sunset",
+      "speciesName": "Sunset Deepfin",
+      "image": "/deepfin-sunset.png",
+      "rarityScore": 790,
+      "rarityRank": 162,
+      "metadata": "/nft/fish/metadata/474.json"
+    },
+    {
+      "tokenId": 475,
+      "speciesId": "bladejaw_reefsteel",
+      "speciesName": "Reefsteel Bladejaw",
+      "image": "/bladejaw-reefsteel.png",
+      "rarityScore": 290,
+      "rarityRank": 428,
+      "metadata": "/nft/fish/metadata/475.json"
+    },
+    {
+      "tokenId": 476,
+      "speciesId": "crownfin_amethyst",
+      "speciesName": "Amethyst Crownfin",
+      "image": "/crownfin-amethyst.png",
+      "rarityScore": 277,
+      "rarityRank": 434,
+      "metadata": "/nft/fish/metadata/476.json"
+    },
+    {
+      "tokenId": 477,
+      "speciesId": "crownfin_frost",
+      "speciesName": "Frost Crownfin",
+      "image": "/crownfin-frost.png",
+      "rarityScore": 404,
+      "rarityRank": 341,
+      "metadata": "/nft/fish/metadata/477.json"
+    },
+    {
+      "tokenId": 478,
+      "speciesId": "prismacrown",
+      "speciesName": "Prismacrown",
+      "image": "/prismacrown.png",
+      "rarityScore": 392,
+      "rarityRank": 359,
+      "metadata": "/nft/fish/metadata/478.json"
+    },
+    {
+      "tokenId": 479,
+      "speciesId": "skyspear_emberwave",
+      "speciesName": "Emberwave Skyspear",
+      "image": "/skyspear-emberwave.png",
+      "rarityScore": 687,
+      "rarityRank": 205,
+      "metadata": "/nft/fish/metadata/479.json"
+    },
+    {
+      "tokenId": 480,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 534,
+      "rarityRank": 261,
+      "metadata": "/nft/fish/metadata/480.json"
+    },
+    {
+      "tokenId": 481,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 289,
+      "rarityRank": 433,
+      "metadata": "/nft/fish/metadata/481.json"
+    },
+    {
+      "tokenId": 482,
+      "speciesId": "bladejaw_obsidian",
+      "speciesName": "Obsidian Bladejaw",
+      "image": "/bladejaw-obsidian.png",
+      "rarityScore": 317,
+      "rarityRank": 423,
+      "metadata": "/nft/fish/metadata/482.json"
+    },
+    {
+      "tokenId": 483,
+      "speciesId": "deepfin_plumtide",
+      "speciesName": "Plumtide Deepfin",
+      "image": "/deepfin-plumtide.png",
+      "rarityScore": 172,
+      "rarityRank": 499,
+      "metadata": "/nft/fish/metadata/483.json"
+    },
+    {
+      "tokenId": 484,
+      "speciesId": "crownfin_emerald",
+      "speciesName": "Emerald Crownfin",
+      "image": "/crownfin-emerald.png",
+      "rarityScore": 574,
+      "rarityRank": 245,
+      "metadata": "/nft/fish/metadata/484.json"
+    },
+    {
+      "tokenId": 485,
+      "speciesId": "crownfin",
+      "speciesName": "Crownfin",
+      "image": "/crownfin.png",
+      "rarityScore": 317,
+      "rarityRank": 424,
+      "metadata": "/nft/fish/metadata/485.json"
+    },
+    {
+      "tokenId": 486,
+      "speciesId": "moonveil_aurora",
+      "speciesName": "Aurora Moonveil",
+      "image": "/moonveil-aurora.png",
+      "rarityScore": 277,
+      "rarityRank": 435,
+      "metadata": "/nft/fish/metadata/486.json"
+    },
+    {
+      "tokenId": 487,
+      "speciesId": "crownfin_tidejade",
+      "speciesName": "Tidejade Crownfin",
+      "image": "/crownfin-tidejade.png",
+      "rarityScore": 1030,
+      "rarityRank": 97,
+      "metadata": "/nft/fish/metadata/487.json"
+    },
+    {
+      "tokenId": 488,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 1129,
+      "rarityRank": 70,
+      "metadata": "/nft/fish/metadata/488.json"
+    },
+    {
+      "tokenId": 489,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 784,
+      "rarityRank": 164,
+      "metadata": "/nft/fish/metadata/489.json"
+    },
+    {
+      "tokenId": 490,
+      "speciesId": "aetherwing",
+      "speciesName": "Aetherwing",
+      "image": "/aetherwing.png",
+      "rarityScore": 582,
+      "rarityRank": 236,
+      "metadata": "/nft/fish/metadata/490.json"
+    },
+    {
+      "tokenId": 491,
+      "speciesId": "oracleray_duskgold",
+      "speciesName": "Duskgold Oracleray",
+      "image": "/oracleray-duskgold.png",
+      "rarityScore": 647,
+      "rarityRank": 213,
+      "metadata": "/nft/fish/metadata/491.json"
+    },
+    {
+      "tokenId": 492,
+      "speciesId": "leviathan",
+      "speciesName": "Leviathan",
+      "image": "/leviathan.png",
+      "rarityScore": 469,
+      "rarityRank": 288,
+      "metadata": "/nft/fish/metadata/492.json"
+    },
+    {
+      "tokenId": 493,
+      "speciesId": "skyspear_citrinejade",
+      "speciesName": "Citrinejade Skyspear",
+      "image": "/skyspear-citrinejade.png",
+      "rarityScore": 1044,
+      "rarityRank": 88,
+      "metadata": "/nft/fish/metadata/493.json"
+    },
+    {
+      "tokenId": 494,
+      "speciesId": "thornback_jadefire",
+      "speciesName": "Jadefire Thornback",
+      "image": "/thornback-jadefire.png",
+      "rarityScore": 352,
+      "rarityRank": 377,
+      "metadata": "/nft/fish/metadata/494.json"
+    },
+    {
+      "tokenId": 495,
+      "speciesId": "bastionray",
+      "speciesName": "Bastionray",
+      "image": "/bastionray.png",
+      "rarityScore": 457,
+      "rarityRank": 313,
+      "metadata": "/nft/fish/metadata/495.json"
+    },
+    {
+      "tokenId": 496,
+      "speciesId": "moonveil",
+      "speciesName": "Moonveil",
+      "image": "/moonveil.png",
+      "rarityScore": 454,
+      "rarityRank": 324,
+      "metadata": "/nft/fish/metadata/496.json"
+    },
+    {
+      "tokenId": 497,
+      "speciesId": "moonveil_nightblossom",
+      "speciesName": "Nightblossom Moonveil",
+      "image": "/moonveil-nightblossom.png",
+      "rarityScore": 799,
+      "rarityRank": 156,
+      "metadata": "/nft/fish/metadata/497.json"
+    },
+    {
+      "tokenId": 498,
+      "speciesId": "darttail_ember",
+      "speciesName": "Ember Darttail",
+      "image": "/darttail-ember.png",
+      "rarityScore": 990,
+      "rarityRank": 107,
+      "metadata": "/nft/fish/metadata/498.json"
+    },
+    {
+      "tokenId": 499,
+      "speciesId": "deepfin_moss",
+      "speciesName": "Moss Deepfin",
+      "image": "/deepfin-moss.png",
+      "rarityScore": 237,
+      "rarityRank": 481,
+      "metadata": "/nft/fish/metadata/499.json"
+    },
+    {
+      "tokenId": 500,
+      "speciesId": "bastionray_marshfire",
+      "speciesName": "Marshfire Bastionray",
+      "image": "/bastionray-marshfire.png",
+      "rarityScore": 714,
+      "rarityRank": 192,
+      "metadata": "/nft/fish/metadata/500.json"
+    }
+  ]
+}

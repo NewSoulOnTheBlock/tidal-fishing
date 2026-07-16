@@ -1,0 +1,71 @@
+{
+  "name": "Bull Fish #211 - Aurora Royalcrest",
+  "description": "A limited Bull Fish Blitz catch NFT minted from verified Robinhood Chain gameplay. Art uses the Aurora Royalcrest species file; traits and rarity score make this edition unique.",
+  "image": "/royalcrest-aurora.png",
+  "external_url": "https://www.bullfishblitz.com",
+  "attributes": [
+    {
+      "trait_type": "Species",
+      "value": "Aurora Royalcrest"
+    },
+    {
+      "trait_type": "Species ID",
+      "value": "royalcrest_aurora"
+    },
+    {
+      "trait_type": "Base Rarity",
+      "value": "mythic"
+    },
+    {
+      "trait_type": "Edition Number",
+      "value": 1,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Visual Variant",
+      "value": "Moonlit"
+    },
+    {
+      "trait_type": "Mutation",
+      "value": "none"
+    },
+    {
+      "trait_type": "Aura",
+      "value": "none"
+    },
+    {
+      "trait_type": "Size Class",
+      "value": "Fingerling"
+    },
+    {
+      "trait_type": "Weight Class",
+      "value": "Light"
+    },
+    {
+      "trait_type": "Water Biome",
+      "value": "ocean"
+    },
+    {
+      "trait_type": "Time Window",
+      "value": "dawn"
+    },
+    {
+      "trait_type": "Temperament",
+      "value": "Trickster"
+    },
+    {
+      "trait_type": "Serial Tier",
+      "value": "Top 50 Rarity"
+    },
+    {
+      "trait_type": "Rarity Score",
+      "value": 1682,
+      "display_type": "number"
+    },
+    {
+      "trait_type": "Rarity Rank",
+      "value": 23,
+      "display_type": "number"
+    }
+  ]
+}
