@@ -269,7 +269,7 @@ export class CatchCard {
             await navigator.share({
               files: [file],
               title: `I caught a ${fishName}!`,
-              text: `Check out my catch on Tidal! 🎣 #Tidal #Solana`,
+              text: `Check out my catch on Tidal! 🎣 #Tidal #RobinhoodChain`,
               url: window.location.origin,
             });
             if (xWin && !xWin.closed) xWin.close();

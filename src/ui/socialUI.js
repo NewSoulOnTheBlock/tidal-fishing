@@ -49,7 +49,7 @@ export class SocialUI {
     let html = `<span class="wb-online"><span class="wb-dot"></span>${online} fishing now</span>`;
     if (hotLabel) {
       html += `<span class="wb-hot${here ? " wb-here" : ""}">🔥 Hot: ${esc(hotLabel)}` +
-        `<span class="wb-hot-sub">${here ? "you're here · +10%" : "+10% $SBF"}</span></span>`;
+        `<span class="wb-hot-sub">${here ? "you're here · +10%" : "+10% USDG"}</span></span>`;
     }
     this.badge.innerHTML = html;
     this.badge.classList.toggle("hidden", online <= 0 && !hotLabel);

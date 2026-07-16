@@ -376,7 +376,7 @@ export class ChatUI {
         const d = await res.json();
         if (cmd === "rank") {
           const earned = Math.round(Number(d.totalEarned) || 0).toLocaleString("en-US");
-          this.appendLocal(`🏅 You're #${d.rank} · ${earned} $SBF earned · ${d.totalCatches} catches${d.streak ? ` · 🔥${d.streak}d streak` : ""}`);
+          this.appendLocal(`🏅 You're #${d.rank} · ${earned} USDG earned · ${d.totalCatches} catches${d.streak ? ` · 🔥${d.streak}d streak` : ""}`);
         } else {
           this.appendLocal(d.best
             ? `🐟 Your biggest: ${d.best.sizeCm}cm ${d.best.species}`

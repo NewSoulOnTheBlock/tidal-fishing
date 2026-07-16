@@ -35,8 +35,8 @@ export class OnboardingUI {
           <div class="onboarding-logo">🎣</div>
           <h1 class="onboarding-title">Welcome to <span>Tidal Fishing</span></h1>
           <p class="onboarding-tagline">
-            The web3 fishing adventure on Solana. Cast your line, reel in rare
-            fish, climb the leaderboard, and earn&nbsp;$SBF.
+            The web3 fishing adventure on Robinhood Chain. Cast your line, reel in rare
+            fish, climb the leaderboard, and earn&nbsp;USDG.
           </p>
         </div>
 

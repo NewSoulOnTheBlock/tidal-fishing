@@ -17,12 +17,12 @@ const SLIDES = [
   {
     icon: ICON('<path d="M16 3l4 4l-4 4" /><path d="M10 7l10 0" /><path d="M8 13l-4 4l4 4" /><path d="M4 17l9 0" />'),
     title: "Casual or Pro?",
-    body: "Tap the <b>mode button</b> (top corner) to switch anytime. <b>🎣 Casual Angler</b> — just fish for fun: <b>no bait needed</b>, cast freely, and every catch still fills your Journal (catch &amp; release, no $SBF). <b>💰 Pro Angler</b> — the full economy: each cast spends <b>bait</b> and your catches are worth real <b>$SBF</b> to sell. New anglers start in Casual.",
+    body: "Tap the <b>mode button</b> (top corner) to switch anytime. <b>🎣 Casual Angler</b> — just fish for fun: <b>no bait needed</b>, cast freely, and every catch still fills your Journal (catch &amp; release, no USDG). <b>💰 Pro Angler</b> — the full economy: each cast spends <b>bait</b> and your catches are worth real <b>USDG</b> to sell. New anglers start in Casual.",
   },
   {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-1" /><path d="M10 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M12 7v2" />'),
     title: "Bait every cast",
-    body: "In <b>Pro Angler</b> mode, every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>SOL</b> or <b>$SBF</b> — same value either way. <i>(Casual mode needs no bait.)</i>",
+    body: "In <b>Pro Angler</b> mode, every cast spends <b>1 bait</b>, so stock up in the <b>Shop</b> first — you start with none. <b>Cheaper bait</b> lands mostly common fish; <b>pricier bait</b> tilts your odds toward rare, epic &amp; legendary catches. Buy bait with <b>ETH</b> or <b>USDG</b> — same value either way. <i>(Casual mode needs no bait.)</i>",
   },
   {
     icon: ICON('<path d="M16 9v6a5 5 0 0 1 -10 0v-4l3 3" /><path d="M14 7a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M16 5v-2" />'),
@@ -51,8 +51,8 @@ const SLIDES = [
   },
   {
     icon: ICON('<path d="M16.69 7.44a6.973 6.973 0 0 0 -1.69 4.56c0 1.747 .64 3.345 1.699 4.571" /><path d="M2 9.504c7.715 8.647 14.75 10.265 20 2.498c-5.25 -7.761 -12.285 -6.142 -20 2.504" /><path d="M18 11v.01" /><path d="M11.5 10.5c-.667 1 -.667 2 0 3" />'),
-    title: "Spots, $SBF &amp; beyond",
-    body: "Spot drifting <b>ripple rings</b> on the water? Cast into one for faster bites and rarer fish. Every catch earns <b>$SBF</b> and XP — sell your haul, upgrade gear, unlock new waters, and climb the leaderboard. <b>Tight lines!</b>",
+    title: "Spots, USDG &amp; beyond",
+    body: "Spot drifting <b>ripple rings</b> on the water? Cast into one for faster bites and rarer fish. Every catch earns <b>USDG</b> and XP — sell your haul, upgrade gear, unlock new waters, and climb the leaderboard. <b>Tight lines!</b>",
   },
 ];
 

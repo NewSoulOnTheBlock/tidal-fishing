@@ -228,7 +228,7 @@ export function catchTweetText(name) {
   const origin =
     (typeof window !== "undefined" && window.location && window.location.origin) ||
     "https://tidalfishing.fun";
-  return `I just caught a ${name} on Tidal! 🎣 #Tidal #Solana\n\nPlay at ${origin}`;
+  return `I just caught a ${name} on Tidal! 🎣 #Tidal #RobinhoodChain\n\nPlay at ${origin}`;
 }
 
 /** Build the X/Twitter web-intent URL for the given text. */

@@ -1,4 +1,4 @@
-// Wallet HUD panel — connect/disconnect, address pill, SOL + $SBF balances.
+// Wallet HUD panel — connect/disconnect, address pill, ETH + USDG balances.
 //
 // Lives in the top-right HUD column under the clock card. Renders as plain DOM
 // so it slots into the existing tideline aesthetic with zero extra runtime
@@ -24,7 +24,7 @@ const REFRESH_INTERVAL_MS = 60_000;
 // Players must HOLD this much game token in their connected wallet before the
 // earned-token withdraw faucet unlocks. Enforced on the withdraw tap (splash
 // popup when unmet); the disclaimer also shows on the wallet-connect screen.
-const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $SBF
+const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 USDG
 
 export class WalletPanel {
   constructor() {
@@ -46,7 +46,7 @@ export class WalletPanel {
     this.modal = null;
     this.refreshTimer = null;
     this.account = null;
-    this.lastTideBalanceUi = 0; // on-chain $SBF (UI units) for the hold gate
+    this.lastTideBalanceUi = 0; // on-chain USDG (UI units) for the hold gate
     this._splash = null;        // active withdraw-locked splash, if any
     this._lastHudTop = 0;     // cached --hud-topright-top to avoid redundant writes
 
@@ -70,7 +70,7 @@ export class WalletPanel {
     // (the interval is paused while hidden to avoid background RPC spam).
     this._onVis = () => { if (!document.hidden) this.refreshBalances(); };
     document.addEventListener("visibilitychange", this._onVis);
-    // Re-render when the player's earned $SBF changes so the Withdraw row
+    // Re-render when the player's earned USDG changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
     events.on("solSale", () => this.render());
@@ -106,10 +106,10 @@ export class WalletPanel {
         const label = this.withdrawing ? "Withdrawing…" : `Withdraw ${formatMoney(earned)}`;
         withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
       } else if (!mintConfigured && earned > 0) {
-        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $SBF goes live">Withdraw soon™</button>`;
+        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once USDG goes live">Withdraw soon™</button>`;
       }
       if (solSaleValue > 0) {
-        const solLabel = this.withdrawingSol ? "Sending SOL…" : `Withdraw ${formatSol(solSaleAmount)} from fish sales`;
+        const solLabel = this.withdrawingSol ? "Sending ETH…" : `Withdraw ${formatSol(solSaleAmount)} from fish sales`;
         withdrawHtml += `<button class="btn btn-sol btn-withdraw-compact" data-withdraw-sol ${this.withdrawingSol ? "disabled" : ""}>${solLabel}</button>`;
       }
 
@@ -201,7 +201,7 @@ export class WalletPanel {
     try {
       const result = await withdrawSol(amount);
       economy.deductSolSaleValue(amount);
-      const solText = Number.isFinite(result?.solAmount) ? formatSol(result.solAmount) : "SOL";
+      const solText = Number.isFinite(result?.solAmount) ? formatSol(result.solAmount) : "ETH";
       events.emit("toast", {
         msg: `Sold fish for ${solText} · ${shortAddress(result.signature, 6, 6)}`,
         kind: "gold",
@@ -210,7 +210,7 @@ export class WalletPanel {
       this.refreshBalances();
     } catch (e) {
       console.error("[withdraw-sol] failed:", e);
-      events.emit("toast", { msg: e?.message ?? "SOL payout failed", kind: "warn" });
+      events.emit("toast", { msg: e?.message ?? "ETH payout failed", kind: "warn" });
     } finally {
       this.withdrawingSol = false;
       this.render();

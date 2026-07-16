@@ -1,5 +1,5 @@
 // Consumable bait. ONE bait is spent per Pro cast (see economy.consumeBait), so
-// bait is the wager chip of Bull Fish Blitz: players buy bait with SOL, cast it,
+// bait is the wager chip of Bull Fish Blitz: players buy bait with ETH, cast it,
 // then win by selling whatever fish that bait odds table produces.
 //
 // Hybrid mode:
@@ -42,7 +42,7 @@ export const BAITS = [
       odds("uncommon", 0.18, 0.9, "Decent bite"),
       odds("rare", 0.06, 1.65, "Rare splash"),
     ],
-    blurb: "Low-stakes SOL bait. Mostly commons, with a clean shot at a rare fish.",
+    blurb: "Low-stakes ETH bait. Mostly commons, with a clean shot at a rare fish.",
     lookIdx: 0,
   },
   {
@@ -167,7 +167,7 @@ export function baitStatLines(b) {
   const bite = b.biteSpeed === 1 ? "normal" : `+${Math.round((1 - b.biteSpeed) * 100)}% faster bites`;
   return [
     baitSettlementLabel(b),
-    `SOL wager ${b.solPrice} per bait`,
+    `ETH wager ${b.solPrice} per bait`,
     baitRtpLabel(b),
     `Bite speed ${bite}`,
     `Rare ladder: ${rareOdds}`,
