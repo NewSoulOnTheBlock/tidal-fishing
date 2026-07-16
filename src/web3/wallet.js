@@ -1,8 +1,8 @@
-// EVM wallet connection for Robinhood Chain. This replaces the old Solana
+// EVM wallet connection for Robinhood Chain. This replaces the old Robinhood Chain
 // Wallet Standard adapter while preserving the tiny framework-free API used by
 // the existing DOM HUD.
 
-import { CHAIN_ID, CHAIN_ID_HEX, RPC_URL, EXPLORER_BASE, NETWORK } from "./solana.js";
+import { CHAIN_ID, CHAIN_ID_HEX, RPC_URL, EXPLORER_BASE, NETWORK } from "./chain.js";
 
 const listeners = new Set();
 let _provider = null;
@@ -13,9 +13,9 @@ function addressObject(address) {
   if (!address) return null;
   return {
     address,
-    publicKey: address,
+    walletAddress: address,
     toString: () => address,
-    toBase58: () => address, // legacy call sites from the Solana version
+    toBase58: () => address, // legacy call sites from the Robinhood Chain version
   };
 }
 
@@ -30,7 +30,8 @@ function emit() {
 export function onChange(cb) { listeners.add(cb); cb({ wallet: _provider ? { name: _walletName || "EVM Wallet", provider: _provider } : null, account: addressObject(_account) }); return () => listeners.delete(cb); }
 export function currentWallet() { return _provider ? { name: _walletName || "EVM Wallet", provider: _provider } : null; }
 export function currentAccount() { return addressObject(_account); }
-export function currentPublicKey() { return addressObject(_account); }
+export function currentWalletAddress() { return addressObject(_account); }
+export const currentAccountAddress = currentWalletAddress;
 export function currentAddress() { return _account; }
 
 function injectedProviders() {
@@ -125,8 +126,8 @@ function hexToBytes(hex) {
   return out;
 }
 
-// Legacy Solana transaction methods are intentionally unsupported after the
+// Legacy Robinhood Chain transaction methods are intentionally unsupported after the
 // Robinhood conversion.
-export async function signTransaction() { throw new Error("Solana transactions are disabled; use Robinhood Chain EVM transactions."); }
-export async function signAndSendTransaction() { throw new Error("Solana transactions are disabled; use Robinhood Chain EVM transactions."); }
-export const SolanaSignIn = "eip191:personal_sign";
+export async function signTransaction() { throw new Error("Robinhood Chain transactions are disabled; use Robinhood Chain EVM transactions."); }
+export async function signAndSendTransaction() { throw new Error("Robinhood Chain transactions are disabled; use Robinhood Chain EVM transactions."); }
+export const WalletSignIn = "eip191:personal_sign";

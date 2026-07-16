@@ -1,4 +1,4 @@
-// Sign-In With Solana (SIWS) session.
+// EVM sign-in (EVM) session.
 //
 // One signature when the wallet connects yields a short-lived bearer token that
 // authorizes the write endpoints (save / catch / profile / chat). This proves
@@ -8,7 +8,7 @@
 // The token is held in memory + sessionStorage (so a page reload doesn't force
 // a re-sign) and attached automatically to API calls via the api.js auth hooks.
 
-import { currentPublicKey, signMessage } from "./wallet.js";
+import { currentWalletAddress, signMessage } from "./wallet.js";
 import { apiFetch, setAuthHooks } from "../utils/api.js";
 
 const STORAGE_KEY = "tidal_session_v1";
@@ -67,7 +67,7 @@ export function clearSession() {
  * and a no-op when a valid token already exists. Returns true on success.
  */
 export async function establishSession() {
-  const pk = currentPublicKey();
+  const pk = currentWalletAddress();
   if (!pk) return false;
   const wallet = pk.toBase58();
 

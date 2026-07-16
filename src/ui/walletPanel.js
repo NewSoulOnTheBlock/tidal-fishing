@@ -11,7 +11,7 @@ import {
   formatSol,
   formatTokens,
 } from "../web3/token.js";
-import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT, TIDE_SYMBOL, NATIVE_SYMBOL } from "../web3/solana.js";
+import { shortAddress, explorerAddressUrl, explorerTxUrl, NETWORK, TIDE_MINT, TIDE_SYMBOL, NATIVE_SYMBOL } from "../web3/chain.js";
 import { withdrawTide, withdrawSol } from "../web3/withdraw.js";
 import { tideToSolLive } from "../web3/priceConvert.js";
 import { onWalletConnect, onWalletDisconnect } from "../web3/databaseIntegration.js";

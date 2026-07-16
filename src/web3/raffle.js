@@ -1,7 +1,7 @@
 // Client API wrapper for the 24-Hour Fish Raffle → Gacha Prize system.
 //
 // Mirrors src/web3/database.js: every call funnels through apiFetch (timeouts +
-// SIWS bearer token). All ticket math + winner selection is server-authoritative;
+// EVM bearer token). All ticket math + winner selection is server-authoritative;
 // these are thin read/write helpers for the "Lucky Catch" shop tab.
 
 import { apiFetch } from '../utils/api.js';

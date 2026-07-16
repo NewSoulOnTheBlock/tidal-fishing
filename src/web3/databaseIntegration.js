@@ -2,7 +2,7 @@
 // Auto-saves player state, records catches, syncs on wallet connect
 
 import { authenticatePlayer, savePlayerState, recordCatch } from "./database.js";
-import { currentPublicKey } from "./wallet.js";
+import { currentWalletAddress } from "./wallet.js";
 import { establishSession, clearSession, getSessionToken } from "./session.js";
 import { S, events } from "../state/gameState.js";
 import { saveGame } from "../state/saveLoad.js";
@@ -17,7 +17,7 @@ let sessionPromptWallet = null;
 let lastCheckinWallet = null;
 
 /**
- * Kick off the one-time Sign-In With Solana signature for this wallet. Shows a
+ * Kick off the one-time EVM sign-in signature for this wallet. Shows a
  * single explanatory toast (once per wallet) so the signature prompt isn't a
  * surprise. Fire-and-forget — never blocks the connect flow or gameplay.
  */
@@ -40,7 +40,7 @@ function ensureSession(walletAddress) {
 
 /**
  * Daily check-in: advances the consecutive-day streak and, once per UTC day,
- * credits a small $SBF bonus (server-authoritative). Runs once per connect and
+ * credits a small USDG bonus (server-authoritative). Runs once per connect and
  * only after a session token exists. Non-interactive so it never pops a wallet
  * prompt on its own.
  */
@@ -62,7 +62,7 @@ async function checkInDaily(walletAddress) {
       addMoney(data.bonus);
       const streak = data.streak || 1;
       events.emit("toast", {
-        msg: `🔥 ${streak}-day streak! +${data.bonus} $SBF daily bonus`,
+        msg: `🔥 ${streak}-day streak! +${data.bonus} USDG daily bonus`,
         kind: "success",
       });
     }
@@ -73,16 +73,16 @@ async function checkInDaily(walletAddress) {
  * Authenticate player on wallet connect and start auto-save
  */
 export async function onWalletConnect() {
-  const publicKey = currentPublicKey();
-  if (!publicKey) {
+  const walletAccount = currentWalletAddress();
+  if (!walletAccount) {
     console.warn("[db] Cannot authenticate: no public key");
     return;
   }
 
-  const walletAddress = publicKey.toString();
+  const walletAddress = walletAccount.toString();
   console.log("[db] Authenticating player:", walletAddress);
 
-  // Sign-In With Solana: prompt for the session signature RIGHT NOW, while the
+  // EVM sign-in: prompt for the session signature RIGHT NOW, while the
   // user is in the "just connected" context. Fired independently of (and before)
   // the DB authenticate call below, which can cold-start or fail — a slow/empty
   // database must never suppress or delay the sign-in prompt.
@@ -175,8 +175,8 @@ function stopAutoSave() {
  * Sync current player state to database
  */
 export async function syncPlayerState(opts = {}) {
-  const publicKey = currentPublicKey();
-  if (!publicKey) return;
+  const walletAccount = currentWalletAddress();
+  if (!walletAccount) return;
 
   if (isSyncing) {
     console.log("[db] Sync already in progress, skipping");
@@ -194,7 +194,7 @@ export async function syncPlayerState(opts = {}) {
 
   isSyncing = true;
   lastSyncTime = now;
-  const walletAddress = publicKey.toString();
+  const walletAddress = walletAccount.toString();
 
   try {
     // Also save to localStorage
@@ -230,10 +230,10 @@ export async function syncPlayerState(opts = {}) {
  * Record a fish catch to database
  */
 export async function recordCatchToDB(fish, isPerfect = false) {
-  const publicKey = currentPublicKey();
+  const walletAccount = currentWalletAddress();
   if (!publicKey || !isAuthenticated) return;
 
-  const walletAddress = publicKey.toString();
+  const walletAddress = walletAccount.toString();
 
   try {
     const success = await recordCatch({

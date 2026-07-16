@@ -1,7 +1,7 @@
 // Profile UI - Player profile editor with achievements and badges
 
 import { S, events } from "../state/gameState.js";
-import { currentPublicKey } from "../web3/wallet.js";
+import { currentWalletAddress } from "../web3/wallet.js";
 import { updateProfile, getPlayerProfile } from "../web3/database.js";
 import { saveGame } from "../state/saveLoad.js";
 import { PROFILE_AVATARS, getAvatar } from "../data/profileAvatars.js";
@@ -9,7 +9,7 @@ import { mountCharacterChooser } from "./characterChooser.js";
 import { getCharacter } from "../data/characters.js";
 import { ACHIEVEMENTS } from "../progression/achievements.js";
 import { formatMoney } from "../utils/utils.js";
-import { shortAddress } from "../web3/solana.js";
+import { shortAddress } from "../web3/chain.js";
 
 export class ProfileUI {
   constructor() {
@@ -41,9 +41,9 @@ export class ProfileUI {
   }
 
   async show() {
-    const publicKey = currentPublicKey();
+    const walletAccount = currentWalletAddress();
 
-    if (!publicKey) {
+    if (!walletAccount) {
       events.emit("toast", {
         msg: "Connect your wallet to view your profile",
         kind: "warn",
@@ -58,7 +58,7 @@ export class ProfileUI {
     if (this.panel) this.hide();
     this._opening = true;
 
-    const walletAddress = publicKey.toString();
+    const walletAddress = walletAccount.toString();
 
     // Local state is the source of truth (instant, offline-safe).
     this.currentProfile = this.buildLocalProfile(walletAddress);
@@ -370,10 +370,10 @@ export class ProfileUI {
       console.warn('[ProfileUI] saveGame failed:', e?.message);
     }
 
-    const publicKey = currentPublicKey();
+    const walletAccount = currentWalletAddress();
     if (publicKey) {
       try {
-        await updateProfile(publicKey.toString(), serverPatch);
+        await updateProfile(walletAddress.toString(), serverPatch);
       } catch (e) {
         console.warn('[ProfileUI] Remote profile sync failed (saved locally):', e?.message);
       }

@@ -8,7 +8,7 @@ import * as economy from "../economy/economy.js";
 import { audio } from "../audio/audioManager.js";
 import { formatMoney } from "../utils/utils.js";
 import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
-import { explorerTxUrl, shortAddress } from "../web3/solana.js";
+import { explorerTxUrl, shortAddress } from "../web3/chain.js";
 
 const $ = (id) => document.getElementById(id);
 

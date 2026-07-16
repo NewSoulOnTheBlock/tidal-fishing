@@ -2,7 +2,7 @@
 // token economics set VITE_GAME_TOKEN_ADDRESS and optionally wire a real market
 // data source. No fake market cap is shown.
 
-import { TIDE_MINT, TIDE_SYMBOL } from "./solana.js";
+import { TIDE_MINT, TIDE_SYMBOL } from "./chain.js";
 export const TIDE_MINT_ADDRESS = TIDE_MINT;
 
 export async function fetchTideMarket() {

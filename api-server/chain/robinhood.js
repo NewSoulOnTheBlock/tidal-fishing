@@ -1,0 +1,13 @@
+export const ROBINHOOD_CHAIN_ID = Number(process.env.ROBINHOOD_CHAIN_ID || 4663);
+export const ROBINHOOD_RPC_URL = process.env.ROBINHOOD_RPC_URL || 'https://rpc.mainnet.chain.robinhood.com';
+export const ROBINHOOD_EXPLORER = 'https://robinhoodchain.blockscout.com';
+export const USDG_ADDRESS = process.env.USDG_ADDRESS || '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168';
+export const GAME_TOKEN_ADDRESS = process.env.GAME_TOKEN_ADDRESS || USDG_ADDRESS;
+export const GAME_TOKEN_SYMBOL = process.env.GAME_TOKEN_SYMBOL || 'USDG';
+export const GAME_TOKEN_DECIMALS = Number(process.env.GAME_TOKEN_DECIMALS || 18);
+export const OPERATOR_TREASURY = process.env.OPERATOR_TREASURY || '';
+export const REWARD_ESCROW_ADDRESS = process.env.REWARD_ESCROW_ADDRESS || '';
+export const BAIT_STORE_ADDRESS = process.env.BAIT_STORE_ADDRESS || '';
+export const HOUSE_RESERVE_VAULT_ADDRESS = process.env.HOUSE_RESERVE_VAULT_ADDRESS || '';
+export const TOURNAMENT_VAULT_ADDRESS = process.env.TOURNAMENT_VAULT_ADDRESS || '';
+export const SPONSORED_HOTSPOTS_ADDRESS = process.env.SPONSORED_HOTSPOTS_ADDRESS || '';

@@ -1,5 +1,5 @@
 import { apiFetch } from "../utils/api.js";
-import { currentPublicKey, sendTransaction } from "./wallet.js";
+import { currentWalletAddress, sendTransaction } from "./wallet.js";
 import { AbiCoder } from "ethers";
 
 export async function getFishNftManifest() {
@@ -8,7 +8,7 @@ export async function getFishNftManifest() {
   return res.json();
 }
 
-export async function getActiveFishNftOpportunity(walletAddress = currentPublicKey()?.toString()) {
+export async function getActiveFishNftOpportunity(walletAddress = currentWalletAddress()?.toString()) {
   if (!walletAddress) return null;
   const res = await apiFetch(`/api/nft/opportunity/${encodeURIComponent(walletAddress)}`);
   if (!res.ok) return null;
@@ -16,7 +16,7 @@ export async function getActiveFishNftOpportunity(walletAddress = currentPublicK
   return data.opportunity || null;
 }
 
-export async function claimFishNft(walletAddress = currentPublicKey()?.toString()) {
+export async function claimFishNft(walletAddress = currentWalletAddress()?.toString()) {
   if (!walletAddress) throw new Error("Connect your wallet first");
   const res = await apiFetch("/api/nft/mint-claim", {
     method: "POST",

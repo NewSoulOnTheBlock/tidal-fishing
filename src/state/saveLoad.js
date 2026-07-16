@@ -1,7 +1,7 @@
 // localStorage persistence with graceful fallback when storage is unavailable
 // (private browsing, blocked storage, etc.). Falls back to in-memory only.
 //
-// Tidal extension: when a Solana wallet is connected, saves are keyed by the
+// Tidal extension: when a EVM wallet is connected, saves are keyed by the
 // wallet address (`tidal_save_v1:<addr>`) so different wallets get distinct
 // progress. On the first connection of a wallet with no save, the anonymous
 // local save is migrated into the wallet slot. The anonymous slot

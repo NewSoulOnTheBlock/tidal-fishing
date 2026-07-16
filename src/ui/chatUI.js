@@ -3,8 +3,8 @@
 // Banned wallets are blocked server-side; posting requires a chosen angler name.
 
 import { S, events } from "../state/gameState.js";
-import { currentPublicKey } from "../web3/wallet.js";
-import { shortAddress } from "../web3/solana.js";
+import { currentWalletAddress } from "../web3/wallet.js";
+import { shortAddress } from "../web3/chain.js";
 import { apiFetch } from "../utils/api.js";
 import { cachedGetJson } from "../utils/apiCache.js";
 import { getOnline, getHotSpotLabel } from "../web3/world.js";
@@ -396,7 +396,7 @@ export class ChatUI {
 
   currentWallet() {
     try {
-      const pk = currentPublicKey();
+      const pk = currentWalletAddress();
       return pk ? pk.toString() : null;
     } catch {
       return null;

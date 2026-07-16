@@ -1,8 +1,8 @@
 // Robinhood Chain native ETH payment helper. Function names retain the old
-// Solana API so the shop can be converted incrementally.
+// Robinhood Chain API so the shop can be converted incrementally.
 
-import { TIDE_TREASURY, NATIVE_SYMBOL } from "./solana.js";
-import { currentPublicKey, sendTransaction, rpc } from "./wallet.js";
+import { TIDE_TREASURY, NATIVE_SYMBOL } from "./chain.js";
+import { currentWalletAddress, sendTransaction, rpc } from "./wallet.js";
 
 const SOL_TO_TIDE_RATE = 3500; // legacy name: USDG-equivalent per ETH fallback
 const WEI_PER_ETH = 10n ** 18n;
@@ -19,7 +19,7 @@ function hexQuantity(v) { return `0x${BigInt(v).toString(16)}`; }
 
 export async function paySol(solAmount, { memo, split } = {}) {
   if (!TIDE_TREASURY) throw new Error("Treasury wallet not configured");
-  const payer = currentPublicKey();
+  const payer = currentWalletAddress();
   const from = payer?.address || payer?.toString?.();
   if (!from) throw new Error("Wallet not connected");
   const totalWei = parseEth(solAmount);
@@ -42,7 +42,7 @@ export async function paySol(solAmount, { memo, split } = {}) {
   return firstHash;
 }
 
-export function isSolPayEnabled() { return Boolean(currentPublicKey() && TIDE_TREASURY); }
+export function isSolPayEnabled() { return Boolean(currentWalletAddress() && TIDE_TREASURY); }
 export function formatSol(solAmount) {
   const n = Number(solAmount);
   if (!Number.isFinite(n)) return `— ${NATIVE_SYMBOL}`;

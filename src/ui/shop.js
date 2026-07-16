@@ -15,8 +15,8 @@ import { fishSVG } from "./fishSvg.js";
 import { isOnChainPayEnabled, payTide } from "../web3/payment.js";
 import { isSolPayEnabled, paySol, formatSol, tideToSol } from "../web3/solPayment.js";
 import { solToTideLive, tideToSolLive, refreshRate, isRateLoaded } from "../web3/priceConvert.js";
-import { explorerTxUrl, shortAddress } from "../web3/solana.js";
-import { currentPublicKey } from "../web3/wallet.js";
+import { explorerTxUrl, shortAddress } from "../web3/chain.js";
+import { currentWalletAddress } from "../web3/wallet.js";
 import { getCurrentRaffle, getUserRaffle, getRaffleHistory, exchangeFishForTickets, buyPackWithFish } from "../web3/raffle.js";
 
 const $ = (id) => document.getElementById(id);
@@ -158,7 +158,7 @@ export class ShopUI {
         action.innerHTML = `<span class="locked-tag">Level ${item.level}</span>`;
       } else {
         // Show dual payment buttons if wallet connected
-        const walletConnected = Boolean(currentPublicKey());
+        const walletConnected = Boolean(currentWalletAddress());
         const solPayAvailable = isSolPayEnabled();
         const tidePayAvailable = isOnChainPayEnabled();
         
@@ -255,7 +255,7 @@ export class ShopUI {
 
     const qty = this.baitQty;
     const selected = S.bait?.selected;
-    const walletConnected = Boolean(currentPublicKey());
+    const walletConnected = Boolean(currentWalletAddress());
     const solPayAvailable = isSolPayEnabled();
 
     BAITS.forEach((b) => {
@@ -435,7 +435,7 @@ export class ShopUI {
     const el = this.contentEl;
     el.innerHTML = `<div class="lucky-loading">Loading the Lucky Catch raffle…</div>`;
 
-    const wallet = currentPublicKey();
+    const wallet = currentWalletAddress();
     let current = null;
     let user = null;
     let history = [];
@@ -709,7 +709,7 @@ export class ShopUI {
         });
         action.appendChild(btn);
       } else {
-        const walletConnected = Boolean(currentPublicKey());
+        const walletConnected = Boolean(currentWalletAddress());
         const solPayAvailable = isSolPayEnabled();
         const tidePayAvailable = isOnChainPayEnabled();
 

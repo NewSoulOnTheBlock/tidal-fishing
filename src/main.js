@@ -1,5 +1,5 @@
 // TIDAL — bootstrap, game loop, state machine wiring and input routing.
-// Forked from bridge-mind/tideline. Now Web3-native on Solana mainnet.
+// Forked from bridge-mind/tideline. Now Web3-native on Robinhood Chain.
 
 import * as THREE from "three";
 import { CONFIG } from "./data/config.js";
@@ -52,7 +52,7 @@ import { SocialUI } from "./ui/socialUI.js";
 import { onChange as onWalletChange } from "./web3/wallet.js";
 import { initMobileWalletAdapter } from "./web3/mwa.js";
 import { initTelegram, isTelegram, tgHaptic, tgSetBackButton } from "./platform/telegram.js";
-import { shortAddress } from "./web3/solana.js";
+import { shortAddress } from "./web3/chain.js";
 import { refreshRate as warmTideRate } from "./web3/priceConvert.js";
 import { GamepadInput } from "./input/gamepad.js";
 import { lerp, randRange, projectToScreen } from "./utils/utils.js";
@@ -73,7 +73,7 @@ loadGame();
 // gestures work, and exposes safe-area insets to CSS.
 initTelegram();
 
-// Register Solana Mobile Wallet Adapter so installed mobile wallets appear in
+// Register mobile wallet adapter so installed mobile wallets appear in
 // the connect modal automatically (no-op on desktop unless VITE_MWA_REMOTE_HOST
 // is set; see src/web3/mwa.js).
 initMobileWalletAdapter();
@@ -239,11 +239,11 @@ if (!isInstalledPWA()) {
 const socialUI = new SocialUI();
 socialUI.mount();
 
-// Warm the live SOL→$SBF rate (Jupiter) so the bait shop shows the correct
-// $SBF price the first time it's opened. Fire-and-forget; self-throttled.
+// Warm the live ETH→USDG rate (live market) so the bait shop shows the correct
+// USDG price the first time it's opened. Fire-and-forget; self-throttled.
 warmTideRate().catch(() => {});
 
-// Title-screen market-cap pill + $SBF contract-address footer. Lazy-loaded so
+// Title-screen market-cap pill + USDG contract-address footer. Lazy-loaded so
 // this non-critical widget stays out of the main entry chunk (keeps the wallet
 // adapter graph from being pulled in eagerly).
 import("./ui/marketCapUI.js")

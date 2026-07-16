@@ -4,7 +4,7 @@
 // a valid name is entered, so every player starts with an identity.
 
 import { S, events } from "../state/gameState.js";
-import { currentPublicKey } from "../web3/wallet.js";
+import { currentWalletAddress } from "../web3/wallet.js";
 import { updateProfile } from "../web3/database.js";
 import { saveGame } from "../state/saveLoad.js";
 import { isTelegram, tgSuggestedName } from "../platform/telegram.js";
@@ -24,7 +24,7 @@ export class OnboardingUI {
   show() {
     // Guard against double-show (event may fire more than once).
     if (this.panel) return;
-    if (!currentPublicKey()) return;
+    if (!currentWalletAddress()) return;
 
     this.panel = document.createElement("div");
     this.panel.id = "onboarding-panel";
@@ -124,12 +124,12 @@ export class OnboardingUI {
     }
 
     // Best-effort: persist the name to the server in the background so it follows
-    // the wallet across devices. Fire-and-forget — a fresh wallet has no SIWS
+    // the wallet across devices. Fire-and-forget — a fresh wallet has no EVM
     // session yet, so awaiting it here would stall behind a signature prompt and
     // make the flow feel frozen. Its success must not gate play.
-    const publicKey = currentPublicKey();
+    const walletAddress = currentWalletAddress();
     if (publicKey) {
-      updateProfile(publicKey.toString(), { username: name }).catch((e) => {
+      updateProfile(walletAddress.toString(), { username: name }).catch((e) => {
         console.warn("[onboarding] server name save failed (saved locally):", e?.message);
       });
     }

@@ -1,0 +1,4 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+import './Common.sol';
+contract SponsoredHotspots is OwnableLite { using SafeERC20Lite for IERC20Lite; IERC20Lite public immutable asset; address public operatorTreasury; uint16 public operatorBps=2500; event HotspotSponsored(address indexed sponsor,bytes32 indexed locationId,uint256 startsAt,uint256 endsAt,uint256 grossAmount,string metadataURI); constructor(IERC20Lite asset_,address operator_){asset=asset_;operatorTreasury=operator_;} function sponsorHotspot(bytes32 locationId,uint256 startsAt,uint256 endsAt,uint256 grossAmount,string calldata metadataURI) external { require(endsAt>startsAt && grossAmount>0,'bad sponsor'); asset.safeTransferFrom(msg.sender,operatorTreasury,grossAmount*operatorBps/10000); asset.safeTransferFrom(msg.sender,address(this),grossAmount-(grossAmount*operatorBps/10000)); emit HotspotSponsored(msg.sender,locationId,startsAt,endsAt,grossAmount,metadataURI); } }

@@ -3,7 +3,7 @@
 
 import { S } from "../state/gameState.js";
 import { formatMoney } from "../utils/utils.js";
-import { shortAddress } from "../web3/solana.js";
+import { shortAddress } from "../web3/chain.js";
 import { FISH_BY_ID, RARITIES } from "../data/fishData.js";
 import { apiFetch } from "../utils/api.js";
 import { cachedGetJson } from "../utils/apiCache.js";

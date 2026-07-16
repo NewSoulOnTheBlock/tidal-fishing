@@ -1,8 +1,8 @@
-// Robinhood Chain ERC-20 payment helpers. Keeps legacy $SBF function names so
+// Robinhood Chain ERC-20 payment helpers. Keeps legacy USDG function names so
 // shop/economy code can migrate without a full rewrite.
 
-import { TIDE_MINT, TIDE_TREASURY, TIDE_SYMBOL } from "./solana.js";
-import { currentAddress, currentPublicKey, sendTransaction, call } from "./wallet.js";
+import { TIDE_MINT, TIDE_TREASURY, TIDE_SYMBOL } from "./chain.js";
+import { currentAddress, currentWalletAddress, sendTransaction, call } from "./wallet.js";
 import { fetchErc20Balance } from "./token.js";
 
 const DEFAULT_DECIMALS = Number(import.meta.env.VITE_GAME_TOKEN_DECIMALS ?? 18);
@@ -16,7 +16,7 @@ function parseUnits(value, decimals = DEFAULT_DECIMALS) {
   return BigInt(whole || "0") * 10n ** BigInt(decimals) + BigInt(cleanFrac || "0");
 }
 
-export function isOnChainPayEnabled() { return Boolean(TIDE_MINT && TIDE_TREASURY && currentPublicKey()); }
+export function isOnChainPayEnabled() { return Boolean(TIDE_MINT && TIDE_TREASURY && currentWalletAddress()); }
 
 export function paymentConfig() {
   return { mint: TIDE_MINT || null, model: "erc20_transfer_to_treasury", treasury: TIDE_TREASURY || null, decimals: DEFAULT_DECIMALS, symbol: TIDE_SYMBOL, enabled: isOnChainPayEnabled() };

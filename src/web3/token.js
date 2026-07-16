@@ -1,6 +1,6 @@
 // Read-only Robinhood Chain balance helpers used by the wallet HUD.
 
-import { TIDE_MINT, TIDE_SYMBOL, NATIVE_SYMBOL, RPC_URL } from "./solana.js";
+import { TIDE_MINT, TIDE_SYMBOL, NATIVE_SYMBOL, RPC_URL } from "./chain.js";
 import { call, rpc } from "./wallet.js";
 
 export const SOL_DECIMALS = 18;

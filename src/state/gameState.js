@@ -59,7 +59,7 @@ export function createDefaultState() {
     version: 1,
     profile: {
       money: CONFIG.economy.startMoney,
-      // Native-SOL sale bucket. Stored as the $SBF-equivalent fish value so the
+      // Native ETH sale bucket. Stored as the USDG-equivalent fish value so the
       // server can spend the same authoritative earned ledger, then convert to
       // live SOL at withdrawal time.
       solSaleValue: 0,
@@ -71,7 +71,7 @@ export function createDefaultState() {
       character: "r2d2",
       anglersOwned: [], // premium angler ids unlocked in Shop → Anglers
       tutorialSeen: false,
-      // Casual (default) = play for fun, no bait, no $SBF. Pro = bait required,
+      // Casual (default) = play for fun, no bait, no USDG. Pro = bait required,
       // catches are valuable. See state/gameMode.js.
       mode: "casual",
     },

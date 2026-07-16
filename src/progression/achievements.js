@@ -21,10 +21,10 @@ export const ACHIEVEMENTS = [
   { id: 'complete_all', label: 'Pokédex Complete', desc: 'Catch every species', check: (stats) => stats.uniqueSpecies >= 22, icon: '🌟', reward: 0 },
 
   // Money achievements - NO REWARDS
-  { id: 'earn_1k', label: 'First Grand', desc: 'Earn 1,000 $SBF', check: (stats) => stats.lifetimeEarnings >= 1000, icon: '💰', reward: 0 },
-  { id: 'earn_10k', label: 'Big Earner', desc: 'Earn 10,000 $SBF', check: (stats) => stats.lifetimeEarnings >= 10000, icon: '💵', reward: 0 },
-  { id: 'earn_100k', label: 'Six Figures', desc: 'Earn 100,000 $SBF', check: (stats) => stats.lifetimeEarnings >= 100000, icon: '💸', reward: 0 },
-  { id: 'earn_1m', label: 'Millionaire', desc: 'Earn 1,000,000 $SBF', check: (stats) => stats.lifetimeEarnings >= 1000000, icon: '🤑', reward: 0 },
+  { id: 'earn_1k', label: 'First Grand', desc: 'Earn 1,000 USDG', check: (stats) => stats.lifetimeEarnings >= 1000, icon: '💰', reward: 0 },
+  { id: 'earn_10k', label: 'Big Earner', desc: 'Earn 10,000 USDG', check: (stats) => stats.lifetimeEarnings >= 10000, icon: '💵', reward: 0 },
+  { id: 'earn_100k', label: 'Six Figures', desc: 'Earn 100,000 USDG', check: (stats) => stats.lifetimeEarnings >= 100000, icon: '💸', reward: 0 },
+  { id: 'earn_1m', label: 'Millionaire', desc: 'Earn 1,000,000 USDG', check: (stats) => stats.lifetimeEarnings >= 1000000, icon: '🤑', reward: 0 },
 
   // Location achievements - NO REWARDS
   { id: 'unlock_river', label: 'River Explorer', desc: 'Unlock River Bend', check: (stats) => stats.unlockedLocations.includes('river'), icon: '🌊', reward: 0 },

@@ -1,7 +1,7 @@
 {
   "name": "tidal-api-server",
   "version": "1.0.0",
-  "description": "Tidal API server for Solana withdrawals",
+  "description": "Bull Fish Blitz Robinhood Chain API server",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -11,16 +11,12 @@
     "test": "node --test"
   },
   "dependencies": {
-    "@onsol/tldparser": "^1.2.1",
-    "@solana/web3.js": "^1.95.5",
-    "bs58": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ethers": "^6.17.0",
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.2.0",
-    "pg": "^8.11.3",
-    "tweetnacl": "^1.0.3"
+    "pg": "^8.11.3"
   }
 }

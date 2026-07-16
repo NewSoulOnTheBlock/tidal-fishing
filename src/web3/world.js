@@ -4,7 +4,7 @@
 
 import { apiFetch } from "../utils/api.js";
 import { events } from "../state/gameState.js";
-import { currentPublicKey } from "./wallet.js";
+import { currentWalletAddress } from "./wallet.js";
 
 const PRESENCE_MS = 30000; // heartbeat cadence (server TTL is 60s)
 const WORLD_MS = 60000;    // world snapshot (catch of the day) refresh
@@ -45,7 +45,7 @@ function emit() { events.emit("world:update", { ...state }); }
 
 async function pingPresence() {
   try {
-    const wallet = currentPublicKey()?.toString() || undefined;
+    const wallet = currentWalletAddress()?.toString() || undefined;
     const res = await apiFetch("/api/presence", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

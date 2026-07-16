@@ -1,7 +1,7 @@
 // Server-side catch validation - prevents offline fishing
 // All catches must be approved by the server before being registered
 
-import { currentPublicKey } from "./wallet.js";
+import { currentWalletAddress } from "./wallet.js";
 import { apiFetch } from "../utils/api.js";
 
 let lastValidationCheck = 0;
@@ -13,17 +13,17 @@ const CACHE_DURATION = 30_000; // 30 seconds
  * Returns { allowed: boolean, error?: string }
  */
 export async function validateCatch(speciesId, value) {
-  const publicKey = currentPublicKey();
+  const walletAccount = currentWalletAddress();
   
   // Require wallet connection
-  if (!publicKey) {
+  if (!walletAccount) {
     return { 
       allowed: false, 
       error: "Connect your wallet to fish" 
     };
   }
 
-  const walletAddress = publicKey.toString();
+  const walletAddress = walletAccount.toString();
   
   try {
     const response = await apiFetch("/api/catch/validate", {

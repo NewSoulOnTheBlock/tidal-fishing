@@ -33,7 +33,7 @@ function resolveApiUrl(path) {
   return `${API_BASE}${path}`;
 }
 
-// SIWS session hooks, wired in by src/web3/session.js. Kept as setter-injected
+// EVM session hooks, wired in by src/web3/session.js. Kept as setter-injected
 // callbacks so this module has no import cycle with the session/wallet layer.
 let _getToken = null;
 let _reauth = null;
@@ -49,7 +49,7 @@ export function setAuthHooks({ getToken, reauth } = {}) {
  * game's network calls forever. Accepts a path (joined to API_BASE) or a full
  * URL. Options:
  *   - timeoutMs (default 12s)
- *   - auth: true   → attach the SIWS bearer token (when present).
+ *   - auth: true   → attach the EVM bearer token (when present).
  *   - interactive  → when a write 401s with an expired/missing session AND this
  *                    is true (default), transparently re-establish a session
  *                    (which may prompt the wallet to sign) and retry once.
