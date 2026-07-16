@@ -9,8 +9,19 @@ import { dirname, resolve } from 'node:path';
 import dotenv from 'dotenv';
 import pg from 'pg';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const manifest = JSON.parse(readFileSync(resolve(__dirname, '../shared/fish-nft-manifest.json'), 'utf8'));
-const economy = JSON.parse(readFileSync(resolve(__dirname, '../shared/economy.json'), 'utf8'));
+function readJsonOr(path, fallback) {
+  try { return JSON.parse(readFileSync(path, 'utf8')); } catch { return fallback; }
+}
+const manifest = readJsonOr(resolve(__dirname, '../shared/fish-nft-manifest.json'), []);
+const economy = readJsonOr(resolve(__dirname, '../shared/economy.json'), {
+  minWithdrawalUi: 10,
+  maxWithdrawalUiPerDay: 500,
+  maxRewardPoolUtilizationBps: 7500,
+  platformFeeBps: 2500,
+  rewardPoolBps: 6500,
+  lpFeeBps: 700,
+  sponsorBps: 300,
+});
 import { normalizeEvmAddress, verifyEvmLogin, parseSignedMessageFields } from './auth/evmAuth.js';
 import { ROBINHOOD_CHAIN_ID, GAME_TOKEN_ADDRESS, GAME_TOKEN_SYMBOL, BAIT_STORE_ADDRESS, REWARD_ESCROW_ADDRESS, HOUSE_RESERVE_VAULT_ADDRESS, TOURNAMENT_VAULT_ADDRESS, SPONSORED_HOTSPOTS_ADDRESS } from './chain/robinhood.js';
 import { getTransactionReceipt } from './chain/rpc.js';
