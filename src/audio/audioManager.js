@@ -20,6 +20,7 @@ class AudioManager {
     
     // Music playlist - 6 tracks that cycle
     this.musicPlaylist = [
+      '/music/robin-hood-and-the-tanner.mp3',
       '/music/track1-lake-fishing.mp3',
       '/music/track2-acoustic-fields.mp3',
       '/music/track3-whistle-folk.mp3',

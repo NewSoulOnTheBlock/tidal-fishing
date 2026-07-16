@@ -966,7 +966,7 @@ document.getElementById("btn-mode")?.addEventListener("click", () => {
   const mode = toggleMode();
   if (mode === "pro") {
     events.emit("toast", {
-      msg: "Pro Angler — buy bait with SOL, cast it as your wager, then sell your catches to win.",
+      msg: "Pro Angler — buy bait with ETH, cast it as your wager, then sell your catches to win.",
       kind: "gold",
     });
   } else {

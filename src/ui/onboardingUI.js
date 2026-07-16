@@ -32,7 +32,7 @@ export class OnboardingUI {
     this.panel.innerHTML = `
       <div class="modal-content onboarding-modal">
         <div class="onboarding-hero">
-          <div class="onboarding-logo">🎣</div>
+          <img class="onboarding-logo onboarding-brand-logo" src="/brand/tidal-robinhood-logo.png" alt="Tidal — a Robinhood Chain fishing game" />
           <h1 class="onboarding-title">Welcome to <span>Tidal Fishing</span></h1>
           <p class="onboarding-tagline">
             The web3 fishing adventure on Robinhood Chain. Cast your line, reel in rare
@@ -143,7 +143,7 @@ export class OnboardingUI {
     const modal = this.panel.querySelector(".onboarding-modal");
     if (!modal) {
       // Defensive: if the modal shell is gone, skip straight to the tutorial.
-      this.finishCharacter(S.profile.character || "r2d2");
+      this.finishCharacter(S.profile.character || "robin-hood");
       return;
     }
     const name = S.profile.username || "angler";
@@ -159,10 +159,10 @@ export class OnboardingUI {
     `;
     const mount = modal.querySelector(".onboarding-character-body");
     this.chooser = mountCharacterChooser(mount, {
-      initial: S.profile.character || "r2d2",
+      initial: S.profile.character || "robin-hood",
       confirmLabel: "Fish as {name} →",
       cancelLabel: "Skip for now",
-      onCancel: () => this.finishCharacter(S.profile.character || "r2d2"),
+      onCancel: () => this.finishCharacter(S.profile.character || "robin-hood"),
       onConfirm: (id) => this.finishCharacter(id),
     });
   }

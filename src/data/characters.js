@@ -23,6 +23,30 @@ const PIKACHU_CAST_SOUNDS = [
 
 export const CHARACTERS = [
   {
+    id: "robin-hood",
+    name: "Robin Hood",
+    emoji: "🏹",
+    blurb: "Sherwood's legendary outlaw-angler — precise casts, clean steals, and big green-water catches.",
+    url: "/models/characters/robin-hood.glb",
+    height: 1.8,
+    yawDeg: 180,
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  {
+    id: "little-john",
+    name: "Little John",
+    emoji: "🪵",
+    blurb: "Robin's towering right hand. Built like a bridge and calm enough to land monsters.",
+    url: "/models/characters/little-john.glb",
+    height: 1.9,
+    yawDeg: 180,
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  {
     id: "r2d2",
     name: "R2-D2",
     emoji: "🤖",
@@ -233,7 +257,7 @@ export const CHARACTERS = [
   ...premiumAngler("cj", "CJ", "🚲", "Grove Street's finest. Ah, here we go again — straight to the big catch."),
 ];
 
-export const DEFAULT_CHARACTER = "r2d2";
+export const DEFAULT_CHARACTER = "robin-hood";
 
 /** Build a premium animated-VRM angler entry that reuses the shared fishing clips. */
 function premiumAngler(id, name, emoji, blurb, extra = {}) {
