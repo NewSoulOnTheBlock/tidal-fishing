@@ -354,6 +354,22 @@ function ensureChatSchema() {
 }
 
 let _sysChatCount = 0;
+let _memoryChatId = 0;
+const memoryChat = [];
+function pushMemoryChat(row) {
+  const msg = {
+    id: ++_memoryChatId,
+    wallet_address: row.wallet_address || SYSTEM_WALLET,
+    username: row.username || null,
+    message: String(row.message || '').slice(0, 280),
+    kind: row.kind || 'user',
+    level: Number(row.level) || 0,
+    created_at: new Date().toISOString(),
+  };
+  memoryChat.push(msg);
+  while (memoryChat.length > 500) memoryChat.shift();
+  return msg;
+}
 async function insertSystemChat(message, kind = 'system') {
   const msg = String(message)
     .replace(/[\u0000-\u001F\u007F]/g, ' ')
@@ -373,7 +389,9 @@ async function insertSystemChat(message, kind = 'system') {
          WHERE id < (SELECT MIN(id) FROM (SELECT id FROM chat_messages ORDER BY id DESC LIMIT 500) t)`
       ).catch(() => {});
     }
-  } catch (e) { /* best-effort flavor — never throw */ }
+  } catch (e) {
+    pushMemoryChat({ wallet_address: SYSTEM_WALLET, username: 'Fishermans Hole', message: msg, kind, level: 0 });
+  }
 }
 
 // Timing-safe admin key check (avoids leaking the secret via response timing).
@@ -1853,7 +1871,10 @@ app.get('/api/chat', cacheControl('no-store'), async (req, res) => {
     res.json({ messages: result.rows });
   } catch (error) {
     console.error('[chat] Fetch error:', error);
-    res.status(500).json({ error: 'Failed to fetch chat' });
+    const rows = Number.isFinite(since) && since > 0
+      ? memoryChat.filter((m) => m.id > since).slice(0, limit)
+      : memoryChat.slice(-limit);
+    res.json({ messages: rows, fallback: true });
   }
 });
 
@@ -1863,6 +1884,10 @@ app.get('/api/chat', cacheControl('no-store'), async (req, res) => {
 app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
   const { walletAddress } = req.body;
   let { message } = req.body;
+  const requestedName = String(req.body?.username || '')
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    .trim()
+    .slice(0, 50);
 
   if (!walletAddress || walletAddress.length < 32) {
     return res.status(400).json({ error: 'Valid wallet address required' });
@@ -1886,9 +1911,11 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
     let posterLevel = 0;
     try {
       const lr = await pool.query('SELECT username, level FROM players WHERE wallet_address = $1', [walletAddress]);
-      cleanName = (lr.rows[0]?.username || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 50);
+      cleanName = (lr.rows[0]?.username || requestedName || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, 50);
       posterLevel = Number(lr.rows[0]?.level) || 0;
-    } catch (e) { /* identity lookup failed — treat as no name set */ }
+    } catch (e) {
+      cleanName = requestedName;
+    }
 
     if (!cleanName) {
       return res.status(400).json({ error: 'Set an angler name before chatting', code: 'NAME_REQUIRED' });
@@ -1922,7 +1949,8 @@ app.post('/api/chat', writeLimiter, requireSession, async (req, res) => {
     res.json({ success: true, message: inserted.rows[0] });
   } catch (error) {
     console.error('[chat] Post error:', error);
-    res.status(500).json({ error: 'Failed to post message' });
+    const fallback = pushMemoryChat({ wallet_address: walletAddress, username: requestedName || 'Angler', message, kind: 'user', level: 0 });
+    res.json({ success: true, message: fallback, fallback: true });
   }
 });
 
