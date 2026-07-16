@@ -1,0 +1,15 @@
+{
+  "network": "Robinhood Chain",
+  "chainId": 4663,
+  "contracts": {
+    "BullFishBlitzFishNFT": {
+      "address": "0x59B9cB77cdD1b9bF761f9EA39807ed950B406527",
+      "txHash": "0x6111a20457eece8b1a2598b2f149441e82803c07704b34fdd42ed7f6d8c1c3a0",
+      "blockNumber": 11034945,
+      "owner": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
+      "claimSigner": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
+      "maxSupply": 500,
+      "baseTokenURI": "https://www.bullfishblitz.com/nft/fish/metadata/"
+    }
+  }
+}
