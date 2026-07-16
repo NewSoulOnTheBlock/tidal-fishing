@@ -136,7 +136,7 @@ export class HUD {
     this.withdrawBtn.disabled = earned <= 0;
     this.withdrawBtn.title = earned > 0
       ? `Withdraw ${formatMoney(earned)} to your connected wallet`
-      : "Earn USDG before withdrawing";
+      : "Earn $TIDAL before withdrawing";
   }
 
   updateXp() {
@@ -162,7 +162,7 @@ export class HUD {
     this.modeBtn.classList.toggle("mode-pro", pro);
     this.modeBtn.classList.toggle("mode-casual", !pro);
     this.modeBtn.title = pro
-      ? "Pro Angler — bait required, catches worth USDG. Click to switch to Casual."
+      ? "Pro Angler — bait required, catches worth $TIDAL. Click to switch to Casual."
       : "Casual Angler — fish freely for fun. Click to switch to Pro.";
     // Keep the bait chip's visibility in sync with the active mode.
     this.baitChip.classList.toggle("hidden", !pro);

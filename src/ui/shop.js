@@ -1,6 +1,6 @@
 // Shop screen: four gear categories with tiered upgrades plus a Sell tab for
 // the catch bag. Renders from data; all transactions go through economy.js.
-// Now with DUAL PAYMENT OPTIONS: pay with USDG or ETH!
+// Now with DUAL PAYMENT OPTIONS: pay with $TIDAL or ETH!
 
 import { S, events } from "../state/gameState.js";
 import { GEAR, GEAR_CATS, gearStatLines } from "../data/gearData.js";
@@ -108,8 +108,8 @@ export class ShopUI {
 
   renderGear(catKey) {
     this.contentEl.innerHTML = "";
-    // Option-A pricing: each item is anchored to an ETH price and its USDG cost is
-    // the live ETH-equivalent (same model as bait), so paying in USDG always
+    // Option-A pricing: each item is anchored to an ETH price and its $TIDAL cost is
+    // the live ETH-equivalent (same model as bait), so paying in $TIDAL always
     // costs the same value as the ETH price. Ensure a rate is loaded; re-render once
     // it arrives so prices reflect the live market instead of the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
@@ -169,18 +169,18 @@ export class ShopUI {
           const paymentOptions = document.createElement("div");
           paymentOptions.className = "payment-options";
           
-          // Off-chain USDG button (always available)
+          // Off-chain $TIDAL button (always available)
           const offChainBtn = document.createElement("button");
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
-            <span class="pay-label">Pay with USDG</span>
+            <span class="pay-label">Pay with $TIDAL</span>
             <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
             offChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
-            offChainBtn.title = "Not enough USDG";
+            offChainBtn.title = "Not enough $TIDAL";
           }
           paymentOptions.appendChild(offChainBtn);
           
@@ -196,12 +196,12 @@ export class ShopUI {
             paymentOptions.appendChild(solBtn);
           }
           
-          // On-chain USDG button (if token deployed)
+          // On-chain $TIDAL button (if token deployed)
           if (tidePayAvailable) {
             const onChainBtn = document.createElement("button");
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
-              <span class="pay-label">Pay with USDG (on-chain)</span>
+              <span class="pay-label">Pay with $TIDAL (on-chain)</span>
               <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
             onChainBtn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-onchain', solAmount, tideCost));
@@ -213,7 +213,7 @@ export class ShopUI {
           // No wallet connected - standard buy button
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough USDG";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDAL";
           btn.disabled = !afford;
           if (afford) {
             btn.addEventListener("click", () => this.buyGear(catKey, idx, 'tide-offchain', solAmount, tideCost));
@@ -321,14 +321,14 @@ export class ShopUI {
       const usdgBtn = document.createElement("button");
       usdgBtn.className = `btn btn-tide ${walletConnected ? "" : "btn-disabled"}`;
       usdgBtn.innerHTML = `
-        <span class="pay-label">Buy ×${qty} bait · USDG onchain</span>
+        <span class="pay-label">Buy ×${qty} bait · $TIDAL onchain</span>
         <span class="pay-amount">${formatMoney(usdCost)}</span>
       `;
       if (walletConnected) {
         usdgBtn.addEventListener("click", () => this.buyBaitWith(b.id, qty, "tide-onchain", solCost, usdCost));
       } else {
         usdgBtn.disabled = true;
-        usdgBtn.title = "Connect wallet to buy bait with USDG";
+        usdgBtn.title = "Connect wallet to buy bait with $TIDAL";
       }
       paymentOptions.appendChild(usdgBtn);
       action.appendChild(paymentOptions);
@@ -372,7 +372,7 @@ export class ShopUI {
       `;
       const sbfBtn = document.createElement("button");
       sbfBtn.className = "btn";
-      sbfBtn.textContent = "Sell USDG";
+      sbfBtn.textContent = "Sell $TIDAL";
       sbfBtn.addEventListener("click", () => {
         audio.play("sell");
         economy.sellFishAt(idx, "sbf");
@@ -401,7 +401,7 @@ export class ShopUI {
     footer.innerHTML = `<span class="sell-total">Total: <span style="color:var(--gold)">${formatMoney(economy.inventoryValue())}</span> <span class="sell-sol-total">or ${formatSol(tideToSolLive(economy.inventoryValue()))}</span></span>`;
     const sellAllBtn = document.createElement("button");
     sellAllBtn.className = "btn btn-buy";
-    sellAllBtn.textContent = "Sell All USDG";
+    sellAllBtn.textContent = "Sell All $TIDAL";
     sellAllBtn.addEventListener("click", () => {
       const total = economy.sellAll("sbf");
       audio.play("sell");
@@ -686,7 +686,7 @@ export class ShopUI {
     intro.innerHTML = `Unlock animated anglers to fish as. Each is yours forever once bought.`;
     this.contentEl.appendChild(intro);
 
-    // Option-A pricing: USDG cost is the live ETH-equivalent of each angler's
+    // Option-A pricing: $TIDAL cost is the live ETH-equivalent of each angler's
     // ETH price. Re-render once the rate loads so prices leave the cold-start fallback.
     const rateWasLoaded = isRateLoaded();
     refreshRate().then(() => {
@@ -737,14 +737,14 @@ export class ShopUI {
           const offChainBtn = document.createElement("button");
           offChainBtn.className = `btn btn-primary ${afford ? "" : "btn-disabled"}`;
           offChainBtn.innerHTML = `
-            <span class="pay-label">Pay with USDG</span>
+            <span class="pay-label">Pay with $TIDAL</span>
             <span class="pay-amount">${formatMoney(tideCost)}</span>
           `;
           if (afford) {
             offChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
           } else {
             offChainBtn.disabled = true;
-            offChainBtn.title = "Not enough USDG";
+            offChainBtn.title = "Not enough $TIDAL";
           }
           paymentOptions.appendChild(offChainBtn);
 
@@ -763,7 +763,7 @@ export class ShopUI {
             const onChainBtn = document.createElement("button");
             onChainBtn.className = "btn btn-tide";
             onChainBtn.innerHTML = `
-              <span class="pay-label">Pay with USDG (on-chain)</span>
+              <span class="pay-label">Pay with $TIDAL (on-chain)</span>
               <span class="pay-amount">${formatMoney(tideCost)}</span>
             `;
             onChainBtn.addEventListener("click", () => this.buyAngler(c.id, "tide-onchain", solAmount, tideCost));
@@ -774,7 +774,7 @@ export class ShopUI {
         } else {
           const btn = document.createElement("button");
           btn.className = `btn ${afford ? "" : "btn-disabled"}`;
-          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough USDG";
+          btn.textContent = afford ? `Buy ${formatMoney(tideCost)}` : "Not enough $TIDAL";
           btn.disabled = !afford;
           if (afford) {
             btn.addEventListener("click", () => this.buyAngler(c.id, "tide-offchain", solAmount, tideCost));
@@ -828,7 +828,7 @@ export class ShopUI {
       }
     } else if (method === "tide-onchain") {
       try {
-        events.emit("toast", { msg: "Approve USDG if needed, then confirm BaitStore purchase...", kind: "info" });
+        events.emit("toast", { msg: "Approve $TIDAL if needed, then confirm BaitStore purchase...", kind: "info" });
         const txHash = await buyBaitPackOnChain(b, qty);
         events.emit("toast", { msg: "Verifying bait purchase on Robinhood Chain...", kind: "info", href: explorerTxUrl(txHash) });
         const verified = await verifyBaitPurchase(txHash);
@@ -893,19 +893,19 @@ export class ShopUI {
       }
     } else if (method === "tide-onchain") {
       try {
-        events.emit("toast", { msg: "Processing USDG transfer...", kind: "info" });
+        events.emit("toast", { msg: "Processing $TIDAL transfer...", kind: "info" });
         const sig = await payTide(tideCost, { memo: `tidal:angler:${id}` });
         economy.grantAnglerOnChain(id, sig);
         economy.selectAngler(id);
         audio.play("buy");
         events.emit("toast", {
-          msg: `${c.name} unlocked with USDG · ${shortAddress(sig, 6, 6)}`,
+          msg: `${c.name} unlocked with $TIDAL · ${shortAddress(sig, 6, 6)}`,
           kind: "gold",
           href: explorerTxUrl(sig),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain USDG angler payment failed", e);
+        console.error("[tidal] on-chain $TIDAL angler payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {
@@ -925,11 +925,11 @@ export class ShopUI {
     const item = GEAR[catKey][idx];
     
     if (method === 'tide-offchain') {
-      // Standard off-chain USDG purchase
+      // Standard off-chain $TIDAL purchase
       const res = economy.buyGear(catKey, idx, tideCost);
       if (res.ok) {
         audio.play("buy");
-        events.emit("toast", { msg: `${item.name} purchased with USDG`, kind: "success" });
+        events.emit("toast", { msg: `${item.name} purchased with $TIDAL`, kind: "success" });
       } else {
         audio.play("error");
         events.emit("toast", { msg: res.reason, kind: "warn" });
@@ -960,21 +960,21 @@ export class ShopUI {
       }
       
     } else if (method === 'tide-onchain') {
-      // On-chain USDG payment (treasury transfer)
+      // On-chain $TIDAL payment (treasury transfer)
       try {
-        events.emit("toast", { msg: "Processing USDG transfer...", kind: "info" });
+        events.emit("toast", { msg: "Processing $TIDAL transfer...", kind: "info" });
         const sig = await payTide(tideCost, { memo: `tidal:gear:${catKey}:${idx}` });
         
         economy.grantGearOnChain(catKey, idx, sig);
         audio.play("buy");
         events.emit("toast", {
-          msg: `${item.name} unlocked with USDG · ${shortAddress(sig, 6, 6)}`,
+          msg: `${item.name} unlocked with $TIDAL · ${shortAddress(sig, 6, 6)}`,
           kind: "gold",
           href: explorerTxUrl(sig),
         });
         events.emit("wallet:refresh");
       } catch (e) {
-        console.error("[tidal] on-chain USDG payment failed", e);
+        console.error("[tidal] on-chain $TIDAL payment failed", e);
         audio.play("error");
         events.emit("toast", { msg: e?.message ?? "On-chain payment failed", kind: "warn" });
       } finally {

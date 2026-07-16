@@ -1,5 +1,5 @@
 {
-  "currencySymbol": "USDG",
+  "currencySymbol": "$TIDAL",
   "targetHouseEdgeBps": 1800,
   "minHouseEdgeBps": 1200,
   "platformFeeBps": 2500,

@@ -3,6 +3,7 @@ import { sendTransaction, call, currentAddress } from './wallet.js';
 import { BAIT_STORE_ADDRESS, GAME_TOKEN_ADDRESS, GAME_TOKEN_DECIMALS } from './chain.js';
 
 export const BAIT_STORE_ABI = [
+  'function asset() view returns (address)',
   'function buyBaitPack(uint256 packId,uint256 quantity)',
   'function packs(uint256 packId) view returns (uint256 price,bool active)',
 ];
@@ -15,6 +16,12 @@ const erc20Iface = new Interface([
 
 export function baitPackIdForBait(bait) { return Number(bait?.packId || bait?.tier || 1); }
 export function encodeBuyBaitPack(packId, quantity) { return baitStoreIface.encodeFunctionData('buyBaitPack', [BigInt(packId), BigInt(quantity)]); }
+export async function fetchBaitStoreAsset() {
+  if (!BAIT_STORE_ADDRESS) return null;
+  const data = baitStoreIface.encodeFunctionData('asset', []);
+  const raw = await call({ to: BAIT_STORE_ADDRESS, data });
+  return String(baitStoreIface.decodeFunctionResult('asset', raw)[0]);
+}
 export async function fetchBaitPack(packId) {
   if (!BAIT_STORE_ADDRESS) return null;
   const data = baitStoreIface.encodeFunctionData('packs', [BigInt(packId)]);
@@ -34,7 +41,7 @@ export async function ensureBaitStoreAllowance(rawAmount) {
     readErc20('balanceOf', [owner]),
     readErc20('allowance', [owner, BAIT_STORE_ADDRESS]),
   ]);
-  if (balance < rawAmount) throw new Error('Not enough USDG for this bait purchase');
+  if (balance < rawAmount) throw new Error('Not enough $TIDAL for this bait purchase');
   if (allowance >= rawAmount) return null;
   const data = erc20Iface.encodeFunctionData('approve', [BAIT_STORE_ADDRESS, rawAmount]);
   return sendTransaction({ to: GAME_TOKEN_ADDRESS, data, value: '0x0' });
@@ -42,7 +49,10 @@ export async function ensureBaitStoreAllowance(rawAmount) {
 export async function buyBaitPackOnChain(bait, quantity) {
   if (!BAIT_STORE_ADDRESS) throw new Error('BaitStore is not deployed/configured');
   const packId = baitPackIdForBait(bait);
-  const pack = await fetchBaitPack(packId);
+  const [storeAsset, pack] = await Promise.all([fetchBaitStoreAsset(), fetchBaitPack(packId)]);
+  if (storeAsset && storeAsset.toLowerCase() !== GAME_TOKEN_ADDRESS.toLowerCase()) {
+    throw new Error('BaitStore was deployed for the previous token and must be redeployed for $TIDAL before on-chain bait purchases can run.');
+  }
   if (!pack?.active) throw new Error(`Bait pack ${packId} is inactive`);
   const rawGross = pack.price * BigInt(quantity);
   await ensureBaitStoreAllowance(rawGross);

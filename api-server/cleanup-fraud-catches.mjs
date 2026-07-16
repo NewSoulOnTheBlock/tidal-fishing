@@ -93,14 +93,14 @@ async function main() {
 
   console.log('By species:');
   for (const [sp, { count, value }] of [...bySpecies.entries()].sort((a, b) => b[1].value - a[1].value)) {
-    console.log(`  ${sp.padEnd(20)} ${String(count).padStart(5)} catches  ${value.toLocaleString()} USDG`);
+    console.log(`  ${sp.padEnd(20)} ${String(count).padStart(5)} catches  ${value.toLocaleString()} $TIDAL`);
   }
   console.log('\nBy wallet:');
   for (const [wallet, { count, value }] of [...byWallet.entries()].sort((a, b) => b[1].value - a[1].value)) {
-    console.log(`  ${wallet}  ${String(count).padStart(5)} catches  ${value.toLocaleString()} USDG`);
+    console.log(`  ${wallet}  ${String(count).padStart(5)} catches  ${value.toLocaleString()} $TIDAL`);
   }
   const totalValue = fraud.reduce((a, r) => a + (Number(r.value) || 0), 0);
-  console.log(`\nTotal: ${fraud.length} catches across ${byWallet.size} wallet(s), ${totalValue.toLocaleString()} USDG to claw back.`);
+  console.log(`\nTotal: ${fraud.length} catches across ${byWallet.size} wallet(s), ${totalValue.toLocaleString()} $TIDAL to claw back.`);
 
   if (!APPLY) {
     console.log('\nℹ️  Dry run — no changes made. Re-run with --apply to execute.');

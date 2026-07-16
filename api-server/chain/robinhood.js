@@ -1,9 +1,9 @@
 export const ROBINHOOD_CHAIN_ID = Number(process.env.ROBINHOOD_CHAIN_ID || 4663);
 export const ROBINHOOD_RPC_URL = process.env.ROBINHOOD_RPC_URL || 'https://rpc.mainnet.chain.robinhood.com';
 export const ROBINHOOD_EXPLORER = 'https://robinhoodchain.blockscout.com';
-export const USDG_ADDRESS = process.env.USDG_ADDRESS || '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168';
-export const GAME_TOKEN_ADDRESS = process.env.GAME_TOKEN_ADDRESS || USDG_ADDRESS;
-export const GAME_TOKEN_SYMBOL = process.env.GAME_TOKEN_SYMBOL || 'USDG';
+export const TIDAL_TOKEN_ADDRESS = process.env.TIDAL_TOKEN_ADDRESS || '0xcf987e5ec08229eb9cf260f66d3382c827e37777';
+export const GAME_TOKEN_ADDRESS = process.env.GAME_TOKEN_ADDRESS || TIDAL_TOKEN_ADDRESS;
+export const GAME_TOKEN_SYMBOL = process.env.GAME_TOKEN_SYMBOL || '$TIDAL';
 export const GAME_TOKEN_DECIMALS = Number(process.env.GAME_TOKEN_DECIMALS || 18);
 export const OPERATOR_TREASURY = process.env.OPERATOR_TREASURY || '0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60';
 export const REWARD_ESCROW_ADDRESS = process.env.REWARD_ESCROW_ADDRESS || '0xCe81b8730D897Bf4B3581C541a9A3B788402E565';

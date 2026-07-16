@@ -2,10 +2,10 @@
 //
 //   Casual — just play. No bait is required to cast and catches are purely
 //            recreational: they still fill the Journal and stats, but earn no
-//            USDG, aren't server-validated, and aren't added to the sellable
+//            $TIDAL, aren't server-validated, and aren't added to the sellable
 //            catch bag (catch & release).
 //   Pro    — the full economy. Every cast spends one bait, catches are
-//            server-validated and worth real USDG you can sell.
+//            server-validated and worth real $TIDAL you can sell.
 //
 // Persisted on S.profile.mode. New anglers start in Casual so anyone can fish
 // right away; flip to Pro from the HUD to play for value.
@@ -18,7 +18,7 @@ export function getMode() {
   return S.profile?.mode === "pro" ? "pro" : "casual";
 }
 
-/** True when the player is fishing for real USDG value (bait required). */
+/** True when the player is fishing for real $TIDAL value (bait required). */
 export function isPro() {
   return getMode() === "pro";
 }

@@ -172,7 +172,7 @@ export const CHARACTERS = [
     z: 0,
   },
 
-  // ---- Premium Anglers (purchasable in Shop → Anglers for USDG) ----------
+  // ---- Premium Anglers (purchasable in Shop → Anglers for $TIDAL) ----------
   // Animated VRM avatars that reuse the shared Mixamo fishing clips. They must
   // be unlocked (price below) before they can be selected as the player body.
   ...premiumAngler("shadow", "Shadow", "🦔", "The ultimate life form — now chasing the ultimate catch.", {

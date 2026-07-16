@@ -2,7 +2,7 @@
   "network": "Robinhood Chain",
   "chainId": 4663,
   "deployedAt": "2026-07-16T06:50:48.737Z",
-  "asset": "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168",
+  "asset": "0xcf987e5ec08229eb9cf260f66d3382c827e37777",
   "operatorTreasury": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
   "rewardSigner": "0x793a5e8b8Ff431cC2D8eE41e8ec2D9ad70247E60",
   "contracts": {
@@ -90,7 +90,7 @@
   ],
   "rewardEscrowFunding": {
     "status": "unfunded",
-    "reason": "deployer USDG balance was 0 at configuration time"
+    "reason": "deployer $TIDAL balance was 0 at configuration time"
   },
   "sourceVerification": {
     "blockscoutApi": "https://robinhoodchain.blockscout.com/api",
@@ -106,5 +106,9 @@
       "sponsoredHotspots": "Fail - Unable to verify"
     },
     "bytecodeVerification": "eth_getCode returned non-empty bytecode for all deployed contracts; source verification API accepted jobs but returned generic failure."
+  },
+  "platformToken": {
+    "address": "0xcf987e5ec08229eb9cf260f66d3382c827e37777",
+    "symbol": "$TIDAL"
   }
 }

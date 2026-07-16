@@ -239,11 +239,11 @@ if (!isInstalledPWA()) {
 const socialUI = new SocialUI();
 socialUI.mount();
 
-// Warm the live ETH→USDG rate (live market) so the bait shop shows the correct
-// USDG price the first time it's opened. Fire-and-forget; self-throttled.
+// Warm the live ETH→$TIDAL rate (live market) so the bait shop shows the correct
+// $TIDAL price the first time it's opened. Fire-and-forget; self-throttled.
 warmTideRate().catch(() => {});
 
-// Title-screen market-cap pill + USDG contract-address footer. Lazy-loaded so
+// Title-screen market-cap pill + $TIDAL contract-address footer. Lazy-loaded so
 // this non-critical widget stays out of the main entry chunk (keeps the wallet
 // adapter graph from being pulled in eagerly).
 import("./ui/marketCapUI.js")

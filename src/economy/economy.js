@@ -73,7 +73,7 @@ export function addMoney(amount) {
 }
 
 /**
- * Subtract `amount` from the in-game earned USDG bucket. Used after a
+ * Subtract `amount` from the in-game earned $TIDAL bucket. Used after a
  * confirmed on-chain withdrawal so the off-chain balance reflects what was
  * moved to the wallet. Clamped at zero — never overdraws.
  */
@@ -144,7 +144,7 @@ export function addXp(amount) {
  */
 export async function registerCatch(fish) {
   // Casual Angler: pure-fun mode. Catches still fill the Journal and stats, but
-  // earn no USDG, skip server validation/anti-farming, and aren't added to the
+  // earn no $TIDAL, skip server validation/anti-farming, and aren't added to the
   // sellable bag (catch & release). Pro mode runs the full economy below.
   const casual = !isPro();
 
@@ -205,7 +205,7 @@ export async function registerCatch(fish) {
   const isJackpot = !casual && !!fish.jackpot;
 
   if (isJackpot) {
-    // No inventory entry — auto-credit. This avoids ever having a 10M USDG
+    // No inventory entry — auto-credit. This avoids ever having a 10M $TIDAL
     // fish sitting in the catch bag (sellable, but losable if the bag is
     // somehow cleared elsewhere).
     S.profile.money += fish.value;
@@ -282,7 +282,7 @@ export async function registerCatch(fish) {
     });
   }
   
-  // Check achievements. Skipped in Casual — achievement rewards pay USDG, which
+  // Check achievements. Skipped in Casual — achievement rewards pay $TIDAL, which
   // would leak value into the no-stakes mode.
   if (!casual && S.achievements) {
     const stats = getGameStats();
@@ -346,9 +346,9 @@ export function buyGear(catKey, index, costOverride = null) {
   if (!item) return { ok: false, reason: "Unknown item" };
   if (S.gear.owned[catKey].includes(index)) return { ok: false, reason: "Already owned" };
   if (S.profile.level < item.level) return { ok: false, reason: `Requires level ${item.level}` };
-  // Option-A pricing: the live USDG cost (live market ETH-equivalent) is passed in.
+  // Option-A pricing: the live $TIDAL cost (live market ETH-equivalent) is passed in.
   const cost = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : item.price;
-  if (S.profile.money < cost) return { ok: false, reason: "Not enough USDG" };
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDAL" };
   S.profile.money -= cost;
   S.gear.owned[catKey].push(index);
   S.gear.equipped[catKey] = index; // auto-equip new purchases
@@ -359,8 +359,8 @@ export function buyGear(catKey, index, costOverride = null) {
 }
 
 /**
- * Grant gear after a successful on-chain USDG burn. Skips the in-game
- * balance check/deduction since the player has burned real USDG supply.
+ * Grant gear after a successful on-chain $TIDAL burn. Skips the in-game
+ * balance check/deduction since the player has burned real $TIDAL supply.
  * The burn signature is recorded in the save for audit.
  */
 export function grantGearOnChain(catKey, index, signature) {
@@ -388,7 +388,7 @@ export function equipGear(catKey, index) {
 export function canUnlockLocation(loc) {
   if (S.world.unlocked.includes(loc.id)) return { ok: false, reason: "Already unlocked" };
   if (S.profile.level < loc.unlock.level) return { ok: false, reason: `Requires level ${loc.unlock.level}` };
-  if (S.profile.money < loc.unlock.cost) return { ok: false, reason: "Not enough USDG" };
+  if (S.profile.money < loc.unlock.cost) return { ok: false, reason: "Not enough $TIDAL" };
   return { ok: true };
 }
 
@@ -438,8 +438,8 @@ export function unlockLocation(loc) {
 }
 
 /**
- * Unlock a location after a successful on-chain USDG burn. Skips the
- * in-game balance check/deduction since the player has burned real USDG.
+ * Unlock a location after a successful on-chain $TIDAL burn. Skips the
+ * in-game balance check/deduction since the player has burned real $TIDAL.
  */
 export function grantLocationOnChain(loc, signature) {
   if (S.world.unlocked.includes(loc.id)) return { ok: false, reason: "Already unlocked" };
@@ -461,14 +461,14 @@ export function isAnglerOwned(id) {
   return (S.profile.anglersOwned || []).includes(c.id);
 }
 
-/** Spend in-game USDG to unlock a premium angler. */
+/** Spend in-game $TIDAL to unlock a premium angler. */
 export function buyAngler(id, costOverride = null) {
   const c = getCharacter(id);
   if (!c?.premium) return { ok: false, reason: "Unknown angler" };
   if (isAnglerOwned(c.id)) return { ok: false, reason: "Already owned" };
-  // Option-A pricing: the live USDG cost (live market ETH-equivalent) is passed in.
+  // Option-A pricing: the live $TIDAL cost (live market ETH-equivalent) is passed in.
   const price = Number.isFinite(costOverride) && costOverride > 0 ? Math.round(costOverride) : (c.price || 0);
-  if (S.profile.money < price) return { ok: false, reason: "Not enough USDG" };
+  if (S.profile.money < price) return { ok: false, reason: "Not enough $TIDAL" };
   S.profile.money -= price;
   (S.profile.anglersOwned ??= []).push(c.id);
   emitMoney(-price);
@@ -490,7 +490,7 @@ export function grantAnglerOnChain(id, signature) {
   return { ok: true, item: c };
 }
 
-/** Grant a premium angler from the 7-day daily-quest reward (no USDG award/cost). */
+/** Grant a premium angler from the 7-day daily-quest reward (no $TIDAL award/cost). */
 export function grantAnglerFromQuest(id) {
   const c = getCharacter(id);
   if (!c?.premium) return { ok: false, reason: "Unknown angler" };
@@ -603,7 +603,7 @@ export function selectBait(id) {
   return true;
 }
 
-/** Buy `qty` of a bait with in-game USDG. The USDG price is the live
+/** Buy `qty` of a bait with in-game $TIDAL. The $TIDAL price is the live
  *  ETH-equivalent of the bait's SOL price (live market rate). `costOverride` lets the
  *  shop charge exactly the amount it displayed, avoiding mid-render rate drift. */
 export function buyBait(id, qty = 1, costOverride = null) {
@@ -613,7 +613,7 @@ export function buyBait(id, qty = 1, costOverride = null) {
   const cost = Number.isFinite(costOverride) && costOverride > 0
     ? Math.round(costOverride)
     : solToTideLive(b.solPrice * qty);
-  if (S.profile.money < cost) return { ok: false, reason: "Not enough USDG" };
+  if (S.profile.money < cost) return { ok: false, reason: "Not enough $TIDAL" };
   S.profile.money -= cost;
   addBait(id, qty);
   emitMoney(-cost);

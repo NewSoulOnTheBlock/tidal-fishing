@@ -70,7 +70,7 @@ export class DailyQuestsUI {
       <div class="quests-hero">
         <div>
           <div class="quests-kicker">Daily Quests</div>
-          <p>Finish all 3 quests on 7 different days. No USDG rewards — only a free character unlock.</p>
+          <p>Finish all 3 quests on 7 different days. No $TIDAL rewards — only a free character unlock.</p>
         </div>
         <div class="quests-week-badge" aria-label="Weekly quest progress">${snap.weekProgress}/7</div>
       </div>

@@ -4,7 +4,7 @@
   "name": "Bull Fish Blitz",
   "short_name": "Bull Fish Blitz",
   "id": "/",
-  "description": "A web3 fishing adventure on Robinhood Chain. Catch fish, earn USDG, unlock new waters, and own your catches.",
+  "description": "A web3 fishing adventure on Robinhood Chain. Catch fish, earn $TIDAL, unlock new waters, and own your catches.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["fullscreen", "standalone", "minimal-ui"],
@@ -81,7 +81,7 @@
     {
       "name": "Tidal Leaderboard",
       "short_name": "Tidal",
-      "description": "See who is leading the Tidal Fishing leaderboard, total USDG earned, and how many anglers are playing.",
+      "description": "See who is leading the Tidal Fishing leaderboard, total $TIDAL earned, and how many anglers are playing.",
       "tag": "tidal-leaderboard",
       "ms_ac_template": "/widgets/tidal-widget.json",
       "data": "https://tidal-fishing.onrender.com/api/widget",

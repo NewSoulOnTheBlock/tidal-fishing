@@ -1,9 +1,9 @@
-// Live ETH <-> USDG conversion for Robinhood Chain game pricing. The legacy
+// Live ETH <-> $TIDAL conversion for Robinhood Chain game pricing. The legacy
 // function names keep existing shop/economy code working during migration.
 
 const CACHE_TTL_MS = 60_000;
 const REQUEST_TIMEOUT_MS = 8000;
-const FALLBACK_TIDE_PER_SOL = 3500; // USDG per ETH fallback
+const FALLBACK_TIDE_PER_SOL = 3500; // $TIDAL per ETH fallback
 let cachedRate = 0;
 let cachedAt = 0;
 let inflight = null;

@@ -4,7 +4,7 @@
 import { TIDE_TREASURY, NATIVE_SYMBOL } from "./chain.js";
 import { currentWalletAddress, sendTransaction, rpc } from "./wallet.js";
 
-const SOL_TO_TIDE_RATE = 3500; // legacy name: USDG-equivalent per ETH fallback
+const SOL_TO_TIDE_RATE = 3500; // legacy name: $TIDAL-equivalent per ETH fallback
 const WEI_PER_ETH = 10n ** 18n;
 
 export function tideToSol(tideAmount) { return Number(tideAmount) / SOL_TO_TIDE_RATE; }

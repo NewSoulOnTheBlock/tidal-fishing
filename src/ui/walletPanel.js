@@ -1,4 +1,4 @@
-// Wallet HUD panel — connect/disconnect, address pill, ETH + USDG balances.
+// Wallet HUD panel — connect/disconnect, address pill, ETH + $TIDAL balances.
 //
 // Lives in the top-right HUD column under the clock card. Renders as plain DOM
 // so it slots into the existing tideline aesthetic with zero extra runtime
@@ -24,7 +24,7 @@ const REFRESH_INTERVAL_MS = 60_000;
 // Players must HOLD this much game token in their connected wallet before the
 // earned-token withdraw faucet unlocks. Enforced on the withdraw tap (splash
 // popup when unmet); the disclaimer also shows on the wallet-connect screen.
-const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 USDG
+const MIN_HOLD_REQUIREMENT = 1_000_000; // 1,000,000 $TIDAL
 
 export class WalletPanel {
   constructor() {
@@ -46,7 +46,7 @@ export class WalletPanel {
     this.modal = null;
     this.refreshTimer = null;
     this.account = null;
-    this.lastTideBalanceUi = 0; // on-chain USDG (UI units) for the hold gate
+    this.lastTideBalanceUi = 0; // on-chain $TIDAL (UI units) for the hold gate
     this._splash = null;        // active withdraw-locked splash, if any
     this._lastHudTop = 0;     // cached --hud-topright-top to avoid redundant writes
 
@@ -70,7 +70,7 @@ export class WalletPanel {
     // (the interval is paused while hidden to avoid background RPC spam).
     this._onVis = () => { if (!document.hidden) this.refreshBalances(); };
     document.addEventListener("visibilitychange", this._onVis);
-    // Re-render when the player's earned USDG changes so the Withdraw row
+    // Re-render when the player's earned $TIDAL changes so the Withdraw row
     // tracks the running balance live.
     events.on("money", () => this.render());
     events.on("solSale", () => this.render());
@@ -106,7 +106,7 @@ export class WalletPanel {
         const label = this.withdrawing ? "Withdrawing…" : `Withdraw ${formatMoney(earned)}`;
         withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" data-withdraw ${this.withdrawing ? "disabled" : ""}>${label}</button>`;
       } else if (!mintConfigured && earned > 0) {
-        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once USDG goes live">Withdraw soon™</button>`;
+        withdrawHtml += `<button class="btn btn-withdraw btn-withdraw-compact" disabled title="Withdrawals activate once $TIDAL goes live">Withdraw soon™</button>`;
       }
       if (solSaleValue > 0) {
         const solLabel = this.withdrawingSol ? "Sending ETH…" : `Withdraw ${formatSol(solSaleAmount)} from fish sales`;

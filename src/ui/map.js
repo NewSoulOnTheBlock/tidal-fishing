@@ -1,5 +1,5 @@
 // Location-select screen: travel between unlocked waters, unlock new ones
-// with USDG + level, and see collection progress per spot.
+// with $TIDAL + level, and see collection progress per spot.
 
 import { S, events } from "../state/gameState.js";
 import { LOCATIONS } from "../data/locationData.js";
@@ -88,8 +88,8 @@ export class MapUI {
         if (isOnChainPayEnabled() && lvlOk) {
           const chainBtn = document.createElement("button");
           chainBtn.className = "btn btn-onchain";
-          chainBtn.innerHTML = `🔥 Burn ${loc.unlock.cost} USDG`;
-          chainBtn.title = `Burn ${loc.unlock.cost} on-chain USDG on Robinhood Chain to unlock`;
+          chainBtn.innerHTML = `🔥 Burn ${loc.unlock.cost} $TIDAL`;
+          chainBtn.title = `Burn ${loc.unlock.cost} on-chain $TIDAL on Robinhood Chain to unlock`;
           chainBtn.addEventListener("click", async () => {
             chainBtn.disabled = true;
             chainBtn.textContent = "Burning…";
@@ -99,7 +99,7 @@ export class MapUI {
               if (res.ok) {
                 audio.play("buy");
                 events.emit("toast", {
-                  msg: `${loc.name} unlocked — ${loc.unlock.cost} USDG burned · ${shortAddress(sig, 6, 6)}`,
+                  msg: `${loc.name} unlocked — ${loc.unlock.cost} $TIDAL burned · ${shortAddress(sig, 6, 6)}`,
                   kind: "gold",
                   href: explorerTxUrl(sig),
                 });

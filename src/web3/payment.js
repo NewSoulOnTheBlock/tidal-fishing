@@ -1,4 +1,4 @@
-// Robinhood Chain ERC-20 payment helpers. Keeps legacy USDG function names so
+// Robinhood Chain ERC-20 payment helpers. Keeps legacy $TIDAL function names so
 // shop/economy code can migrate without a full rewrite.
 
 import { TIDE_MINT, TIDE_TREASURY, TIDE_SYMBOL } from "./chain.js";
