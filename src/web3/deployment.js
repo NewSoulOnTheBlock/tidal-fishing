@@ -9,11 +9,11 @@ export const deployment = Object.freeze({
   tournamentVault: TOURNAMENT_VAULT_ADDRESS,
   sponsoredHotspots: SPONSORED_HOTSPOTS_ADDRESS,
   txHashes: {
-    baitStore: '0xfc7fa5d57e3b9a486e0ae34f8a64e9cc2d43ff508fb922d29215c58c173dfdee',
-    rewardEscrow: '0x50dcadf4399ecc93fab6f2f46fff58bfa16eb271d0e4dc685efe3f0b1d5baa28',
-    houseReserveVault: '0x388b04d8957b5205813cb36d375a54e22f01222331230a5e74b214e66dd88d15',
-    tournamentVault: '0x3fa29e8311c6c0c6ce281d4013b2876e9c6fa0f860346c76b408c7e6be5601c6',
-    sponsoredHotspots: '0x834ab4a9639746e128bf12b48db09f4951f7e9210c9f3e25ffea3095d652225c',
+    baitStore: '0x9293e0914fdc48288e06751885d7d7b3311008735e09d83d508256f5b14d62b8',
+    rewardEscrow: '0xee09ac1d881b69dd88aa3c3ac7137ca163ea92d961b7614d9a80d5de767af146',
+    houseReserveVault: '0xfb06a3664faa6913f25d3ffee7d3f8d63471e8f8defb538a40eb72f58a02d3d8',
+    tournamentVault: '0x0806703fa5d1e66b48e254a64d4bfb320a90c9c9594f519062c72ed91d08e87e',
+    sponsoredHotspots: '0x4a42a1abef64cf92918436c69e97c54dc874d5f471d9455bc58ef1b8dbb725ab',
   },
 });
 
